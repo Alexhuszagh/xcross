@@ -1,0 +1,7 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-aarch64-linux-gnu \
+    libc6-arm64-cross
+
+COPY cmake/arm64.cmake /toolchains

@@ -1,1 +1,1 @@
-docker run -it -v "$(pwd)"/cmake:/toolchains cross /bin/bash
+docker run -it ahuszagh/cross:all /bin/bash

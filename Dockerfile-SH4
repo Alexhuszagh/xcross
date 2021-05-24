@@ -1,0 +1,7 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-sh4-linux-gnu \
+    libc6-sh4-cross
+
+COPY cmake/sh4.cmake /toolchains

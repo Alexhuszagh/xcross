@@ -1,0 +1,7 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-s390x-linux-gnu \
+    libc6-s390-s390x-cross
+
+COPY cmake/s390x.cmake /toolchains

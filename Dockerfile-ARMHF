@@ -1,0 +1,7 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-arm-linux-gnueabihf \
+    libc6-armel-armhf-cross
+
+COPY cmake/armel-armhf.cmake /toolchains

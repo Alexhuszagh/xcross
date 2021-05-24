@@ -15,9 +15,8 @@ This runs through the logic of building and running an example repository on Pow
 ./build.sh
 ./run.sh
 # In the image
-git clone https://github.com/Alexhuszagh/fast_float
+git clone https://github.com/fastfloat/fast_float --depth 1
 cd fast_float
-git checkout endian
 mkdir build && cd build
 cmake -DFASTFLOAT_TEST=ON -DCMAKE_TOOLCHAIN_FILE=/toolchains/ppc64.cmake ..
 make -j 2
