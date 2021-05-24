@@ -4,4 +4,22 @@ Simple toolchains for cross-compiling.
 
 # Building/Running Dockerfiles
 
-Each directory has the scripts `build.sh` and `run.sh`, which will build and run the Dockerfile from that directory. If you need more complex Docker configuration, simple copy the script and add in your own logic.
+To build the Docker image, run `build.sh`. To run it with the installed toolchains, run `run.sh`, which will run the Dockerfile from the current directory. If you need more complex Docker configuration, simple copy the script and add in your own logic.
+
+# Example
+
+This runs through the logic of building and running an example repository on PowerPC64, a big-endian system:
+
+```bash
+# On the host.
+./build.sh
+./run.sh
+# In the image
+git clone https://github.com/Alexhuszagh/fast_float
+cd fast_float
+git checkout endian
+mkdir build && cd build
+cmake -DFASTFLOAT_TEST=ON -DCMAKE_TOOLCHAIN_FILE=/toolchains/ppc64.cmake ..
+make -j 2
+qemu-ppc64 tests/basictest
+```
