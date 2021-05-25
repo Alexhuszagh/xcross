@@ -23,6 +23,7 @@ docker push ahuszagh/cross:riscv64
 docker push ahuszagh/cross:s390x
 docker push ahuszagh/cross:sh4
 docker push ahuszagh/cross:sparc64
+docker push ahuszagh/cross:x86_64
 
 # Very slow, do last.
 docker push ahuszagh/cross:all
