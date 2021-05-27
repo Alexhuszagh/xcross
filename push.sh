@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 DOCKERFILES=(
     "base"
 
@@ -37,6 +39,6 @@ for name in "${DOCKERFILES[@]}"; do
     docker push "ahuszagh/cross:$name"
     if [[ "$name" == *-unknown-linux-gnu ]]; then
         base="${name%-unknown-linux-gnu}"
-        docker tag "ahuszagh/cross:$name" "ahuszagh/cross:$base"
+        docker push "ahuszagh/cross:$base"
     fi
 done
