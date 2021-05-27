@@ -34,6 +34,13 @@ DOCKERFILES=(
 
     # Bare-metal targets.
     "ppcle-unknown-elf"
+
+    # x86_64-multilib-linux-musl
+    # Add Musl, uclibc, and elf targets.
+    # riscv32-hifive1-elf
+    # riscv32-unknown-elf
+    # sparc!
+    #   Maybe add in a few processors too.
 )
 
 for name in "${DOCKERFILES[@]}"; do
