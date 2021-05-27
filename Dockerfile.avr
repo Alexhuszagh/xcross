@@ -1,0 +1,13 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+RUN adduser --disabled-password --gecos "" crosstoolng
+COPY ct-ng/avr.config /ct-ng/avr.config
+COPY ct-ng.sh /ct-ng.sh
+RUN ARCH=avr /ct-ng.sh
+RUN rm /ct-ng/avr.config
+RUN rm /ct-ng.sh
+
+# Add toolchains
+COPY cmake/avr.cmake /toolchains
+COPY env/avr /toolchains/env

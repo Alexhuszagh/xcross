@@ -1,0 +1,11 @@
+XTOOLS_DIR=/home/crosstoolng/x-tools/avr/
+export CC=${XTOOLS_DIR}/bin/avr-gcc
+export CXX=${XTOOLS_DIR}/bin/avr-g++
+export AR=${XTOOLS_DIR}/bin/avr-ar
+export AS=${XTOOLS_DIR}/bin/avr-as
+export RANLIB=${XTOOLS_DIR}/bin/avr-ranlib
+export LD=${XTOOLS_DIR}/bin/avr-ld
+export NM=${XTOOLS_DIR}/bin/avr-nm
+export SIZE=${XTOOLS_DIR}/bin/avr-size
+export STRINGS=${XTOOLS_DIR}/bin/avr-strings
+export STRIP=${XTOOLS_DIR}/bin/avr-strip

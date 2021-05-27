@@ -10,7 +10,9 @@ set -ex
 
 export DEBIAN_FRONTEND="noninteractive"
 
-# Install dependencies to build ct-ng
+# Install dependencies to build ct-ng.
+# python3 is for glibc
+# python3-pip for gdb
 apt-get update
 apt-get install --assume-yes --no-install-recommends \
     autoconf \
@@ -23,6 +25,7 @@ apt-get install --assume-yes --no-install-recommends \
     libtool-bin \
     patch \
     python3 \
+    python3-pip \
     texinfo \
     unzip \
     wget \
@@ -68,7 +71,12 @@ make install
 #   # CT_GLIBC_V_2_29 is not set
 #   CT_GLIBC_VERSION="2.31"
 
-# Build our toolchain
+# Build our toolchain.
+# When debugging, use `CT_DEBUG_CT_SAVE_STEPS=1 ct-ng build`
+# so the build can restart. Find the offending step via
+# `ct-ng list-steps`, and then restart via
+# `RESTART=$step ct-ng build`. This dramatically speeds up
+# debugging new builds.
 cd /src
 mkdir ct-ng-build
 chown -R crosstoolng:crosstoolng ct-ng-build
@@ -91,6 +99,7 @@ apt-get remove --purge --assume-yes \
     libtool-bin \
     patch \
     python3 \
+    python3-pip \
     texinfo \
     unzip \
     wget \
