@@ -1,0 +1,10 @@
+export CC=sparc64-linux-gnu-gcc-10
+export CXX=sparc64-linux-gnu-g++-10
+export AR=sparc64-linux-gnu-ar
+export AS=sparc64-linux-gnu-as
+export RANLIB=sparc64-linux-gnu-ranlib
+export LD=sparc64-linux-gnu-ld
+export NM=sparc64-linux-gnu-nm
+export SIZE=sparc64-linux-gnu-size
+export STRINGS=sparc64-linux-gnu-strings
+export STRIP=sparc64-linux-gnu-strip

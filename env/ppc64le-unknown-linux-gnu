@@ -1,0 +1,10 @@
+export CC=powerpc64le-linux-gnu-gcc-10
+export CXX=powerpc64le-linux-gnu-g++-10
+export AR=powerpc64le-linux-gnu-ar
+export AS=powerpc64le-linux-gnu-as
+export RANLIB=powerpc64le-linux-gnu-ranlib
+export LD=powerpc64le-linux-gnu-ld
+export NM=powerpc64le-linux-gnu-nm
+export SIZE=powerpc64le-linux-gnu-size
+export STRINGS=powerpc64le-linux-gnu-strings
+export STRIP=powerpc64le-linux-gnu-strip

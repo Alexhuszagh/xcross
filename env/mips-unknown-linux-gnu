@@ -1,0 +1,10 @@
+export CC=mips-linux-gnu-gcc-10
+export CXX=mips-linux-gnu-g++-10
+export AR=mips-linux-gnu-ar
+export AS=mips-linux-gnu-as
+export RANLIB=mips-linux-gnu-ranlib
+export LD=mips-linux-gnu-ld
+export NM=mips-linux-gnu-nm
+export SIZE=mips-linux-gnu-size
+export STRINGS=mips-linux-gnu-strings
+export STRIP=mips-linux-gnu-strip

@@ -1,0 +1,9 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-alpha-linux-gnu \
+    libc6.1-alpha-cross
+
+COPY cmake/alpha-unknown-linux-gnu.cmake /toolchains
+COPY cmake/alpha-unknown-linux-gnu.cmake /toolchains/alpha.cmake
+COPY env/alpha-unknown-linux-gnu /toolchains/env

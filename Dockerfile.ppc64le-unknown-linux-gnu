@@ -1,0 +1,9 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-powerpc64le-linux-gnu \
+    libc6-ppc64el-cross
+
+COPY cmake/ppc64le-unknown-linux-gnu.cmake /toolchains
+COPY cmake/ppc64le-unknown-linux-gnu.cmake /toolchains/ppc64le.cmake
+COPY env/ppc64le-unknown-linux-gnu /toolchains/env

@@ -1,0 +1,9 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-powerpc-linux-gnu \
+    libc6-powerpc-cross
+
+COPY cmake/ppc-unknown-linux-gnu.cmake /toolchains
+COPY cmake/ppc-unknown-linux-gnu.cmake /toolchains/ppc.cmake
+COPY env/ppc-unknown-linux-gnu /toolchains/env

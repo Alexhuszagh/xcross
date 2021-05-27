@@ -1,0 +1,10 @@
+export CC=arm-linux-gnueabihf-gcc-10
+export CXX=arm-linux-gnueabihf-g++-10
+export AR=arm-linux-gnueabihf-ar
+export AS=arm-linux-gnueabihf-as
+export RANLIB=arm-linux-gnueabihf-ranlib
+export LD=arm-linux-gnueabihf-ld
+export NM=arm-linux-gnueabihf-nm
+export SIZE=arm-linux-gnueabihf-size
+export STRINGS=arm-linux-gnueabihf-strings
+export STRIP=arm-linux-gnueabihf-strip

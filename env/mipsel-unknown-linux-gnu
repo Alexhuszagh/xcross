@@ -1,0 +1,10 @@
+export CC=mipsel-linux-gnu-gcc-10
+export CXX=mipsel-linux-gnu-g++-10
+export AR=mipsel-linux-gnu-ar
+export AS=mipsel-linux-gnu-as
+export RANLIB=mipsel-linux-gnu-ranlib
+export LD=mipsel-linux-gnu-ld
+export NM=mipsel-linux-gnu-nm
+export SIZE=mipsel-linux-gnu-size
+export STRINGS=mipsel-linux-gnu-strings
+export STRIP=mipsel-linux-gnu-strip

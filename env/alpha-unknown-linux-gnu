@@ -1,0 +1,10 @@
+export CC=alpha-linux-gnu-gcc-10
+export CXX=alpha-linux-gnu-g++-10
+export AR=alpha-linux-gnu-ar
+export AS=alpha-linux-gnu-as
+export RANLIB=alpha-linux-gnu-ranlib
+export LD=alpha-linux-gnu-ld
+export NM=alpha-linux-gnu-nm
+export SIZE=alpha-linux-gnu-size
+export STRINGS=alpha-linux-gnu-strings
+export STRIP=alpha-linux-gnu-strip

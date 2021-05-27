@@ -1,7 +1,0 @@
-FROM ahuszagh/cross:base
-
-RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
-    g++-10-arm-linux-gnueabi \
-    libc6-armel-cross
-
-COPY cmake/armel.cmake /toolchains

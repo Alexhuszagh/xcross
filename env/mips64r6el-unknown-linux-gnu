@@ -1,0 +1,10 @@
+export CC=mipsisa64r6el-linux-gnuabi64-gcc-10
+export CXX=mipsisa64r6el-linux-gnuabi64-g++-10
+export AR=mipsisa64r6el-linux-gnuabi64-ar
+export AS=mipsisa64r6el-linux-gnuabi64-as
+export RANLIB=mipsisa64r6el-linux-gnuabi64-ranlib
+export LD=mipsisa64r6el-linux-gnuabi64-ld
+export NM=mipsisa64r6el-linux-gnuabi64-nm
+export SIZE=mipsisa64r6el-linux-gnuabi64-size
+export STRINGS=mipsisa64r6el-linux-gnuabi64-strings
+export STRIP=mipsisa64r6el-linux-gnuabi64-strip

@@ -1,0 +1,9 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-mipsisa32r6-linux-gnu \
+    libc6-mipsr6-cross
+
+COPY cmake/mipsr6-unknown-linux-gnu.cmake /toolchains
+COPY cmake/mipsr6-unknown-linux-gnu.cmake /toolchains/mipsr6.cmake
+COPY env/mipsr6-unknown-linux-gnu /toolchains/env

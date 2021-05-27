@@ -1,0 +1,10 @@
+export CC=i686-linux-gnu-gcc-10
+export CXX=i686-linux-gnu-g++-10
+export AR=i686-linux-gnu-ar
+export AS=i686-linux-gnu-as
+export RANLIB=i686-linux-gnu-ranlib
+export LD=i686-linux-gnu-ld
+export NM=i686-linux-gnu-nm
+export SIZE=i686-linux-gnu-size
+export STRINGS=i686-linux-gnu-strings
+export STRIP=i686-linux-gnu-strip

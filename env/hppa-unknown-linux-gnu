@@ -1,0 +1,10 @@
+export CC=hppa-linux-gnu-gcc-10
+export CXX=hppa-linux-gnu-g++-10
+export AR=hppa-linux-gnu-ar
+export AS=hppa-linux-gnu-as
+export RANLIB=hppa-linux-gnu-ranlib
+export LD=hppa-linux-gnu-ld
+export NM=hppa-linux-gnu-nm
+export SIZE=hppa-linux-gnu-size
+export STRINGS=hppa-linux-gnu-strings
+export STRIP=hppa-linux-gnu-strip

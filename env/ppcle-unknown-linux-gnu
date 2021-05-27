@@ -1,0 +1,11 @@
+XTOOLS_DIR=/home/crosstoolng/x-tools/powerpcle-unknown-linux-gnu/
+export CC=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-gcc
+export CXX=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-g++
+export AR=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-ar
+export AS=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-as
+export RANLIB=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-ranlib
+export LD=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-ld
+export NM=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-nm
+export SIZE=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-size
+export STRINGS=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-strings
+export STRIP=${XTOOLS_DIR}/bin/powerpcle-unknown-linux-gnu-strip

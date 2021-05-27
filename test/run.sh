@@ -1,9 +1,8 @@
 #!/bin/bash
 
-DOCKERFILES=(
-    "base"
+set -ex
 
-    # Linux-gnu targets
+IMAGES=(
     "alpha-unknown-linux-gnu"
     "armel-unknown-linux-gnu"
     "armelhf-unknown-linux-gnu"
@@ -23,21 +22,29 @@ DOCKERFILES=(
     "ppcle-unknown-linux-gnu"
     "ppc64-unknown-linux-gnu"
     "ppc64le-unknown-linux-gnu"
-    # rv32i-based targets are not supported
     "riscv64-unknown-linux-gnu"
     "s390x-unknown-linux-gnu"
     "sh4-unknown-linux-gnu"
     "sparc64-unknown-linux-gnu"
     "x86_64-unknown-linux-gnu"
+)
 
-    # Bare-metal targets.
+for name in "${IMAGES[@]}"; do
+    echo "Running $name."
+    ./docker-run.sh helloworld "$name"
+    if [[ "$name" == *-unknown-linux-gnu ]]; then
+        base="${name%-unknown-linux-gnu}"
+        ./docker-run.sh helloworld "$name" "$base"
+    fi
+done
+
+BAREMETAL=(
+    # Use different tests bare-metal machines.
+    # These don't have allocators, so we get numerous errors.
     "ppcle-unknown-elf"
 )
 
-for name in "${DOCKERFILES[@]}"; do
-    docker build -t "ahuszagh/cross:$name" . --file "Dockerfile.$name"
-    if [[ "$name" == *-unknown-linux-gnu ]]; then
-        base="${name%-unknown-linux-gnu}"
-        docker tag "ahuszagh/cross:$name" "ahuszagh/cross:$base"
-    fi
+for name in "${BAREMETAL[@]}"; do
+    echo "Running $name."
+    ./docker-run.sh add "$name"
 done

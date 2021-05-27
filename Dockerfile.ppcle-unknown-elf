@@ -1,0 +1,14 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+RUN adduser --disabled-password --gecos "" crosstoolng
+COPY ct-ng/powerpcle-unknown-elf.config /ct-ng/powerpcle-unknown-elf.config
+COPY ct-ng.sh /ct-ng.sh
+RUN ARCH=powerpcle-unknown-elf /ct-ng.sh
+RUN rm /ct-ng/powerpcle-unknown-elf.config
+RUN rm /ct-ng.sh
+
+# Add toolchains
+COPY cmake/ppcle-unknown-elf.cmake /toolchains
+COPY cmake/ppcle-unknown-elf.cmake /toolchains/ppcle.cmake
+COPY env/ppcle-unknown-elf /toolchains/env
