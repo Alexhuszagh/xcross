@@ -1,4 +1,5 @@
 #!/bin/bash
+# Run a given test.
 
 CMD="$1"
 IMAGE="$2"

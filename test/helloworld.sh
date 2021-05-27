@@ -1,4 +1,5 @@
 #!/bin/bash
+# Run the cpp-helloworld test, for toolchains built on an OS.
 
 TOOLCHAIN="$1"
 git clone https://github.com/Alexhuszagh/cpp-helloworld.git

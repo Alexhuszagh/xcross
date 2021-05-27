@@ -1,4 +1,5 @@
 #!/bin/bash
+# Push all the docker images to DockerHub.
 
 set -ex
 

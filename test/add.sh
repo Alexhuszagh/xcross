@@ -1,4 +1,5 @@
 #!/bin/bash
+# Run the cpp-add test, for bare-metal toolchains.
 
 TOOLCHAIN="$1"
 git clone https://github.com/Alexhuszagh/cpp-add.git

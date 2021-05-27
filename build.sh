@@ -1,4 +1,5 @@
 #!/bin/bash
+# Build all the docker images.
 
 set -ex
 
