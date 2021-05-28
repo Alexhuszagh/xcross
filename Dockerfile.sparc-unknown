@@ -1,0 +1,15 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/sparc-unknown.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=sparc-unknown /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+# TODO(ahuszagh) Restore
+#COPY cmake/sparc-unknown.cmake /toolchains
+#COPY cmake/sparc-unknown.cmake /toolchains/sparc.cmake
+#COPY env/sparc-unknown /toolchains/env

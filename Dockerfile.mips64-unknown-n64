@@ -1,0 +1,15 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/mips64-unknown-n64.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=mips64-unknown-n64 /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+# TODO(ahuszagh) Restore
+#COPY cmake/mips64-unknown-n64.cmake /toolchains
+#COPY cmake/mips64-unknown-n64.cmake /toolchains/mips64.cmake
+#COPY env/mips64-unknown-n64 /toolchains/env

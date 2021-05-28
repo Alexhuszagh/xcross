@@ -1,0 +1,15 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/xtensabe-unknown.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=xtensabe-unknown /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+# TODO(ahuszagh) Restore
+#COPY cmake/xtensabe-unknown.cmake /toolchains
+#COPY cmake/xtensabe-unknown.cmake /toolchains/xtensabe.cmake
+#COPY env/xtensabe-unknown /toolchains/env

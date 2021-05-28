@@ -1,0 +1,15 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/s390-unknown.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=s390-unknown /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+# TODO(ahuszagh) Restore
+#COPY cmake/s390-unknown.cmake /toolchains
+#COPY cmake/s390-unknown.cmake /toolchains/s390.cmake
+#COPY env/s390-unknown /toolchains/env

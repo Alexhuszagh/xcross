@@ -1,0 +1,15 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/mipsel-unknown-o32.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=mipsel-unknown-o32 /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+# TODO(ahuszagh) Restore
+#COPY cmake/mipsel-unknown-o32.cmake /toolchains
+#COPY cmake/mipsel-unknown-o32.cmake /toolchains/mipsel.cmake
+#COPY env/mipsel-unknown-o32 /toolchains/env

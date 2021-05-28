@@ -1,6 +1,6 @@
 # Toolchains
 
-Simple C/C++ toolchains for cross-compiling, useful for testing cross-platform support, such as in CI pipelines.
+Simple C/C++ toolchains for cross-compiling, useful for testing cross-platform support, such as in CI pipelines. Images may be downloaded from [ahuszagh/cross](https://hub.docker.com/r/ahuszagh/cross)>
 
 # Image Types
 
@@ -8,10 +8,7 @@ There are two types of images:
 - Images with an OS layer, such as `ppcle-unknown-linux-gnu`.
 - Bare metal images, such as `ppcle-unknown-elf`.
 
-The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and by default do not link to any allocator. This may be used with:
-
-- elf (an object format, `*-elf`)
-- eabi (an embedded ABI, `*-eabi`)
+The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and by default do not link to any allocator.
 
 The other images use a C-runtime that depends on a POSIX-like OS (such as Linux, FreeBSD, or MinGW for Windows), and can be used with:
 
@@ -21,6 +18,30 @@ The other images use a C-runtime that depends on a POSIX-like OS (such as Linux,
 - android (`*-android`, only available on some architectures)
 
 If you would like to test if the code compiles (and optionally, runs) for a target architecture, you should generally use a `linux-gnu` image.
+
+**Triples**
+
+All images are named as `ahuszagh/cross:$triple`, where `$triple` is the target triple. The target triple consists of:
+
+- `arch`, the CPU architecture (mandatory).
+- `vendor`, the CPU vendor.
+- `os`, the OS the image is built on.
+- `system`, the system type, which can comprise both the C-runtime and ABI.
+
+For example, the following image names decompose to the following triples:
+
+- `avr`, or `(avr, unknown, -, -)`
+- `mips-unknown-o32`, `(mips, unknown, -, o32)`
+- `mips-unknown-linux-gnu`, `(mips, unknown, linux, gnu)`
+
+If an `$arch-unknown-linux-gnu` is available, then `$arch` is an alias for `$arch-unknown-linux-gnu`.
+
+**Versioning**
+
+Image names may optionally contain a trailing version, which will always use the same host OS, GCC, and C-runtime version.
+
+- **No Version**: Alias for the latest version listed.
+- **0.1**: GCC 10.2.0, glibc 2.31, and Ubuntu 20.04.
 
 # Example
 
@@ -127,6 +148,7 @@ In order to build the toolchains, you must have:
 - Docker
 - Bash
 - Git
+- Cut
 
 Everything else runs in the container.
 
@@ -147,6 +169,12 @@ To add your own toolchain, the general workflow is as follows:
 5. Create a source environment file.
 6. Create a CMake toolchain file.
 7. Create a `Dockerfile`.
+
+After the toolchain is created, the source environment file, CMake toolchain file, and Dockerfile may be created via:
+
+```bash
+BITNESS=32 OS=Linux TARGET=arm-unknown-linux-gnueabi ./new-image.sh
+```
 
 **Configure Toolchain**
 

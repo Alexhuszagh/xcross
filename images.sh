@@ -32,6 +32,15 @@ export OS_IMAGES=(
     # MUSL
     "x86_64-multilib-linux-musl"
 
+    # UCLIBC
+    "x86_64-unknown-linux-uclibc"
+
+    # Android
+    "aarch64-unknown-linux-android"
+    "armv7a-unknown-linux-androideabi"
+    "i686-unknown-linux-android"
+    "x86_64-unknown-linux-android"
+
     # Add Musl, uclibc, and elf targets.
     # riscv32-hifive1-elf
     # riscv32-unknown-elf

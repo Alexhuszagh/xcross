@@ -1,0 +1,12 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY android.sh /
+RUN /android.sh
+
+RUN rm /android.sh
+
+# Add toolchains
+COPY cmake/aarch64-unknown-linux-android.cmake /toolchains
+COPY cmake/aarch64-unknown-linux-android.cmake /toolchains/aarch64.cmake
+COPY env/aarch64-unknown-linux-android /toolchains/env

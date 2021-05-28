@@ -1,0 +1,15 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/alphaev67-unknown.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=alphaev67-unknown /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+# TODO(ahuszagh) Restore
+#COPY cmake/alphaev67-unknown.cmake /toolchains
+#COPY cmake/alphaev67-unknown.cmake /toolchains/alphaev67.cmake
+#COPY env/alphaev67-unknown /toolchains/env

@@ -1,0 +1,15 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/ppc-unknown-spe.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=ppc-unknown-spe /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+# TODO(ahuszagh) Restore
+#COPY cmake/ppc-unknown-spe.cmake /toolchains
+#COPY cmake/ppc-unknown-spe.cmake /toolchains/ppc.cmake
+#COPY env/ppc-unknown-spe /toolchains/env
