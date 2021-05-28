@@ -50,7 +50,7 @@ export METAL_IMAGES=(
     "ppcle-unknown-elf"
 
     # EABI
-    #"ppcle-unknown-eabi"
+    "ppcle-unknown-eabi"
 
     # SPE
 )

@@ -2,21 +2,11 @@ FROM ahuszagh/cross:base
 
 # Build GCC
 COPY ct-ng/avr.config /ct-ng/
-COPY ct-ng/adduser.sh /ct-ng/
-RUN /ct-ng/adduser.sh
-COPY ct-ng/install-deps.sh /ct-ng/
-RUN /ct-ng/install-deps.sh
-COPY ct-ng/build-ctng.sh /ct-ng/
-RUN /ct-ng/build-ctng.sh
-COPY ct-ng/cp-config.sh /ct-ng/
-RUN ARCH=avr /ct-ng/cp-config.sh
-COPY ct-ng/build-cross.sh /ct-ng/
-RUN /ct-ng/build-cross.sh
-COPY ct-ng/clean.sh /ct-ng/
-RUN /ct-ng/clean.sh
+COPY gcc.sh /ct-ng/
+RUN ARCH=avr /ct-ng/gcc.sh
 
 # Remove GCC build scripts and config.
-RUN rm -rf /ct-ng/
+RUN rm -rf /ct-ng
 
 # Add toolchains
 COPY cmake/avr.cmake /toolchains

@@ -241,21 +241,11 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -Wl,--no-export-dy
 FROM ahuszagh/cross:base
 
 # Copy our config files and build GCC.
-# This is done in sequential order, so a failure in any
-# step can us to continue via incremental builds.
+# This is done in a single step, so the docker image is much more
+# compact, to avoid storing any layers with intermediate files.
 COPY ct-ng/arm-unknown-linux-gnueabi.config /ct-ng/
-COPY ct-ng/adduser.sh /ct-ng/
-RUN /ct-ng/adduser.sh
-COPY ct-ng/install-deps.sh /ct-ng/
-RUN /ct-ng/install-deps.sh
-COPY ct-ng/build-ctng.sh /ct-ng/
-RUN /ct-ng/build-ctng.sh
-COPY ct-ng/cp-config.sh /ct-ng/
-RUN ARCH=arm-unknown-linux-gnueabi /ct-ng/cp-config.sh
-COPY ct-ng/build-cross.sh /ct-ng/
-RUN /ct-ng/build-cross.sh
-COPY ct-ng/clean.sh /ct-ng/
-RUN /ct-ng/clean.sh
+COPY gcc.sh /ct-ng/
+RUN ARCH=arm-unknown-linux-gnueabi /ct-ng/gcc.sh
 
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
