@@ -32,7 +32,6 @@ export OS_IMAGES=(
     # MUSL
     "x86_64-multilib-linux-musl"
 
-    # x86_64-multilib-linux-musl
     # Add Musl, uclibc, and elf targets.
     # riscv32-hifive1-elf
     # riscv32-unknown-elf
@@ -44,15 +43,56 @@ export OS_IMAGES=(
 # Bare-metal machines.
 # These don't have allocators, so these do not support system allocators.
 export METAL_IMAGES=(
+    # TODO(ahuszagh) Add toolchains for commented ones.
     "avr"
+    #"alphaev4-unknown"
+    #"alphaev45-unknown"
+    #"alphaev5-unknown"
+    #"alphaev56-unknown"
+    #"alphaev6-unknown"
+    #"alphaev67-unknown"
+    #"arc-unknown"
+    #"arcle-unknown"
+    # TODO(ahuszagh) Need ARM
+    #"m68k-unknown"
+    #"nios2-unknown"
+    #"s390-unknown"
+    #"s390x-unknown"
+    #"sh1-unknown"
+    #"sh1eb-unknown"
+    #"sh2-unknown"
+    #"sh2eb-unknown"
+    # TODO(ahuszagh) Finish off here...
 
     # ELF
+    #"ppc-unknown-elf"
     "ppcle-unknown-elf"
+    #"ppc64-unknown-elf"
+    #"ppc64le-unknown-elf"
 
     # EABI
+    #"ppc-unknown-eabi"
     "ppcle-unknown-eabi"
+    #"ppc64-unknown-eabi"
+    #"ppc64le-unknown-eabi"
 
     # SPE
+    #"ppc-unknown-spe"
+    #"ppcle-unknown-spe"
+    #"ppc64-unknown-spe"
+    #"ppc64le-unknown-spe"
+
+    # O32
+    #"mips-unknown-o32"
+    #"mipsel-unknown-o32"
+
+    # N32
+    #"mips64-unknown-n32"
+    #"mips64el-unknown-n32"
+
+    # N64
+    #"mips64-unknown-n64"
+    #"mips64el-unknown-n64"
 )
 
 export IMAGES=(
