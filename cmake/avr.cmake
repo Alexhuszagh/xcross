@@ -6,14 +6,15 @@ cmake_policy(SET CMP0065 NEW)
 
 # COMPILERS
 # ---------
-SET(XTOOLS_DIR /home/crosstoolng/x-tools/avr)
-SET(CMAKE_C_COMPILER "${XTOOLS_DIR}/bin/avr-gcc")
-SET(CMAKE_CXX_COMPILER "${XTOOLS_DIR}/bin/avr-g++")
-set(CMAKE_COMPILER_PREFIX powerpcle-unknown-elf-)
+SET(prefix avr)
+SET(dir "/home/crosstoolng/x-tools/${prefix}")
+SET(CMAKE_C_COMPILER "${dir}/bin/${prefix}-gcc")
+SET(CMAKE_CXX_COMPILER "${dir}/bin/${prefix}-g++")
+set(CMAKE_COMPILER_PREFIX "${prefix}-")
 
 # PATHS
 # -----
-set(CMAKE_FIND_ROOT_PATH "${XTOOLS_DIR}/")
+set(CMAKE_FIND_ROOT_PATH "${dir}/")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

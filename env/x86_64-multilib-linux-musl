@@ -1,4 +1,4 @@
-prefix=powerpcle-unknown-linux-gnu
+prefix=x86_64-multilib-linux-musl
 dir=/home/crosstoolng/x-tools/"$prefix"/
 export CC="$dir"/bin/"$prefix"-gcc
 export CXX="$dir"/bin/"$prefix"-g++

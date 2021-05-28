@@ -1,10 +1,124 @@
 # Toolchains
 
-Simple toolchains for cross-compiling.
+Simple C/C++ toolchains for cross-compiling, useful for testing cross-platform support, such as in CI pipelines.
+
+# Image Types
+
+There are two types of images:
+- Images with an OS layer, such as `ppcle-unknown-linux-gnu`.
+- Bare metal images, such as `ppcle-unknown-elf`.
+
+The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and by default do not link to any allocator. This may be used with:
+
+- elf (an object format, `*-elf`)
+- eabi (an embedded ABI, `*-eabi`)
+
+The other images use a C-runtime that depends on a POSIX-like OS (such as Linux, FreeBSD, or MinGW for Windows), and can be used with:
+
+- musl (`*-musl`)
+- glibc (`*-gnu`)
+- uclibc-ng (`*-uclibc`)
+- android (`*-android`, only available on some architectures)
+
+If you would like to test if the code compiles (and optionally, runs) for a target architecture, you should generally use a `linux-gnu` image.
+
+# Example
+
+This runs through the logic of building and running a C++ project on PowerPC64, a big-endian system:
+
+```bash
+# Pull the Docker image, and run it interactively, entering the container.
+image=alpha-unknown-linux-gnu
+docker pull "ahuszagh/cross:$image"
+docker run -it "ahuszagh/cross:$image" /bin/bash
+
+# Clone the repository, build and run the code in the container using CMake.
+git clone https://github.com/fastfloat/fast_float --depth 1
+cd fast_float
+mkdir build && cd build
+cmake -DFASTFLOAT_TEST=ON -DCMAKE_TOOLCHAIN_FILE=/toolchains/ppc64-unknown-linux-gnu.cmake ..
+make -j 2
+qemu-ppc64 tests/basictest
+
+# Use the toolchain environment varoables to build the project.
+source /toolchains/env
+cd /
+git clone https://github.com/Alexhuszagh/cpp-helloworld.git
+cd cpp-helloworld
+$CXX helloworld.cc
+```
+
+# CI Example
+
+A simple example of integrating cross images is as follows:
+
+```yaml
+language: cpp
+dist: bionic
+services:
+  - docker
+
+# Use a matrix with both native toolchains and cross-toolchain images.
+matrix:
+  include:
+    - arch: amd64
+      os: linux
+
+    - arch: amd64
+      os: linux
+      env:
+        - TOOLCHAIN="mips64"
+
+before_install:
+  - eval "${COMPILER}"
+  - |
+    if [ "$TOOLCHAIN" != "" ] ; then
+      docker pull ahuszagh/cross:"$TOOLCHAIN"
+    fi
+
+script:
+  - |
+    if [ "$TOOLCHAIN" != "" ] ; then
+      docker run -v "$(pwd)":/src ahuszagh/cross:"$TOOLCHAIN" /bin/bash \
+        -c "cd src && ci/script.sh $TOOLCHAIN"
+    else
+      ci/script.sh
+    fi
+```
+
+Where the contents of `script.sh` are as follows:
+
+```bash
+#!/bin/bash
+
+TOOLCHAIN="$1"
+# Configure and build the target.
+mkdir build && cd build
+if [ "$TOOLCHAIN" != "" ] ; then
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/"$TOOLCHAIN".cmake
+else
+    cmake ..
+fi
+make -j 5
+
+# Use Qemu to test the target.
+# Note that not all targets can be used with Qemu support.
+if [ "$TOOLCHAIN" != "" ] ; then
+  qemu-"$TOOLCHAIN" tests/test
+else
+    ctest --output-on-failure -R test
+fi
+```
 
 # Building/Running Dockerfiles
 
-To build the Docker image, run `build.sh`. To run it with the installed toolchains, run `run.sh`, which will run the Dockerfile from the current directory. If you need more complex Docker configuration, simple copy the script and add in your own logic.
+To build all Docker images, run `build.sh`. To build and run a single docker image, use
+
+```bash
+image=ppcle-unknown-linux-gnu
+docker build -t "ahuszagh/cross:$image" . --file "Dockerfile.$image"
+docker run -it "ahuszagh/cross:$image" /bin/bash
+```
 
 # Requirements
 
@@ -16,52 +130,151 @@ In order to build the toolchains, you must have:
 
 Everything else runs in the container.
 
-# Adding Toolchains
-
-For a given GCC version, you can find supported architectures via `gcc --target-help`.
-
 # Files
 
 In order to use the cross-compiler toolchains, 2 files are provided:
 - `/toolchains/*.cmake`, which is a toolchain file for use with CMake.
 - `/toolchains/env`, which can be sourced to set `CC`, `CXX`, and other environment variables for other build systems.
 
-# Example
+# Developing New Toolchains
 
-This runs through the logic of building and running an example repository on PowerPC64, a big-endian system:
+To add your own toolchain, the general workflow is as follows:
+
+1. List toolchain samples.
+2. Configure your toolchain.
+3. Move the config file to `ct-ng`.
+4. Patch the config file.
+5. Create a source environment file.
+6. Create a CMake toolchain file.
+7. Create a `Dockerfile`.
+
+**Configure Toolchain**
 
 ```bash
-# On the host.
-./build.sh
-./run.sh
-# In the image
-git clone https://github.com/fastfloat/fast_float --depth 1
-cd fast_float
-mkdir build && cd build
-cmake -DFASTFLOAT_TEST=ON -DCMAKE_TOOLCHAIN_FILE=/toolchains/ppc64-unknown-linux-gnu.cmake ..
-make -j 2
-qemu-ppc64 tests/basictest
-
-# Using source.
-source /toolchains/env
-cd /
-git clone https://github.com/Alexhuszagh/cpp-helloworld.git
-cd cpp-helloworld
-$CXX helloworld.cc
+ct-ng list-samples
+image=arm-unknown-linux-gnueabi
+ct-ng "$image"
+ct-ng menuconfig
+mv .config ct-ng/"$image".config
+ct-ng/patch.sh ct-ng/"$image".config
+touch Dockerfile."$image"
 ```
 
-# Developing
+**Source Environment File**
 
-Feel free to add new toolchains, as needed. The relevant scripts to add a new toolchain are mainly `ct-ng.sh`, which generates the relevant cross-compiler, and `ct-ng/patch.sh`, which patches the config files generated from `ct-ng menuconfig` to use more modern versions.
+```bash
+prefix=arm-unknown-linux-gnueabi
+dir=/home/crosstoolng/x-tools/"$prefix"/
+export CC="$dir"/bin/"$prefix"-gcc
+export CXX="$dir"/bin/"$prefix"-g++
+export AR="$dir"/bin/"$prefix"-ar
+export AS="$dir"/bin/"$prefix"-as
+export RANLIB="$dir"/bin/"$prefix"-ranlib
+export LD="$dir"/bin/"$prefix"-ld
+export NM="$dir"/bin/"$prefix"-nm
+export SIZE="$dir"/bin/"$prefix"-size
+export STRINGS="$dir"/bin/"$prefix"-strings
+export STRIP="$dir"/bin/"$prefix"-strip
+```
 
-You should add a Dockerfile similar to `Dockerfile.ppcle-unknown-elf`, a toolchain similar to `cmake/ppcle-unknown-elf.cmake`, and an environment file similar to `env/ppcle-unknown-elf`.
+**CMake Toolchain File - Linux**
 
-Be sure to add your new toolchain to:
-- `build.sh`
-- `push.sh`
-- `test/run.sh`
+```cmake
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR ppcle)
 
-And run the test suite with the new toolchain image.
+# COMPILERS
+# ---------
+SET(prefix powerpcle-unknown-linux-gnu)
+SET(dir "/home/crosstoolng/x-tools/${prefix}")
+SET(CMAKE_C_COMPILER "${dir}/bin/${prefix}-gcc")
+SET(CMAKE_CXX_COMPILER "${dir}/bin/${prefix}-g++")
+set(CMAKE_COMPILER_PREFIX "${prefix}-")
+
+# PATHS
+# -----
+set(CMAKE_FIND_ROOT_PATH "${dir}/")
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# OTHER
+# -----
+set(ARCH 32)
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+```
+
+**CMake Toolchain File - Bare Metal**
+
+```cmake
+# Need to override the system name to allow CMake to configure,
+# otherwise, we get errors on bare-metal systems.
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR ppcle)
+cmake_policy(SET CMP0065 NEW)
+
+# COMPILERS
+# ---------
+SET(prefix powerpcle-unknown-elf)
+SET(dir "/home/crosstoolng/x-tools/${prefix}")
+SET(CMAKE_C_COMPILER "${dir}/bin/${prefix}-gcc")
+SET(CMAKE_CXX_COMPILER "${dir}/bin/${prefix}-g++")
+set(CMAKE_COMPILER_PREFIX "${prefix}-")
+
+# PATHS
+# -----
+set(CMAKE_FIND_ROOT_PATH "${dir}/")
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# OTHER
+# -----
+set(ARCH 32)
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -Wl,--no-export-dynamic")
+```
+
+**Dockerfile**
+
+```dockerfile
+# Base image
+FROM ahuszagh/cross:base
+
+# Copy our config files and build GCC.
+# This is done in sequential order, so a failure in any
+# step can us to continue via incremental builds.
+COPY ct-ng/arm-unknown-linux-gnueabi.config /ct-ng/
+COPY ct-ng/adduser.sh /ct-ng/
+RUN /ct-ng/adduser.sh
+COPY ct-ng/install-deps.sh /ct-ng/
+RUN /ct-ng/install-deps.sh
+COPY ct-ng/build-ctng.sh /ct-ng/
+RUN /ct-ng/build-ctng.sh
+COPY ct-ng/cp-config.sh /ct-ng/
+RUN ARCH=arm-unknown-linux-gnueabi /ct-ng/cp-config.sh
+COPY ct-ng/build-cross.sh /ct-ng/
+RUN /ct-ng/build-cross.sh
+COPY ct-ng/clean.sh /ct-ng/
+RUN /ct-ng/clean.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+COPY cmake/arm-unknown-linux-gnueabi.cmake /toolchains
+COPY cmake/arm-unknown-linux-gnueabi.cmake /toolchains/arm.cmake
+COPY env/arm-unknown-linux-gnueabi /toolchains/env
+```
+
+For a bare-metal example, see `Dockerfile.ppcle-unknown-elf`. For a Linux example, see `Dockerfile.ppcle-unknown-linux-gnu`. Be sure to add your new toolchain to `images.sh`, and run the test suite with the new toolchain image.
+
+# Pre-Built Images
+
+For a list of pre-built images, see [DockerHub](https://hub.docker.com/r/ahuszagh/cross). To remove local, installed images from the pre-built, cross toolchains, run:
+
+```bash
+docker rmi $(docker images | grep 'ahuszagh/cross')
+```
 
 # Contributing
 

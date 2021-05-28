@@ -1,7 +1,7 @@
 FROM ahuszagh/cross:base
 
 # Build GCC
-COPY ct-ng/powerpcle-unknown-linux-gnu.config /ct-ng/
+COPY ct-ng/x86_64-multilib-linux-musl.config /ct-ng/
 COPY ct-ng/adduser.sh /ct-ng/
 RUN /ct-ng/adduser.sh
 COPY ct-ng/install-deps.sh /ct-ng/
@@ -9,7 +9,7 @@ RUN /ct-ng/install-deps.sh
 COPY ct-ng/build-ctng.sh /ct-ng/
 RUN /ct-ng/build-ctng.sh
 COPY ct-ng/cp-config.sh /ct-ng/
-RUN ARCH=powerpcle-unknown-linux-gnu /ct-ng/cp-config.sh
+RUN ARCH=x86_64-multilib-linux-musl /ct-ng/cp-config.sh
 COPY ct-ng/build-cross.sh /ct-ng/
 RUN /ct-ng/build-cross.sh
 COPY ct-ng/clean.sh /ct-ng/
@@ -19,6 +19,6 @@ RUN /ct-ng/clean.sh
 RUN rm -rf /ct-ng/
 
 # Add toolchains
-COPY cmake/ppcle-unknown-linux-gnu.cmake /toolchains
-COPY cmake/ppcle-unknown-linux-gnu.cmake /toolchains/ppcle.cmake
-COPY env/ppcle-unknown-linux-gnu /toolchains/env
+COPY cmake/x86_64-multilib-linux-musl.cmake /toolchains
+COPY cmake/x86_64-multilib-linux-musl.cmake /toolchains/x86_64.cmake
+COPY env/x86_64-multilib-linux-musl /toolchains/env

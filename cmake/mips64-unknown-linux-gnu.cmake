@@ -3,13 +3,14 @@ set(CMAKE_SYSTEM_PROCESSOR mips64)
 
 # COMPILERS
 # ---------
-SET(CMAKE_C_COMPILER mips64-linux-gnuabi64-gcc-10)
-SET(CMAKE_CXX_COMPILER mips64-linux-gnuabi64-g++-10)
-set(CMAKE_COMPILER_PREFIX mips64-linux-gnuabi64-)
+SET(prefix mips64-linux-gnuabi64)
+SET(CMAKE_C_COMPILER "${prefix}-gcc-10")
+SET(CMAKE_CXX_COMPILER "${prefix}-g++-10")
+set(CMAKE_COMPILER_PREFIX "${prefix}-")
 
 # PATHS
 # -----
-set(CMAKE_FIND_ROOT_PATH /usr/mips64-linux-gnuabi64/)
+set(CMAKE_FIND_ROOT_PATH "/usr/${prefix}/")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

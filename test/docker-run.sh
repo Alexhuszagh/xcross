@@ -1,13 +1,16 @@
 #!/bin/bash
 # Run a given test.
 
-CMD="$1"
-IMAGE="$2"
-TOOLCHAIN="$3"
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+echo "$scriptdir"
+
+cmd="$1"
+image="$2"
+toolchain="$3"
 if [ -z "$3" ]; then
-    TOOLCHAIN="$IMAGE"
+    toolchain="$image"
 fi
 
-docker run -v "$(pwd):/test" \
-    ahuszagh/cross:"$IMAGE" \
-    /bin/bash -c "/test/$CMD.sh $TOOLCHAIN"
+docker run -v "$scriptdir:/test" \
+    ahuszagh/cross:"$image" \
+    /bin/bash -c "/test/$cmd.sh $toolchain"

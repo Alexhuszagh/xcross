@@ -1,12 +1,22 @@
 FROM ahuszagh/cross:base
 
 # Build GCC
-RUN adduser --disabled-password --gecos "" crosstoolng
-COPY ct-ng/avr.config /ct-ng/avr.config
-COPY ct-ng.sh /ct-ng.sh
-RUN ARCH=avr /ct-ng.sh
-RUN rm /ct-ng/avr.config
-RUN rm /ct-ng.sh
+COPY ct-ng/avr.config /ct-ng/
+COPY ct-ng/adduser.sh /ct-ng/
+RUN /ct-ng/adduser.sh
+COPY ct-ng/install-deps.sh /ct-ng/
+RUN /ct-ng/install-deps.sh
+COPY ct-ng/build-ctng.sh /ct-ng/
+RUN /ct-ng/build-ctng.sh
+COPY ct-ng/cp-config.sh /ct-ng/
+RUN ARCH=avr /ct-ng/cp-config.sh
+COPY ct-ng/build-cross.sh /ct-ng/
+RUN /ct-ng/build-cross.sh
+COPY ct-ng/clean.sh /ct-ng/
+RUN /ct-ng/clean.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
 
 # Add toolchains
 COPY cmake/avr.cmake /toolchains

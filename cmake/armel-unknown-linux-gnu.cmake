@@ -3,13 +3,14 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 
 # COMPILERS
 # ---------
-SET(CMAKE_C_COMPILER arm-linux-gnueabi-gcc-10)
-SET(CMAKE_CXX_COMPILER arm-linux-gnueabi-g++-10)
-set(CMAKE_COMPILER_PREFIX arm-linux-gnueabi-)
+SET(prefix arm-linux-gnueabi)
+SET(CMAKE_C_COMPILER "${prefix}-gcc-10")
+SET(CMAKE_CXX_COMPILER "${prefix}-g++-10")
+set(CMAKE_COMPILER_PREFIX "${prefix}-")
 
 # PATHS
 # -----
-set(CMAKE_FIND_ROOT_PATH /usr/arm-linux-gnueabi/)
+set(CMAKE_FIND_ROOT_PATH "/usr/${prefix}/")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

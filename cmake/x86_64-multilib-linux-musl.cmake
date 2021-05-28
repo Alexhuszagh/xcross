@@ -1,16 +1,17 @@
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR armhf)
+set(CMAKE_SYSTEM_PROCESSOR ppcle)
 
 # COMPILERS
 # ---------
-SET(prefix arm-linux-gnueabihf)
-SET(CMAKE_C_COMPILER "${prefix}-gcc-10")
-SET(CMAKE_CXX_COMPILER "${prefix}-g++-10")
+SET(prefix x86_64-multilib-linux-musl)
+SET(dir "/home/crosstoolng/x-tools/${prefix}")
+SET(CMAKE_C_COMPILER "${dir}/bin/${prefix}-gcc")
+SET(CMAKE_CXX_COMPILER "${dir}/bin/${prefix}-g++")
 set(CMAKE_COMPILER_PREFIX "${prefix}-")
 
 # PATHS
 # -----
-set(CMAKE_FIND_ROOT_PATH "/usr/${prefix}/")
+set(CMAKE_FIND_ROOT_PATH "${dir}/")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
