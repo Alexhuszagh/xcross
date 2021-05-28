@@ -62,7 +62,19 @@ export METAL_IMAGES=(
     #"sh1eb-unknown"
     #"sh2-unknown"
     #"sh2eb-unknown"
-    # TODO(ahuszagh) Finish off here...
+    #"sh3-unknown"
+    #"sh3eb-unknown"
+    #"sh4-unknown"
+    #"sh4eb-unknown"
+    #"sparc-unknown"
+    #"sparc64-unknown"
+    #"i386-unknown"
+    #"i486-unknown"
+    #"i586-unknown"
+    #"i686-unknown"
+    #"x86_64-unknown"
+    #"xtensale-unknown"
+    #"xtensabe-unknown"
 
     # ELF
     #"ppc-unknown-elf"
