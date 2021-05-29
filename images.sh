@@ -75,8 +75,6 @@ export METAL_IMAGES=(
     # TODO(ahuszagh) Need ARM
     #"m68k-unknown"
     #"nios2-unknown"
-    #"s390-unknown"
-    #"s390x-unknown"
     "sh1-unknown-elf"
     "sh2-unknown-elf"
     "sh2e-unknown-elf"
@@ -97,6 +95,7 @@ export METAL_IMAGES=(
     #"i686-unknown"
     #"x86_64-unknown"
 
+    # Binutils only supports s390/s390x on Linux.
     # Newlib does not support Xtensa.
 
     # ELF
