@@ -1,51 +1,32 @@
 # Toolchains
 
-Simple C/C++ toolchains for cross-compiling, useful for testing cross-platform support, such as in CI pipelines. Images may be downloaded from [ahuszagh/cross](https://hub.docker.com/r/ahuszagh/cross)>
+Simple C/C++ toolchains for cross-compiling, useful for testing cross-platform support, such as in CI pipelines. Images may be downloaded from [ahuszagh/cross](https://hub.docker.com/r/ahuszagh/cross).
 
-# Image Types
+We currently have pre-built toolchains for numerous architectures using GCC and GCC and the following C-runtime:
 
-There are two types of images:
-- Images with an OS layer, such as `ppcle-unknown-linux-gnu`.
-- Bare metal images, such as `ppcle-unknown-elf`.
+- newlib (bare metal)
+- glibc (Linux)
+- uClibc (Linux)
+- musl (Linux)
 
-The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and by default do not link to any allocator.
+We also pre-built toolchains for all supported architectures of Android and MinGW on i686 and x86_64.
 
-The other images use a C-runtime that depends on a POSIX-like OS (such as Linux, FreeBSD, or MinGW for Windows), and can be used with:
+**Table of Contents**
 
-- musl (`*-musl`)
-- glibc (`*-gnu`)
-- uclibc-ng (`*-uclibc`)
-- android (`*-android`, only available on some architectures)
+- [Getting Started](#getting-started)
+- [Travis CI Example](#travis-ci-example)
+- [Building/Running Dockerfiles](#building-running-dockerfiles)
+- [Images](#images)
+- [Development Dependencies](#development-dependencies)
+- [Toolchain Files](#toolchain-files)
+- [Developing New Toolchains](#developing-new-toolchains)
+- [Platform Support](#platform-support)
+- [License](#license)
+- [Contributing](#contributing)
 
-If you would like to test if the code compiles (and optionally, runs) for a target architecture, you should generally use a `linux-gnu` image.
+# Getting Started
 
-**Triples**
-
-All images are named as `ahuszagh/cross:$triple`, where `$triple` is the target triple. The target triple consists of:
-
-- `arch`, the CPU architecture (mandatory).
-- `vendor`, the CPU vendor.
-- `os`, the OS the image is built on.
-- `system`, the system type, which can comprise both the C-runtime and ABI.
-
-For example, the following image names decompose to the following triples:
-
-- `avr`, or `(avr, unknown, -, -)`
-- `mips-unknown-o32`, `(mips, unknown, -, o32)`
-- `mips-unknown-linux-gnu`, `(mips, unknown, linux, gnu)`
-
-If an `$arch-unknown-linux-gnu` is available, then `$arch` is an alias for `$arch-unknown-linux-gnu`.
-
-**Versioning**
-
-Image names may optionally contain a trailing version, which will always use the same host OS, GCC, and C-runtime version.
-
-- **No Version**: Alias for the latest version listed.
-- **0.1**: GCC 10.2.0, glibc 2.31, and Ubuntu 20.04.
-
-# Example
-
-This runs through the logic of building and running a C++ project on PowerPC64, a big-endian system:
+This shows a simple example of building and running a C++ project on PowerPC64, a big-endian system:
 
 ```bash
 # Pull the Docker image, and run it interactively, entering the container.
@@ -57,11 +38,12 @@ docker run -it "ahuszagh/cross:$image" /bin/bash
 git clone https://github.com/fastfloat/fast_float --depth 1
 cd fast_float
 mkdir build && cd build
-cmake -DFASTFLOAT_TEST=ON -DCMAKE_TOOLCHAIN_FILE=/toolchains/ppc64-unknown-linux-gnu.cmake ..
+cmake .. -DFASTFLOAT_TEST=ON -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake
 make -j 2
 qemu-ppc64 tests/basictest
 
-# Use the toolchain environment varoables to build the project.
+# Use the toolchain environment varoables to build a project
+# using GNU Makefiles.
 source /toolchains/env
 cd /
 git clone https://github.com/Alexhuszagh/cpp-helloworld.git
@@ -69,7 +51,7 @@ cd cpp-helloworld
 $CXX helloworld.cc
 ```
 
-# CI Example
+# Travis CI Example
 
 A simple example of integrating cross images is as follows:
 
@@ -116,7 +98,7 @@ TOOLCHAIN="$1"
 # Configure and build the target.
 mkdir build && cd build
 if [ "$TOOLCHAIN" != "" ] ; then
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/"$TOOLCHAIN".cmake
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake
 else
     cmake ..
 fi
@@ -141,7 +123,62 @@ docker build -t "ahuszagh/cross:$image" . --file "Dockerfile.$image"
 docker run -it "ahuszagh/cross:$image" /bin/bash
 ```
 
-# Requirements
+# Images
+
+For a list of pre-built images, see [DockerHub](https://hub.docker.com/r/ahuszagh/cross). To remove local, installed images from the pre-built, cross toolchains, run:
+
+```bash
+docker rmi $(docker images | grep 'ahuszagh/cross')
+```
+
+**Image Types**
+
+There are two types of images:
+- Images with an OS layer, such as `ppcle-unknown-linux-gnu`.
+- Bare metal images, such as `ppcle-unknown-elf`.
+
+The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and by default do not link to any allocator.
+
+The other images use a C-runtime that depends on a POSIX-like OS (such as Linux, FreeBSD, or MinGW for Windows), and can be used with:
+
+- musl (`*-musl`)
+- glibc (`*-gnu`)
+- uClibc-ng (`*-uclibc`)
+- android (`*-android`, only available on some architectures)
+
+If you would like to test if the code compiles (and optionally, runs) for a target architecture, you should generally use a `linux-gnu` image.
+
+**Triples**
+
+All images are named as `ahuszagh/cross:$triple`, where `$triple` is the target triple. The target triple consists of:
+
+- `arch`, the CPU architecture (mandatory).
+- `vendor`, the CPU vendor.
+- `os`, the OS the image is built on.
+- `system`, the system type, which can comprise both the C-runtime and ABI.
+
+For example, the following image names decompose to the following triples:
+
+- `avr`, or `(avr, unknown, -, -)`
+- `mips-unknown-o32`, `(mips, unknown, -, o32)`
+- `mips-unknown-linux-gnu`, `(mips, unknown, linux, gnu)`
+
+If an `$arch-unknown-linux-gnu` is available, then `$arch` is an alias for `$arch-unknown-linux-gnu`.
+
+**OS Support**
+
+In general, the focus of these images is to provide support for a wide variety of architectures, not operating systems. I will gladly accept Dockerfiles/scripts to support more operating systems, like FreeBSD.
+
+We do not support Darwin/iOS for licensing reasons, since reproduction of the macOS SDK is expressly forbidden. If you would like to build a Darwin cross-compiler, see [osxcross](https://github.com/tpoechtrager/osxcross).
+
+**Versioning**
+
+Image names may optionally contain a trailing version, which will always use the same host OS, GCC, and C-runtime version.
+
+- **No Version**: Alias for the latest version listed.
+- **0.1**: GCC 10.2.0, glibc 2.31, and Ubuntu 20.04.
+
+# Development Dependencies
 
 In order to build the toolchains, you must have:
 
@@ -152,7 +189,7 @@ In order to build the toolchains, you must have:
 
 Everything else runs in the container.
 
-# Files
+# Toolchain Files
 
 In order to use the cross-compiler toolchains, 2 files are provided:
 - `/toolchains/*.cmake`, which is a toolchain file for use with CMake.
@@ -229,7 +266,6 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 # OTHER
 # -----
 set(ARCH 32)
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 ```
 
 **CMake Toolchain File - Bare Metal**
@@ -259,7 +295,6 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 # OTHER
 # -----
 set(ARCH 32)
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -Wl,--no-export-dynamic")
 ```
 
 **Dockerfile**
@@ -279,20 +314,13 @@ RUN ARCH=arm-unknown-linux-gnueabi /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add toolchains
-COPY cmake/arm-unknown-linux-gnueabi.cmake /toolchains
-COPY cmake/arm-unknown-linux-gnueabi.cmake /toolchains/arm.cmake
-COPY env/arm-unknown-linux-gnueabi /toolchains/env
+COPY cmake/arm-unknown-linux-gnueabi.cmake /toolchains/shared.cmake
+COPY cmake/static.cmake /toolchains
+COPY env/arm-unknown-linux-gnueabi /env/shared
+COPY env/static /env
 ```
 
 For a bare-metal example, see `Dockerfile.ppcle-unknown-elf`. For a Linux example, see `Dockerfile.ppcle-unknown-linux-gnu`. Be sure to add your new toolchain to `images.sh`, and run the test suite with the new toolchain image.
-
-# Pre-Built Images
-
-For a list of pre-built images, see [DockerHub](https://hub.docker.com/r/ahuszagh/cross). To remove local, installed images from the pre-built, cross toolchains, run:
-
-```bash
-docker rmi $(docker images | grep 'ahuszagh/cross')
-```
 
 # Platform Support
 
@@ -328,6 +356,12 @@ We therefore support:
 Platform-specific details:
 
 - Xtensa does not support newlib, glibc, or musl.
+
+# License
+
+This is free and unencumbered software released into the public domain. This project, however, does derive off of projects that are not necessarily public domain software, such as [crosstool-NG](https://github.com/crosstool-ng/crosstool-ng), the [Android NDK](https://android.googlesource.com/platform/prebuilts/ndk/+/master/NOTICE), and [cctools-port](https://github.com/tpoechtrager/cctools-port), as well as build off of GCC, the Linux kernel headers, and the relevant C-runtime (glibc, musl, uClibc-ng).
+
+These licenses are only relevant if you distribute a toolchain as part of a proprietary system: for merely compiling and linking code as part of a standard toolchain, the usual linking exceptions apply.
 
 # Contributing
 

@@ -10,6 +10,11 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/alphaev5-unknown.cmake /toolchains
-#COPY cmake/alphaev5-unknown.cmake /toolchains/alphaev5.cmake
-#COPY env/alphaev5-unknown /toolchains/env
+#COPY cmake/alphaev5-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/alphaev5-unknown-linux-gnu /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env
+

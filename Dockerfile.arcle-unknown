@@ -10,6 +10,10 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/arcle-unknown.cmake /toolchains
-#COPY cmake/arcle-unknown.cmake /toolchains/arcle.cmake
-#COPY env/arcle-unknown /toolchains/env
+#COPY cmake/arcle-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/arcle-unknown-linux-gnu /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env

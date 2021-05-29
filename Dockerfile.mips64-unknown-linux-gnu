@@ -4,6 +4,12 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-mips64-linux-gnuabi64 \
     libc6-mips64-cross
 
-COPY cmake/mips64-unknown-linux-gnu.cmake /toolchains
-COPY cmake/mips64-unknown-linux-gnu.cmake /toolchains/mips64.cmake
-COPY env/mips64-unknown-linux-gnu /toolchains/env
+COPY cmake/mips64-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+# Necessary for fast_float tests.
+COPY cmake/static.cmake /toolchains/mips64.cmake
+COPY env/mips64-unknown-linux-gnu /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

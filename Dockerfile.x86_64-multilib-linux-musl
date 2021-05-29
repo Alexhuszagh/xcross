@@ -9,6 +9,11 @@ RUN ARCH=x86_64-multilib-linux-musl /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add toolchains
-COPY cmake/x86_64-multilib-linux-musl.cmake /toolchains
-COPY cmake/x86_64-multilib-linux-musl.cmake /toolchains/x86_64.cmake
-COPY env/x86_64-multilib-linux-musl /toolchains/env
+COPY cmake/x86_64-multilib-linux-musl.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/x86_64-multilib-linux-musl /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env
+

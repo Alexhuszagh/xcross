@@ -9,6 +9,10 @@ RUN ARCH=powerpcle-unknown-linux-gnu /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add toolchains
-COPY cmake/ppcle-unknown-linux-gnu.cmake /toolchains
-COPY cmake/ppcle-unknown-linux-gnu.cmake /toolchains/ppcle.cmake
-COPY env/ppcle-unknown-linux-gnu /toolchains/env
+COPY cmake/ppcle-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/ppcle-unknown-linux-gnu /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

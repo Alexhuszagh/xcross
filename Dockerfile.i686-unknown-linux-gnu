@@ -4,6 +4,10 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-i686-linux-gnu \
     libc6-i386-cross
 
-COPY cmake/i686-unknown-linux-gnu.cmake /toolchains
-COPY cmake/i686-unknown-linux-gnu.cmake /toolchains/i686.cmake
-COPY env/i686-unknown-linux-gnu /toolchains/env
+COPY cmake/i686-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/i686-unknown-linux-gnu /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

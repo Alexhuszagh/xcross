@@ -7,6 +7,10 @@ RUN /android.sh
 RUN rm /android.sh
 
 # Add toolchains
-COPY cmake/armv7a-unknown-linux-androideabi.cmake /toolchains
-COPY cmake/armv7a-unknown-linux-androideabi.cmake /toolchains/armv7a.cmake
-COPY env/armv7a-unknown-linux-androideabi /toolchains/env
+COPY cmake/armv7a-unknown-linux-androideabi.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/armv7a-unknown-linux-androideabi /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

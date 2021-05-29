@@ -10,6 +10,10 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/ppc64le-unknown-eabi.cmake /toolchains
-#COPY cmake/ppc64le-unknown-eabi.cmake /toolchains/ppc64le.cmake
-#COPY env/ppc64le-unknown-eabi /toolchains/env
+#COPY cmake/ppc64le-unknown-eabi.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/ppc64le-unknown-eabi /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env

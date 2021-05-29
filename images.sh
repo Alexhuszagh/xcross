@@ -25,8 +25,16 @@ export OS_IMAGES=(
     "ppc64le-unknown-linux-gnu"
     # rv32i-based targets are not supported
     "riscv64-unknown-linux-gnu"
+    "s390-unknown-linux-gnu"
     "s390x-unknown-linux-gnu"
+    "sh3-unknown-linux-gnu"
+    "sh3be-unknown-linux-gnu"
+    # Currently fails due to undefined reference to `__fpscr_values`.
+    #"sh3e-unknown-linux-gnu"
+    # TODO(ahuszagh) Add "sh3be?"
     "sh4-unknown-linux-gnu"
+    # TODO(ahuszagh) Add "sh4be?"
+    #"sparc-unknown-linux-gnu"
     "sparc64-unknown-linux-gnu"
     "x86_64-unknown-linux-gnu"
     # TODO(ahuszagh) Check support for xtensa?
@@ -39,12 +47,16 @@ export OS_IMAGES=(
     # UCLIBC
     "x86_64-unknown-linux-uclibc"
 
+    # TODO(ahuszagh) Need ios...
+
     # Android
-    #"android"  TODO(ahuszagh) Need meta images
     "aarch64-unknown-linux-android"
     "armv7a-unknown-linux-androideabi"
     "i686-unknown-linux-android"
     "x86_64-unknown-linux-android"
+
+    # Add iOS?
+    # Add Darwin?
 
     # Add Musl, uclibc, and elf targets.
     # riscv32-hifive1-elf

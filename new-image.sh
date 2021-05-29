@@ -63,7 +63,6 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 echo "# OTHER
 # -----
 set(ARCH $BITNESS)" >> "$cmake"
-echo 'SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")' >> "$cmake"
 
 # Create our source environment file.
 env="$scriptdir/env/$FILENAME"
@@ -82,6 +81,7 @@ export STRIP="$dir"/bin/"$prefix"-strip
 ' >> "$env"
 
 # Create our dockerfile.
+# TODO(ahuszagh) Needs to handle shared/static
 dockerfile="$scriptdir/Dockerfile.$FILENAME"
 echo "FROM ahuszagh/cross:base
 
@@ -94,9 +94,10 @@ RUN ARCH=$TARGET /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add toolchains
-COPY cmake/$FILENAME.cmake /toolchains
-COPY env/$FILENAME /toolchains/env" > "$dockerfile"
-
-if [ "$TARGET" != "$base" ]; then
-    echo "COPY cmake/$FILENAME.cmake /toolchains/$base.cmake" >> "$dockerfile"
-fi
+COPY cmake/$FILENAME.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/$FILENAME /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env" > "$dockerfile"

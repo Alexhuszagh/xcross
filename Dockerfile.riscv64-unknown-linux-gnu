@@ -4,6 +4,12 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-riscv64-linux-gnu \
     libc6-riscv64-cross
 
-COPY cmake/riscv64-unknown-linux-gnu.cmake /toolchains
-COPY cmake/riscv64-unknown-linux-gnu.cmake /toolchains/riscv64.cmake
-COPY env/riscv64-unknown-linux-gnu /toolchains/env
+COPY cmake/riscv64-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+# Necessary for fast_float tests.
+COPY cmake/static.cmake /toolchains/riscv64.cmake
+COPY env/riscv64-unknown-linux-gnu /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

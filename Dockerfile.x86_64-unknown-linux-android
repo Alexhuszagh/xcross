@@ -7,6 +7,10 @@ RUN /android.sh
 RUN rm /android.sh
 
 # Add toolchains
-COPY cmake/x86_64-unknown-linux-android.cmake /toolchains
-COPY cmake/x86_64-unknown-linux-android.cmake /toolchains/x86_64.cmake
-COPY env/x86_64-unknown-linux-android /toolchains/env
+COPY cmake/x86_64-unknown-linux-android.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/x86_64-unknown-linux-android /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

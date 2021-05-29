@@ -8,8 +8,13 @@ RUN ARCH=xtensale-unknown-linux-uclibc /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
+# Add toolchains
 # TODO(ahuszagh) Restore...
-## Add toolchains
-#COPY cmake/xtensale-unknown-linux-uclibc.cmake /toolchains
-#COPY cmake/xtensale-unknown-linux-uclibc.cmake /toolchains/xtensale.cmake
-#COPY env/xtensale-unknown-linux-uclibc /toolchains/env
+#COPY cmake/xtensale-unknown-linux-uclibc.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/xtensale-unknown-linux-uclibc /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env
+

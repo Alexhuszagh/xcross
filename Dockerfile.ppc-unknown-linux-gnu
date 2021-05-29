@@ -4,6 +4,11 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-powerpc-linux-gnu \
     libc6-powerpc-cross
 
-COPY cmake/ppc-unknown-linux-gnu.cmake /toolchains
-COPY cmake/ppc-unknown-linux-gnu.cmake /toolchains/ppc.cmake
-COPY env/ppc-unknown-linux-gnu /toolchains/env
+# Add toolchains
+COPY cmake/ppc-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/ppc-unknown-linux-gnu /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

@@ -4,6 +4,11 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-s390x-linux-gnu \
     libc6-s390-s390x-cross
 
-COPY cmake/s390x-unknown-linux-gnu.cmake /toolchains
-COPY cmake/s390x-unknown-linux-gnu.cmake /toolchains/s390x.cmake
-COPY env/s390x-unknown-linux-gnu /toolchains/env
+# Add toolchains
+COPY cmake/s390x-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/s390x-unknown-linux-gnu /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

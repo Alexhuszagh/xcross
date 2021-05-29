@@ -10,6 +10,10 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/i386-unknown.cmake /toolchains
-#COPY cmake/i386-unknown.cmake /toolchains/i386.cmake
-#COPY env/i386-unknown /toolchains/env
+#COPY cmake/i386-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/i386-unknown-linux-gnu /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env

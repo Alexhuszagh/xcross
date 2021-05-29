@@ -10,6 +10,10 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/ppcle-unknown-spe.cmake /toolchains
-#COPY cmake/ppcle-unknown-spe.cmake /toolchains/ppcle.cmake
-#COPY env/ppcle-unknown-spe /toolchains/env
+#COPY cmake/ppcle-unknown-spe.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/ppcle-unknown-spe /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env

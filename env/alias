@@ -1,0 +1,11 @@
+# Aliases to call the toolchain as if they were installed globally.
+
+alias cc="$CC $CFLAGS $LDFLAGS"
+alias c++="$CXX $CXXFLAGS $LDFLAGS"
+alias ar="$AR"
+alias as="$AS"
+alias ranlib="$RANLIB"
+alias ld="$LD"
+alias size="$SIZE"
+alias strings="$STRINGS"
+alias strip="$STRIP"

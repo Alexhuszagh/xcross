@@ -10,6 +10,10 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/m68k-unknown.cmake /toolchains
-#COPY cmake/m68k-unknown.cmake /toolchains/m68k.cmake
-#COPY env/m68k-unknown /toolchains/env
+#COPY cmake/m68k-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/m68k-unknown-linux-gnu /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env

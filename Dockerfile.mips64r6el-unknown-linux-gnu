@@ -4,6 +4,10 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-mipsisa64r6el-linux-gnuabi64 \
     libc6-mips64r6el-cross
 
-COPY cmake/mips64r6el-unknown-linux-gnu.cmake /toolchains
-COPY cmake/mips64r6el-unknown-linux-gnu.cmake /toolchains/mips64r6el.cmake
-COPY env/mips64r6el-unknown-linux-gnu /toolchains/env
+COPY cmake/mips64r6el-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/mips64r6el-unknown-linux-gnu /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env

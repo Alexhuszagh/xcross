@@ -1,12 +1,9 @@
-# Need to override the system name to allow CMake to configure,
-# otherwise, we get errors on bare-metal systems.
-SET(CMAKE_SYSTEM_NAME Generic)
-SET(CMAKE_SYSTEM_PROCESSOR sh)
-CMAKE_POLICY(SET CMP0065 NEW)
+SET(CMAKE_SYSTEM_NAME Linux)
+SET(CMAKE_SYSTEM_PROCESSOR s390)
 
 # COMPILERS
 # ---------
-SET(prefix sh-unknown-elf)
+SET(prefix s390-ibm-linux-gnu)
 SET(dir "/home/crosstoolng/x-tools/${prefix}")
 SET(CMAKE_C_COMPILER "${dir}/bin/${prefix}-gcc")
 SET(CMAKE_CXX_COMPILER "${dir}/bin/${prefix}-g++")
@@ -21,4 +18,4 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # OTHER
 # -----
-SET(ARCH 32)
+set(ARCH 32)

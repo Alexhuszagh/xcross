@@ -10,6 +10,10 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/sparc64-unknown.cmake /toolchains
-#COPY cmake/sparc64-unknown.cmake /toolchains/sparc64.cmake
-#COPY env/sparc64-unknown /toolchains/env
+#COPY cmake/sparc64-unknown-elf.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/sparc64-unknown-elf /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env

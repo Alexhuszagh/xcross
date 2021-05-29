@@ -10,6 +10,10 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/i486-unknown.cmake /toolchains
-#COPY cmake/i486-unknown.cmake /toolchains/i486.cmake
-#COPY env/i486-unknown /toolchains/env
+#COPY cmake/i486-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/i486-unknown-linux-gnu /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env

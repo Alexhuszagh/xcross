@@ -10,6 +10,10 @@ RUN rm -rf /ct-ng/
 
 # Add toolchains
 # TODO(ahuszagh) Restore
-#COPY cmake/mips64el-unknown-n64.cmake /toolchains
-#COPY cmake/mips64el-unknown-n64.cmake /toolchains/mips64el.cmake
-#COPY env/mips64el-unknown-n64 /toolchains/env
+#COPY cmake/mips64el-unknown-n64.cmake /toolchains/toolchain.cmake
+#COPY cmake/shared.cmake /toolchains
+#COPY cmake/static.cmake /toolchains
+#COPY env/mips64el-unknown-n64 /env/toolchain
+#COPY env/alias /env
+#COPY env/shared /env
+#COPY env/static /env

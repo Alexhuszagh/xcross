@@ -4,6 +4,10 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-m68k-linux-gnu \
     libc6-m68k-cross
 
-COPY cmake/m68k-unknown-linux-gnu.cmake /toolchains
-COPY cmake/m68k-unknown-linux-gnu.cmake /toolchains/m68k.cmake
-COPY env/m68k-unknown-linux-gnu /toolchains/env
+COPY cmake/m68k-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains
+COPY cmake/static.cmake /toolchains
+COPY env/m68k-unknown-linux-gnu /env/toolchain
+COPY env/alias /env
+COPY env/shared /env
+COPY env/static /env
