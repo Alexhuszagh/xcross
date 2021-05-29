@@ -1,5 +1,5 @@
-set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR i686)
+SET(CMAKE_SYSTEM_NAME Linux)
+SET(CMAKE_SYSTEM_PROCESSOR i686)
 
 # COMPILERS
 # ---------
@@ -7,16 +7,15 @@ SET(prefix i686-linux-android30)
 SET(dir "/usr/local/toolchains/llvm/prebuilt/linux-x86_64")
 SET(CMAKE_C_COMPILER "${dir}/bin/${prefix}-clang")
 SET(CMAKE_CXX_COMPILER "${dir}/bin/${prefix}-clang++")
-set(CMAKE_COMPILER_PREFIX "i686-linux-android-")
+SET(CMAKE_COMPILER_PREFIX "i686-linux-android-")
 
 # PATHS
 # -----
-set(CMAKE_FIND_ROOT_PATH "${dir}/")
+SET(CMAKE_FIND_ROOT_PATH "${dir}/")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # OTHER
 # -----
-set(ARCH 32)
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+SET(ARCH 32)

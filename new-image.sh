@@ -36,13 +36,13 @@ cmake="$scriptdir/cmake/$FILENAME.cmake"
 if [ "$OS" = "Generic" ]; then
     echo "# Need to override the system name to allow CMake to configure,
 # otherwise, we get errors on bare-metal systems.
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR $arch)
-cmake_policy(SET CMP0065 NEW)
+SET(CMAKE_SYSTEM_NAME Generic)
+SET(CMAKE_SYSTEM_PROCESSOR $arch)
+CMAKE_POLICY(SET CMP0065 NEW)
 " > "$cmake"
 else
-    echo "set(CMAKE_SYSTEM_NAME $OS)
-set(CMAKE_SYSTEM_PROCESSOR $arch)
+    echo "SET(CMAKE_SYSTEM_NAME $OS)
+SET(CMAKE_SYSTEM_PROCESSOR $arch)
 " > "$cmake"
 fi
 echo "# COMPILERS
@@ -51,11 +51,11 @@ SET(prefix $TARGET)" >> "$cmake"
 echo 'SET(dir "/home/crosstoolng/x-tools/${prefix}")
 SET(CMAKE_C_COMPILER "${dir}/bin/${prefix}-gcc")
 SET(CMAKE_CXX_COMPILER "${dir}/bin/${prefix}-g++")
-set(CMAKE_COMPILER_PREFIX "${prefix}-")
+SET(CMAKE_COMPILER_PREFIX "${prefix}-")
 
 # PATHS
 # -----
-set(CMAKE_FIND_ROOT_PATH "${dir}/")
+SET(CMAKE_FIND_ROOT_PATH "${dir}/")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

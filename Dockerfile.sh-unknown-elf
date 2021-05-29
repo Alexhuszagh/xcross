@@ -1,0 +1,49 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/sh-unknown-elf.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=sh-unknown-elf /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+COPY cmake/sh1-unknown-elf.cmake /toolchains
+COPY cmake/sh1-unknown-elf.cmake /toolchains/sh1.cmake
+COPY cmake/sh2-unknown-elf.cmake /toolchains
+COPY cmake/sh2-unknown-elf.cmake /toolchains/sh2.cmake
+COPY cmake/sh2e-unknown-elf.cmake /toolchains
+COPY cmake/sh2e-unknown-elf.cmake /toolchains/sh2e.cmake
+COPY cmake/sh3-unknown-elf.cmake /toolchains
+COPY cmake/sh3-unknown-elf.cmake /toolchains/sh3.cmake
+COPY cmake/sh3e-unknown-elf.cmake /toolchains
+COPY cmake/sh3e-unknown-elf.cmake /toolchains/sh3e.cmake
+COPY cmake/sh4-unknown-elf.cmake /toolchains
+COPY cmake/sh4-unknown-elf.cmake /toolchains/sh4.cmake
+COPY cmake/sh4-100-unknown-elf.cmake /toolchains
+COPY cmake/sh4-100-unknown-elf.cmake /toolchains/sh4-100.cmake
+COPY cmake/sh4-200-unknown-elf.cmake /toolchains
+COPY cmake/sh4-200-unknown-elf.cmake /toolchains/sh4-200.cmake
+COPY cmake/sh4-300-unknown-elf.cmake /toolchains
+COPY cmake/sh4-300-unknown-elf.cmake /toolchains/sh4-300.cmake
+COPY cmake/sh4-340-unknown-elf.cmake /toolchains
+COPY cmake/sh4-340-unknown-elf.cmake /toolchains/sh4-340.cmake
+COPY cmake/sh4-500-unknown-elf.cmake /toolchains
+COPY cmake/sh4-500-unknown-elf.cmake /toolchains/sh4-500.cmake
+COPY cmake/sh4a-unknown-elf.cmake /toolchains
+COPY cmake/sh4a-unknown-elf.cmake /toolchains/sh4a.cmake
+
+COPY env/sh-unknown-elf /toolchains/sh-env
+COPY env/sh1-unknown-elf /toolchains/sh1-env
+COPY env/sh2-unknown-elf /toolchains/sh2-env
+COPY env/sh2e-unknown-elf /toolchains/sh2e-env
+COPY env/sh3-unknown-elf /toolchains/sh3-env
+COPY env/sh3e-unknown-elf /toolchains/sh3e-env
+COPY env/sh4-unknown-elf /toolchains/sh4-env
+COPY env/sh4-100-unknown-elf /toolchains/sh4-100-env
+COPY env/sh4-200-unknown-elf /toolchains/sh4-200-env
+COPY env/sh4-300-unknown-elf /toolchains/sh4-300-env
+COPY env/sh4-340-unknown-elf /toolchains/sh4-340-env
+COPY env/sh4-500-unknown-elf /toolchains/sh4-500-env
+COPY env/sh4a-unknown-elf /toolchains/sh4a-env

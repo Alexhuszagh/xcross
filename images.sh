@@ -1,6 +1,7 @@
 #!/bin/bash
 # Get the list of all image names, bare metal and with OSes.
 
+# Images with an OS layer.
 export OS_IMAGES=(
     # GNU
     "alpha-unknown-linux-gnu"
@@ -28,6 +29,9 @@ export OS_IMAGES=(
     "sh4-unknown-linux-gnu"
     "sparc64-unknown-linux-gnu"
     "x86_64-unknown-linux-gnu"
+    # TODO(ahuszagh) Check support for xtensa?
+    #"xtensabe-unknown-linux-gnu"
+    #"xtensale-unknown-linux-gnu"
 
     # MUSL
     "x86_64-multilib-linux-musl"
@@ -36,6 +40,7 @@ export OS_IMAGES=(
     "x86_64-unknown-linux-uclibc"
 
     # Android
+    #"android"  TODO(ahuszagh) Need meta images
     "aarch64-unknown-linux-android"
     "armv7a-unknown-linux-androideabi"
     "i686-unknown-linux-android"
@@ -47,6 +52,11 @@ export OS_IMAGES=(
     # sparc!
     # add avr.
     #   Maybe add in a few processors too.
+)
+
+# Images with compilers for multiple architecture.
+export OS_MULTI_IMAGES=(
+    "android"
 )
 
 # Bare-metal machines.
@@ -67,14 +77,18 @@ export METAL_IMAGES=(
     #"nios2-unknown"
     #"s390-unknown"
     #"s390x-unknown"
-    #"sh1-unknown"
-    #"sh1eb-unknown"
-    #"sh2-unknown"
-    #"sh2eb-unknown"
-    #"sh3-unknown"
-    #"sh3eb-unknown"
-    #"sh4-unknown"
-    #"sh4eb-unknown"
+    "sh1-unknown-elf"
+    "sh2-unknown-elf"
+    "sh2e-unknown-elf"
+    "sh3-unknown-elf"
+    "sh3e-unknown-elf"
+    "sh4-unknown-elf"
+    "sh4-100-unknown-elf"
+    "sh4-200-unknown-elf"
+    "sh4-300-unknown-elf"
+    "sh4-340-unknown-elf"
+    "sh4-500-unknown-elf"
+    "sh4a-unknown-elf"
     #"sparc-unknown"
     #"sparc64-unknown"
     #"i386-unknown"
@@ -82,8 +96,8 @@ export METAL_IMAGES=(
     #"i586-unknown"
     #"i686-unknown"
     #"x86_64-unknown"
-    #"xtensale-unknown"
-    #"xtensabe-unknown"
+
+    # Newlib does not support Xtensa.
 
     # ELF
     #"ppc-unknown-elf"
@@ -116,7 +130,16 @@ export METAL_IMAGES=(
     #"mips64el-unknown-n64"
 )
 
+# Images with compilers for multiple architecture.
+export METAL_MULTI_IMAGES=(
+    "sh-unknown-elf"
+    # Currently fails due to "multiple definition of `_errno'".
+    #"shbe-unknown-elf"
+)
+
 export IMAGES=(
     "${OS_IMAGES[@]}"
+    "${OS_MULTI_IMAGES[@]}"
     "${METAL_IMAGES[@]}"
+    "${METAL_MULTI_IMAGES[@]}"
 )

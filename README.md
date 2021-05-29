@@ -294,6 +294,41 @@ For a list of pre-built images, see [DockerHub](https://hub.docker.com/r/ahuszag
 docker rmi $(docker images | grep 'ahuszagh/cross')
 ```
 
+# Platform Support
+
+Currently, we only create images that are supported by:
+
+- crosstool-NG with official sources
+- Debian packages
+- Android NDK's
+
+We therefore support:
+
+- ARM64 (Linux, Android)
+- ARM32 (Linux, Android)
+- Alpha (Linux)
+- AVR (embedded)
+- HPPA (Linux)
+- i686 (Linux, Android)
+- M68K (Linux)
+- MIPS (Linux, embedded)
+- MIPS-LE (Linux, embedded)
+- MIPS64 (Linux, embedded)
+- MIPS64-LE (Linux, embedded)
+- PowerPC (Linux, embedded)
+- PowerPC-LE (Linux, embedded)
+- PowerPC64 (Linux, embedded)
+- PowerPC64-LE (Linux, embedded)
+- Risc-V64 (Linux)
+- S390x (Linux)
+- SH1-4 (Linux, embedded)
+- Sparc64 (Linux)
+- x86_64 (Linux, Android, embedded)
+
+Platform-specific details:
+
+- Xtensa does not support newlib, glibc, or musl.
+
 # Contributing
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in toolchains by you, will be unlicensed (free and unencumbered software released into the public domain).

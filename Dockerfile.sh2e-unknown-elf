@@ -1,0 +1,15 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/sh-unknown-elf.config /ct-ng/
+COPY gcc.sh /ct-ng/
+RUN ARCH=sh-unknown-elf /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add toolchains
+COPY cmake/sh2e-unknown-elf.cmake /toolchains
+COPY cmake/sh2e-unknown-elf.cmake /toolchains/sh2e.cmake
+COPY env/sh-unknown-elf /toolchains/sh-env
+COPY env/sh2e-unknown-elf /toolchains/env
