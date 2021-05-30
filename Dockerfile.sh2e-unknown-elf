@@ -8,12 +8,15 @@ RUN ARCH=sh-unknown-elf /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/sh2e-unknown-elf.sh /
+RUN /sh2e-unknown-elf.sh
+RUN rm /exec.sh /sh2e-unknown-elf.sh
+
 # Add toolchains
 COPY cmake/sh2e-unknown-elf.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/sh-unknown-elf /env/sh
-COPY env/sh2e-unknown-elf /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

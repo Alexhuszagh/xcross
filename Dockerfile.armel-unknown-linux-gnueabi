@@ -1,0 +1,18 @@
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    g++-10-arm-linux-gnueabi \
+    libc6-armel-cross
+
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/armel-unknown-linux-gnueabi.sh /
+RUN /armel-unknown-linux-gnueabi.sh
+RUN rm /exec.sh /armel-unknown-linux-gnueabi.sh
+
+# Add toolchains
+COPY cmake/armel-unknown-linux-gnueabi.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

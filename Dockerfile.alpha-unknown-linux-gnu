@@ -4,11 +4,15 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-alpha-linux-gnu \
     libc6.1-alpha-cross
 
-COPY cmake/alpha-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/alpha-unknown-linux-gnu /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/alpha-unknown-linux-gnu.sh /
+RUN /alpha-unknown-linux-gnu.sh
+RUN rm /exec.sh /alpha-unknown-linux-gnu.sh
 
+# Add toolchains
+COPY cmake/alpha-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

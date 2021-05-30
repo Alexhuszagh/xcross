@@ -8,12 +8,4 @@ RUN ARCH=nios2-unknown /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# Add toolchains
-# TODO(ahuszagh) Restore
-#COPY cmake/nios2-unknown-elf.cmake /toolchains/toolchain.cmake
-#COPY cmake/shared.cmake /toolchains
-#COPY cmake/static.cmake /toolchains
-#COPY env/nios2-unknown-elf /env/toolchain
-#COPY env/alias /env
-#COPY env/shared /env
-#COPY env/static /env
+# TODO(ahuszagh) Add symlinks and toolchains

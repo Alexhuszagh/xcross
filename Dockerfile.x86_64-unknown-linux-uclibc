@@ -8,11 +8,15 @@ RUN ARCH=x86_64-unknown-linux-uclibc /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/x86_64-unknown-linux-uclibc.sh /
+RUN /x86_64-unknown-linux-uclibc.sh
+RUN rm /exec.sh /x86_64-unknown-linux-uclibc.sh
+
 # Add toolchains
 COPY cmake/x86_64-unknown-linux-uclibc.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/x86_64-unknown-linux-uclibc /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

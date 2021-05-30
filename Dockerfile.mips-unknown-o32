@@ -8,12 +8,4 @@ RUN ARCH=mips-unknown-o32 /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# Add toolchains
-# TODO(ahuszagh) Restore
-#COPY cmake/mips-unknown-o32.cmake /toolchains/toolchain.cmake
-#COPY cmake/shared.cmake /toolchains
-#COPY cmake/static.cmake /toolchains
-#COPY env/mips-unknown-o32 /env/toolchain
-#COPY env/alias /env
-#COPY env/shared /env
-#COPY env/static /env
+# TODO(ahuszagh) Add symlinks and toolchains

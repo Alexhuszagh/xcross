@@ -9,3 +9,4 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     make
 
 RUN mkdir -p /toolchains
+RUN mkdir -p /env

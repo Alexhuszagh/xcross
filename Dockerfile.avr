@@ -8,11 +8,15 @@ RUN ARCH=avr /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/avr.sh /
+RUN /avr.sh
+RUN rm /exec.sh /avr.sh
+
 # Add toolchains
 COPY cmake/avr.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/avr /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

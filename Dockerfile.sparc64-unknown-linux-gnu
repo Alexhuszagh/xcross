@@ -4,10 +4,15 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-sparc64-linux-gnu \
     libc6-sparc64-cross
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/sparc64-unknown-linux-gnu.sh /
+RUN /sparc64-unknown-linux-gnu.sh
+RUN rm /exec.sh /sparc64-unknown-linux-gnu.sh
+
+# Add toolchains
 COPY cmake/sparc64-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/sparc64-unknown-linux-gnu /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

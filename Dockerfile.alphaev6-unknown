@@ -8,13 +8,4 @@ RUN ARCH=alphaev6-unknown /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# Add toolchains
-# TODO(ahuszagh) Restore
-#COPY cmake/alphaev6-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
-#COPY cmake/shared.cmake /toolchains
-#COPY cmake/static.cmake /toolchains
-#COPY env/alphaev6-unknown-linux-gnu /env/toolchain
-#COPY env/alias /env
-#COPY env/shared /env
-#COPY env/static /env
-
+# TODO(ahuszagh) Add symlinks and toolchains

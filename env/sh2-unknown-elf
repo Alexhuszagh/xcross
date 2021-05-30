@@ -1,5 +1,0 @@
-scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/sh"
-
-export CFLAGS="$CFLAGS -m2"
-export CXXFLAGS="$CXXFLAGS -m2"

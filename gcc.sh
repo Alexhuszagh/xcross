@@ -97,6 +97,8 @@ su crosstoolng -c "mkdir -p /home/crosstoolng/src"
 su crosstoolng -c "CT_DEBUG_CT_SAVE_STEPS=1 /src/crosstoolng/bin/ct-ng build.5"
 
 # Cleanup
+# Even though we didn't install GCC, it doesn't get autoremoved,
+# which takes up a lot of space.
 cd /
 rm -rf /src
 rm -rf /home/crosstoolng/src
@@ -104,6 +106,7 @@ apt-get remove --purge --assume-yes \
     autoconf \
     bison \
     flex \
+    gcc \
     g++ \
     gawk \
     help2man \

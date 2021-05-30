@@ -1,0 +1,13 @@
+#!/bin/bash
+
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+source "$scriptdir/exec.sh"
+
+export PREFIX=arm-linux-gnueabi
+export VER=10
+export ARCH=arm
+export LIBPATH="/usr/$PREFIX"
+
+shortcut_gcc
+shortcut_util
+shortcut_run

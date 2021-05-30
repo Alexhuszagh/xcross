@@ -8,12 +8,15 @@ RUN ARCH=x86_64-multilib-linux-musl /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/x86_64-multilib-linux-musl.sh /
+RUN /x86_64-multilib-linux-musl.sh
+RUN rm /exec.sh /x86_64-multilib-linux-musl.sh
+
 # Add toolchains
 COPY cmake/x86_64-multilib-linux-musl.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/x86_64-multilib-linux-musl /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
-
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

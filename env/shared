@@ -1,13 +1,12 @@
 # Sources the aliases and removes any duplicate shared/static flags.
 
-# Compiler toolchain with static linking.
-scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/toolchain"
+# Compiler toolchain with shared linking.
 c_flags="${CFLAGS//-fPIC}"
 cxx_flags="${CXXFLAGS//-fPIC}"
 ld_flags="${LDFLAGS//-static}"
 ld_flags="${ld_flags//-shared}"
 export CFLAGS="$c_flags -fPIC"
 export CXXFLAGS="$cxx_flags -fPIC"
-export LDFLAGS="$ld_flags -shared"
-source "$scriptdir/alias"
+export LDFLAGS="$ld_flags"
+export CC=cc
+export CXX=c++

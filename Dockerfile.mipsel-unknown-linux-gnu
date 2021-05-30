@@ -4,10 +4,15 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-mipsel-linux-gnu \
     libc6-mipsel-cross
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/mipsel-unknown-linux-gnu.sh /
+RUN /mipsel-unknown-linux-gnu.sh
+RUN rm /exec.sh /mipsel-unknown-linux-gnu.sh
+
+# Add toolchains
 COPY cmake/mipsel-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/mipsel-unknown-linux-gnu /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

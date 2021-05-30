@@ -31,15 +31,14 @@ export OS_IMAGES=(
     "sh3be-unknown-linux-gnu"
     # Currently fails due to undefined reference to `__fpscr_values`.
     #"sh3e-unknown-linux-gnu"
-    # TODO(ahuszagh) Add "sh3be?"
     "sh4-unknown-linux-gnu"
-    # TODO(ahuszagh) Add "sh4be?"
+    "sh4be-unknown-linux-gnu"
     #"sparc-unknown-linux-gnu"
     "sparc64-unknown-linux-gnu"
     "x86_64-unknown-linux-gnu"
     # TODO(ahuszagh) Check support for xtensa?
-    #"xtensabe-unknown-linux-gnu"
-    #"xtensale-unknown-linux-gnu"
+    #"xtensabe-unknown-linux-uclibc"
+    #"xtensale-unknown-linux-uclibc"
 
     # MUSL
     "x86_64-multilib-linux-musl"
@@ -47,15 +46,12 @@ export OS_IMAGES=(
     # UCLIBC
     "x86_64-unknown-linux-uclibc"
 
-    # TODO(ahuszagh) Need ios...
-
     # Android
     "aarch64-unknown-linux-android"
     "armv7a-unknown-linux-androideabi"
     "i686-unknown-linux-android"
     "x86_64-unknown-linux-android"
 
-    # Add iOS?
     # Add Darwin?
 
     # Add Musl, uclibc, and elf targets.
@@ -64,11 +60,6 @@ export OS_IMAGES=(
     # sparc!
     # add avr.
     #   Maybe add in a few processors too.
-)
-
-# Images with compilers for multiple architecture.
-export OS_MULTI_IMAGES=(
-    "android"
 )
 
 # Bare-metal machines.
@@ -109,6 +100,8 @@ export METAL_IMAGES=(
 
     # Binutils only supports s390/s390x on Linux.
     # Newlib does not support Xtensa.
+    # Currently fails due to "multiple definition of `_errno'".
+    #"shbe-unknown-elf"
 
     # ELF
     #"ppc-unknown-elf"
@@ -141,16 +134,7 @@ export METAL_IMAGES=(
     #"mips64el-unknown-n64"
 )
 
-# Images with compilers for multiple architecture.
-export METAL_MULTI_IMAGES=(
-    "sh-unknown-elf"
-    # Currently fails due to "multiple definition of `_errno'".
-    #"shbe-unknown-elf"
-)
-
 export IMAGES=(
     "${OS_IMAGES[@]}"
-    "${OS_MULTI_IMAGES[@]}"
     "${METAL_IMAGES[@]}"
-    "${METAL_MULTI_IMAGES[@]}"
 )

@@ -4,11 +4,15 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     g++-10-mipsisa32r6-linux-gnu \
     libc6-mipsr6-cross
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/mipsr6-unknown-linux-gnu.sh /
+RUN /mipsr6-unknown-linux-gnu.sh
+RUN rm /exec.sh /mipsr6-unknown-linux-gnu.sh
+
 # Add toolchains
 COPY cmake/mipsr6-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/mipsr6-unknown-linux-gnu /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

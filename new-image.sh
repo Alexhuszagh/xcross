@@ -38,50 +38,42 @@ if [ "$OS" = "Generic" ]; then
 # otherwise, we get errors on bare-metal systems.
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_PROCESSOR $arch)
-CMAKE_POLICY(SET CMP0065 NEW)
-" > "$cmake"
+CMAKE_POLICY(SET CMP0065 NEW)" > "$cmake"
 else
     echo "SET(CMAKE_SYSTEM_NAME $OS)
-SET(CMAKE_SYSTEM_PROCESSOR $arch)
-" > "$cmake"
+SET(CMAKE_SYSTEM_PROCESSOR $arch)" > "$cmake"
 fi
-echo "# COMPILERS
-# ---------
-SET(prefix $TARGET)" >> "$cmake"
-echo 'SET(dir "/home/crosstoolng/x-tools/${prefix}")
-SET(CMAKE_C_COMPILER "${dir}/bin/${prefix}-gcc")
-SET(CMAKE_CXX_COMPILER "${dir}/bin/${prefix}-g++")
-SET(CMAKE_COMPILER_PREFIX "${prefix}-")
+echo "set(ARCH $BITNESS)
 
-# PATHS
-# -----
-SET(CMAKE_FIND_ROOT_PATH "${dir}/")
+SET(CMAKE_COMPILER_PREFIX \"$TARGET-\")
+SET(CMAKE_FIND_ROOT_PATH \"/home/crosstoolng/x-tools/$TARGET/\")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-' >> "$cmake"
-echo "# OTHER
-# -----
-set(ARCH $BITNESS)" >> "$cmake"
+" >> "$cmake"
 
-# Create our source environment file.
-env="$scriptdir/env/$FILENAME"
+# Create our symlink script.
+env="$scriptdir/symlink/$FILENAME.sh"
+echo '#!/bin/bash
+
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+source "$scriptdir/exec.sh"
+' > "$env"
 echo "prefix=$TARGET" >> "$env"
 echo 'dir=/home/crosstoolng/x-tools/"$prefix"/
-export CC="$dir"/bin/"$prefix"-gcc
-export CXX="$dir"/bin/"$prefix"-g++
-export AR="$dir"/bin/"$prefix"-ar
-export AS="$dir"/bin/"$prefix"-as
-export RANLIB="$dir"/bin/"$prefix"-ranlib
-export LD="$dir"/bin/"$prefix"-ld
-export NM="$dir"/bin/"$prefix"-nm
-export SIZE="$dir"/bin/"$prefix"-size
-export STRINGS="$dir"/bin/"$prefix"-strings
-export STRIP="$dir"/bin/"$prefix"-strip
-' >> "$env"
+
+exec "$dir"/bin/"$prefix"-gcc "/usr/bin/gcc" "/usr/bin/cc"
+exec "$dir"/bin/"$prefix"-g++ "/usr/bin/g++" "/usr/bin/c++"
+exec "$dir"/bin/"$prefix"-ar "/usr/bin/ar"
+exec "$dir"/bin/"$prefix"-as "/usr/bin/as"
+exec "$dir"/bin/"$prefix"-ranlib "/usr/bin/ranlib"
+exec "$dir"/bin/"$prefix"-ld "/usr/bin/ld"
+exec "$dir"/bin/"$prefix"-nm "/usr/bin/nm"
+exec "$dir"/bin/"$prefix"-size "/usr/bin/size"
+exec "$dir"/bin/"$prefix"-strings "/usr/bin/strings"
+exec "$dir"/bin/"$prefix"-strip "/usr/bin/strip"' >> "$env"
 
 # Create our dockerfile.
-# TODO(ahuszagh) Needs to handle shared/static
 dockerfile="$scriptdir/Dockerfile.$FILENAME"
 echo "FROM ahuszagh/cross:base
 
@@ -93,11 +85,15 @@ RUN ARCH=$TARGET /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/$FILENAME.sh /
+RUN /$FILENAME.sh
+RUN rm /exec.sh /$FILENAME.sh
+
 # Add toolchains
 COPY cmake/$FILENAME.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/$FILENAME /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env" > "$dockerfile"
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/" > "$dockerfile"

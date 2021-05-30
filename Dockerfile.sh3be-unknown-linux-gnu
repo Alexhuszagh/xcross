@@ -8,12 +8,15 @@ RUN ARCH=sh3be-unknown-linux-gnu /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
+# Add symlinks
+COPY symlink/exec.sh /
+COPY symlink/sh3be-unknown-linux-gnu.sh /
+RUN /sh3be-unknown-linux-gnu.sh
+RUN rm /exec.sh /sh3be-unknown-linux-gnu.sh
+
 # Add toolchains
 COPY cmake/sh3be-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
-COPY env/sh-unknown-elf /env/sh
-COPY env/sh3be-unknown-linux-gnu /env/toolchain
-COPY env/alias /env
-COPY env/shared /env
-COPY env/static /env
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/
