@@ -1,14 +1,14 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-aarch64-linux-gnu \
     libc6-arm64-cross
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/arm64-unknown-linux-gnu.sh /
 RUN /arm64-unknown-linux-gnu.sh
-RUN rm /exec.sh /arm64-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /arm64-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/arm64-unknown-linux-gnu.cmake /toolchains/toolchain.cmake

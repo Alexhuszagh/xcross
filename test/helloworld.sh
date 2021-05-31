@@ -15,6 +15,10 @@ is_android=no
 if [[ "$IMAGE" = *-android ]] || [[ "$IMAGE" = *-androideabi ]]; then
     is_android=yes
 fi
+is_musl=no
+if [[ "$IMAGE" = *-musl ]]; then
+    is_musl=yes
+fi
 is_ppc32=no
 if [[ "$IMAGE" = ppc-* ]]; then
     is_ppc32=yes
@@ -24,7 +28,7 @@ if [ $has_run = yes ] && [ $is_ppc32 = no ]; then
     run_static=yes
 fi
 run_shared=no
-if [ $has_run = yes ] && [ $is_android = no ]; then
+if [ $has_run = yes ] && [ $is_android = no ] && [ $is_musl = no ]; then
     run_shared=yes
 fi
 
@@ -33,6 +37,7 @@ mkdir build && cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/shared.cmake
 make
 if [ $run_shared = yes ]; then
+    make run
     run hello
 fi
 
@@ -40,6 +45,7 @@ rm -rf ./*
 cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake
 make
 if [ $run_static = yes ]; then
+    make run
     run hello
 fi
 

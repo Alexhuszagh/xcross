@@ -1,7 +1,11 @@
 #!/bin/bash
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/exec.sh"
+source "$scriptdir/shortcut.sh"
 
-exec /usr/bin/gcc-10 "/usr/bin/gcc" "/usr/bin/cc"
-exec /usr/bin/g++-10 "/usr/bin/g++" "/usr/bin/c++"
+export PREFIX=
+export VER=10
+export ARCH=x86_64
+
+shortcut_gcc
+shortcut_run

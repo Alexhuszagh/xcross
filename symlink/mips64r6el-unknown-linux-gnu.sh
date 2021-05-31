@@ -1,7 +1,7 @@
 #!/bin/bash
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/exec.sh"
+source "$scriptdir/shortcut.sh"
 
 export PREFIX=mipsisa64r6el-linux-gnuabi64
 export VER=10

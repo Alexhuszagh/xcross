@@ -1,7 +1,7 @@
 #!/bin/bash
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/exec.sh"
+source "$scriptdir/shortcut.sh"
 
 export PREFIX=arm-linux-androideabi
 export DIR=/usr/local/toolchains/llvm/prebuilt/linux-x86_64

@@ -1,14 +1,14 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-mips64el-linux-gnuabi64 \
     libc6-mips64el-cross
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/mips64el-unknown-linux-gnu.sh /
 RUN /mips64el-unknown-linux-gnu.sh
-RUN rm /exec.sh /mips64el-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /mips64el-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/mips64el-unknown-linux-gnu.cmake /toolchains/toolchain.cmake

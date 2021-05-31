@@ -9,10 +9,10 @@ RUN ARCH=sh4be-unknown-linux-gnu /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/sh4be-unknown-linux-gnu.sh /
 RUN /sh4be-unknown-linux-gnu.sh
-RUN rm /exec.sh /sh4be-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /sh4be-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/sh4be-unknown-linux-gnu.cmake /toolchains/toolchain.cmake

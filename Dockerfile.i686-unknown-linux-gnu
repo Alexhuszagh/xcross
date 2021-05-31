@@ -1,14 +1,14 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-i686-linux-gnu \
     libc6-i386-cross
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/i686-unknown-linux-gnu.sh /
 RUN /i686-unknown-linux-gnu.sh
-RUN rm /exec.sh /i686-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /i686-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/i686-unknown-linux-gnu.cmake /toolchains/toolchain.cmake

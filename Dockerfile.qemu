@@ -1,0 +1,6 @@
+# Base image for those with Qemu runners.
+
+FROM ahuszagh/cross:base
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    qemu-user

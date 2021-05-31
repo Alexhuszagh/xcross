@@ -1,7 +1,7 @@
 #!/bin/bash
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/exec.sh"
+source "$scriptdir/shortcut.sh"
 
 export PREFIX=hppa-linux-gnu
 export VER=10

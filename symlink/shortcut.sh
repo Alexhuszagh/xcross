@@ -1,17 +1,7 @@
 #!/bin/bash
-# Simple wrapper around an executable.
+# Simple shortcuts to call executables.
 
-# TODO(ahuszagh) Remove.
-exec () {
-    echo '#!/bin/bash' >> "$2"
-    echo "$1 \${@:1}" >> "$2"
-    chmod +x "$2"
-    if [ "$3" != "" ]; then
-        ln -s "$2" "$3"
-    fi
-}
-
-# Can't guarantee all files are executables, might be
+# Can't guarantee all files are compiled binaries, might be
 # scripts that use positional arguments. Make it a script
 # that called the argument. Only export shortcut if the
 # command exists, which may either be a command in the path,
@@ -19,7 +9,7 @@ exec () {
 shortcut() {
     if command -v "$1" &> /dev/null; then
         echo '#!/bin/bash' >> "$2"
-        echo "$1 $ARGS \${@:1}" >> "$2"
+        echo "$1 $ARGS \"\$@\"" >> "$2"
         chmod +x "$2"
         for file in "${@:3}"; do
             ln -s "$2" "$file"
@@ -29,11 +19,6 @@ shortcut() {
 
 # Shortcut for a GCC-based compiler.
 shortcut_gcc() {
-    if [ "$PREFIX" = "" ]; then
-        echo "Error: must set a prefix for the GCC compiler."
-        exit 1
-    fi
-
     local prefix
     if [ "$DIR" = "" ]; then
         prefix="$PREFIX"
@@ -41,22 +26,26 @@ shortcut_gcc() {
         prefix="$DIR/bin/$PREFIX"
     fi
 
-    shortcut "$prefix"-gcc "/usr/bin/gcc" "/usr/bin/cc"
-    shortcut "$prefix"-g++ "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
+    local gcc
+    local gxx
+    if [ "$PREFIX" = "" ]; then
+        gcc=gcc
+        gxx=g++
+    else
+        gcc="$prefix"-gcc
+        gxx="$prefix"-g++
+    fi
+    ARGS="$CFLAGS" shortcut "$gcc" "/usr/bin/gcc" "/usr/bin/cc"
+    ARGS="$CFLAGS" shortcut "$gxx" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
 
     if [ "$VER" != "" ]; then
-        shortcut "$prefix"-gcc-"$VER" "/usr/bin/gcc" "/usr/bin/cc"
-        shortcut "$prefix"-g++-"$VER" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
+        ARGS="$CFLAGS" shortcut "$gcc"-"$VER" "/usr/bin/gcc" "/usr/bin/cc"
+        ARGS="$CFLAGS" shortcut "$gxx"-"$VER" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
     fi
 }
 
 # Shortcut for a Clang-based compiler.
 shortcut_clang() {
-    if [ "$PREFIX" = "" ]; then
-        echo "Error: must set a prefix for the Clang compiler."
-        exit 1
-    fi
-
     local prefix
     if [ "$DIR" = "" ]; then
         prefix="$PREFIX"
@@ -64,12 +53,21 @@ shortcut_clang() {
         prefix="$DIR/bin/$PREFIX"
     fi
 
-    shortcut "$prefix"-clang "/usr/bin/clang" "/usr/bin/cc"
-    shortcut "$prefix"-clang++ "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
+    local clang
+    local clangxx
+    if [ "$PREFIX" = "" ]; then
+        clang=clang
+        clangxx=clang++
+    else
+        clang="$prefix"-clang
+        clangxx="$prefix"-clang++
+    fi
+    ARGS="$CFLAGS" shortcut "$clang" "/usr/bin/clang" "/usr/bin/cc"
+    ARGS="$CFLAGS" shortcut "$clangxx" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
 
     if [ "$VER" != "" ]; then
-        shortcut "$prefix"-clang-"$VER" "/usr/bin/clang" "/usr/bin/cc"
-        shortcut "$prefix"-clang++-"$VER" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
+        ARGS="$CFLAGS" shortcut "$clang"-"$VER" "/usr/bin/clang" "/usr/bin/cc"
+        ARGS="$CFLAGS" shortcut "$clangxx"-"$VER" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
     fi
 }
 

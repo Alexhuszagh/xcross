@@ -1,14 +1,14 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-alpha-linux-gnu \
     libc6.1-alpha-cross
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/alpha-unknown-linux-gnu.sh /
 RUN /alpha-unknown-linux-gnu.sh
-RUN rm /exec.sh /alpha-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /alpha-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/alpha-unknown-linux-gnu.cmake /toolchains/toolchain.cmake

@@ -9,10 +9,10 @@ RUN ARCH=avr /ct-ng/gcc.sh
 RUN rm -rf /ct-ng
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/avr.sh /
 RUN /avr.sh
-RUN rm /exec.sh /avr.sh
+RUN rm /shortcut.sh /avr.sh
 
 # Add toolchains
 COPY cmake/avr.cmake /toolchains/toolchain.cmake

@@ -6,10 +6,10 @@ RUN /android.sh
 RUN rm /android.sh
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/i686-unknown-linux-android.sh /
 RUN /i686-unknown-linux-android.sh
-RUN rm /exec.sh /i686-unknown-linux-android.sh
+RUN rm /shortcut.sh /i686-unknown-linux-android.sh
 
 # Add toolchains
 COPY cmake/i686-unknown-linux-android.cmake /toolchains/toolchain.cmake

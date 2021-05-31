@@ -13,3 +13,7 @@ done
 for image in "${METAL_IMAGES[@]}"; do
     "$scriptdir/docker-run.sh" add "$image"
 done
+
+if [ "$METAL_TESTS" != "" ]; then
+    "$scriptdir/docker-run.sh" ppc_metal "ppc-unknown-elf"
+fi

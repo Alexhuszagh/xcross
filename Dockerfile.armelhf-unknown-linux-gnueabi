@@ -1,14 +1,14 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-arm-linux-gnueabihf \
     libc6-armel-armhf-cross
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/armelhf-unknown-linux-gnueabi.sh /
 RUN /armelhf-unknown-linux-gnueabi.sh
-RUN rm /exec.sh /armelhf-unknown-linux-gnueabi.sh
+RUN rm /shortcut.sh /armelhf-unknown-linux-gnueabi.sh
 
 # Add toolchains
 COPY cmake/armelhf-unknown-linux-gnueabi.cmake /toolchains/toolchain.cmake

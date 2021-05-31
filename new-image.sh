@@ -57,21 +57,13 @@ env="$scriptdir/symlink/$FILENAME.sh"
 echo '#!/bin/bash
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/exec.sh"
+source "$scriptdir/shortcut.sh"
 ' > "$env"
-echo "prefix=$TARGET" >> "$env"
-echo 'dir=/home/crosstoolng/x-tools/"$prefix"/
+echo "export PREFIX=$TARGET" >> "$env"
+echo 'export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
-exec "$dir"/bin/"$prefix"-gcc "/usr/bin/gcc" "/usr/bin/cc"
-exec "$dir"/bin/"$prefix"-g++ "/usr/bin/g++" "/usr/bin/c++"
-exec "$dir"/bin/"$prefix"-ar "/usr/bin/ar"
-exec "$dir"/bin/"$prefix"-as "/usr/bin/as"
-exec "$dir"/bin/"$prefix"-ranlib "/usr/bin/ranlib"
-exec "$dir"/bin/"$prefix"-ld "/usr/bin/ld"
-exec "$dir"/bin/"$prefix"-nm "/usr/bin/nm"
-exec "$dir"/bin/"$prefix"-size "/usr/bin/size"
-exec "$dir"/bin/"$prefix"-strings "/usr/bin/strings"
-exec "$dir"/bin/"$prefix"-strip "/usr/bin/strip"' >> "$env"
+shortcut_gcc
+shortcut_util' >> "$env"
 
 # Create our dockerfile.
 dockerfile="$scriptdir/Dockerfile.$FILENAME"
@@ -86,10 +78,10 @@ RUN ARCH=$TARGET /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/$FILENAME.sh /
 RUN /$FILENAME.sh
-RUN rm /exec.sh /$FILENAME.sh
+RUN rm /shortcut.sh /$FILENAME.sh
 
 # Add toolchains
 COPY cmake/$FILENAME.cmake /toolchains/toolchain.cmake

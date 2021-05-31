@@ -6,10 +6,10 @@ RUN /android.sh
 RUN rm /android.sh
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/armv7a-unknown-linux-androideabi.sh /
 RUN /armv7a-unknown-linux-androideabi.sh
-RUN rm /exec.sh /armv7a-unknown-linux-androideabi.sh
+RUN rm /shortcut.sh /armv7a-unknown-linux-androideabi.sh
 
 # Add toolchains
 COPY cmake/armv7a-unknown-linux-androideabi.cmake /toolchains/toolchain.cmake

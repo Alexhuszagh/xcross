@@ -9,6 +9,7 @@ source "$scriptdir/version.sh"
 
 images=(
     "base"
+    "qemu"
     "${IMAGES[@]}"
 )
 

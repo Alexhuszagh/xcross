@@ -1,4 +1,4 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 # Build GCC
 COPY ct-ng/x86_64-multilib-linux-musl.config /ct-ng/
@@ -9,10 +9,10 @@ RUN ARCH=x86_64-multilib-linux-musl /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/x86_64-multilib-linux-musl.sh /
 RUN /x86_64-multilib-linux-musl.sh
-RUN rm /exec.sh /x86_64-multilib-linux-musl.sh
+RUN rm /shortcut.sh /x86_64-multilib-linux-musl.sh
 
 # Add toolchains
 COPY cmake/x86_64-multilib-linux-musl.cmake /toolchains/toolchain.cmake

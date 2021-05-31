@@ -5,8 +5,8 @@
 export OS_IMAGES=(
     # GNU
     "alpha-unknown-linux-gnu"
-    "armel-unknown-linux-gnu"
-    "armelhf-unknown-linux-gnu"
+    "armel-unknown-linux-gnueabi"
+    "armelhf-unknown-linux-gnueabi"
     "arm64-unknown-linux-gnu"
     "hppa-unknown-linux-gnu"
     "i686-unknown-linux-gnu"
@@ -52,7 +52,9 @@ export OS_IMAGES=(
     "i686-unknown-linux-android"
     "x86_64-unknown-linux-android"
 
-    # Add Darwin?
+    # MinGW
+    "i386-w64-mingw32"
+    "x86_64-w64-mingw32"
 
     # Add Musl, uclibc, and elf targets.
     # riscv32-hifive1-elf
@@ -104,7 +106,7 @@ export METAL_IMAGES=(
     #"shbe-unknown-elf"
 
     # ELF
-    #"ppc-unknown-elf"
+    "ppc-unknown-elf"
     "ppcle-unknown-elf"
     #"ppc64-unknown-elf"
     #"ppc64le-unknown-elf"

@@ -9,10 +9,10 @@ RUN ARCH=powerpcle-unknown-eabi /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/ppcle-unknown-eabi.sh /
 RUN /ppcle-unknown-eabi.sh
-RUN rm /exec.sh /ppcle-unknown-eabi.sh
+RUN rm /shortcut.sh /ppcle-unknown-eabi.sh
 
 # Add toolchains
 COPY cmake/ppcle-unknown-eabi.cmake /toolchains/toolchain.cmake

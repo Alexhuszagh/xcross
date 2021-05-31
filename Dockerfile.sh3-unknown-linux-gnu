@@ -9,10 +9,10 @@ RUN ARCH=sh3-unknown-linux-gnu /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/sh3-unknown-linux-gnu.sh /
 RUN /sh3-unknown-linux-gnu.sh
-RUN rm /exec.sh /sh3-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /sh3-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/sh3-unknown-linux-gnu.cmake /toolchains/toolchain.cmake

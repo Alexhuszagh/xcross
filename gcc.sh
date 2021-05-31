@@ -6,9 +6,6 @@ set -ex
 
 export DEBIAN_FRONTEND="noninteractive"
 
-# Add non-root user to build libraries to.
-adduser --disabled-password --gecos "" crosstoolng
-
 # Install dependencies to build ct-ng.
 # python3 is for glibc
 # python3-pip and python3-dev for gdb

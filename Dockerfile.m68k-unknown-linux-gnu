@@ -1,14 +1,14 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-m68k-linux-gnu \
     libc6-m68k-cross
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/m68k-unknown-linux-gnu.sh /
 RUN /m68k-unknown-linux-gnu.sh
-RUN rm /exec.sh /m68k-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /m68k-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/m68k-unknown-linux-gnu.cmake /toolchains/toolchain.cmake

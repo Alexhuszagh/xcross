@@ -9,10 +9,10 @@ RUN ARCH=sh-unknown-elf /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/sh4-340-unknown-elf.sh /
 RUN /sh4-340-unknown-elf.sh
-RUN rm /exec.sh /sh4-340-unknown-elf.sh
+RUN rm /shortcut.sh /sh4-340-unknown-elf.sh
 
 # Add toolchains
 COPY cmake/sh4-340-unknown-elf.cmake /toolchains/toolchain.cmake

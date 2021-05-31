@@ -1,3 +1,5 @@
+# Base image for all other images.
+
 FROM ubuntu:20.04
 
 RUN apt update
@@ -5,8 +7,10 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
     cmake \
     git \
     ca-certificates \
-    qemu-user \
     make
 
 RUN mkdir -p /toolchains
 RUN mkdir -p /env
+
+# Add non-root user to build libraries to and for x-cross.
+RUN adduser --disabled-password --gecos "" crosstoolng

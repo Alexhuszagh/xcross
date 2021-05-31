@@ -9,10 +9,10 @@ RUN ARCH=powerpcle-unknown-linux-gnu /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/ppcle-unknown-linux-gnu.sh /
 RUN /ppcle-unknown-linux-gnu.sh
-RUN rm /exec.sh /ppcle-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /ppcle-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/ppcle-unknown-linux-gnu.cmake /toolchains/toolchain.cmake

@@ -1,18 +1,10 @@
 #!/bin/bash
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/exec.sh"
+source "$scriptdir/shortcut.sh"
 
-prefix=sh-unknown-elf
-dir=/home/crosstoolng/x-tools/"$prefix"/
+export PREFIX=sh-unknown-elf
+export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
-exec "$dir"/bin/"$prefix"-"gcc -m3" "/usr/bin/gcc" "/usr/bin/cc"
-exec "$dir"/bin/"$prefix"-"g++ -m3" "/usr/bin/g++" "/usr/bin/c++"
-exec "$dir"/bin/"$prefix"-ar "/usr/bin/ar"
-exec "$dir"/bin/"$prefix"-as "/usr/bin/as"
-exec "$dir"/bin/"$prefix"-ranlib "/usr/bin/ranlib"
-exec "$dir"/bin/"$prefix"-ld "/usr/bin/ld"
-exec "$dir"/bin/"$prefix"-nm "/usr/bin/nm"
-exec "$dir"/bin/"$prefix"-size "/usr/bin/size"
-exec "$dir"/bin/"$prefix"-strings "/usr/bin/strings"
-exec "$dir"/bin/"$prefix"-strip "/usr/bin/strip"
+CFLAGS="-m3" shortcut_gcc
+shortcut_util

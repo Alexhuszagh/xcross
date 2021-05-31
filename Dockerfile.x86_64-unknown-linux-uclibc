@@ -1,4 +1,4 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 # Build GCC
 COPY ct-ng/x86_64-unknown-linux-uclibc.config /ct-ng/
@@ -9,10 +9,10 @@ RUN ARCH=x86_64-unknown-linux-uclibc /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/x86_64-unknown-linux-uclibc.sh /
 RUN /x86_64-unknown-linux-uclibc.sh
-RUN rm /exec.sh /x86_64-unknown-linux-uclibc.sh
+RUN rm /shortcut.sh /x86_64-unknown-linux-uclibc.sh
 
 # Add toolchains
 COPY cmake/x86_64-unknown-linux-uclibc.cmake /toolchains/toolchain.cmake

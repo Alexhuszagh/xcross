@@ -8,16 +8,15 @@ RUN ARCH=x86_64-w64-mingw32 /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# TODO(ahuszagh) Restore...
-## Add symlinks
-#COPY symlink/exec.sh /
-#COPY symlink/x86_64-w64-mingw32.sh /
-#RUN /x86_64-w64-mingw32.sh
-#RUN rm /exec.sh /x86_64-w64-mingw32.sh
-#
-## Add toolchains
-#COPY cmake/x86_64-w64-mingw32.cmake /toolchains/toolchain.cmake
-#COPY cmake/shared.cmake /toolchains/
-#COPY cmake/static.cmake /toolchains/
-#COPY env/shared /env/
-#COPY env/static /env/
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/x86_64-w64-mingw32.sh /
+RUN /x86_64-w64-mingw32.sh
+RUN rm /shortcut.sh /x86_64-w64-mingw32.sh
+
+# Add toolchains
+COPY cmake/x86_64-w64-mingw32.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

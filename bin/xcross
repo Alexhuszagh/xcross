@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+#
+# A utility for 1-line builds from the parent host.
+
+import argparse
+import os
+import pathlib
+import re
+import subprocess
+import sys
+
+# Create our arguments.
+parser = argparse.ArgumentParser(description='Cross-compile C/C++ with a single command.')
+parser.add_argument(
+    '--target',
+    help='''The target triple for the cross-compiled architecture.
+This may also be supplied via the environment variable `TARGET`.
+Ex: `--target=alpha-unknown-linux-gnu`.''',
+)
+parser.add_argument(
+    '--dir',
+    help='''The directory to share to the docker image.
+This may also be supplied via the environment variable `CROSSDIR`.
+This directory may be an absolute path or relative to
+the current working directory. Both the input and output arguments
+must be relative to this. Defaults to `/`.
+Ex: `--dir=..`''',
+)
+parser.add_argument(
+    '-E',
+    '--env',
+    action='append',
+    help='''Pass through an environment variable to the image.
+May be provided multiple times, or as a comma-separated list of values.
+If an argument is provided without a value, it's passed through using
+the value in the current shell.
+Ex: `-E=CXX=/usr/bin/c++,CC=/usr/bin/cc,AR`''',
+)
+parser.add_argument(
+    '--username',
+    help='''The username for the Docker Hub image.
+This may also be supplied via the environment variable `USERNAME`.
+Ex: `--username=ahuszagh`''',
+)
+parser.add_argument(
+    '--repository',
+    help='''The repository for the Docker Hub image.
+This may also be supplied via the environment variable `REPOSITORY`.
+Ex: `--repository=cross`''',
+)
+parser.add_argument(
+    '--docker',
+    help='''The path or name of the Docker binary.
+This may also be supplied via the environment variable `DOCKER`.
+Ex: `--docker=docker`''',
+)
+args, unknown = parser.parse_known_args()
+
+def error(message):
+    '''Print message, help, and exit on error.'''
+
+    sys.stderr.write(f'error: {message}.\n')
+    parser.print_help()
+    sys.exit(2)
+
+def validate_username(username):
+    return re.match('^[A-Za-z0-9_-]*$', username)
+
+def validate_repository(repository):
+    return re.match('^[A-Za-z0-9_-]+$', repository)
+
+def validate_target(target):
+    return re.match('^[A-Za-z0-9_-]+$', target)
+
+def escape(string):
+    # Avoid quoting, since this can change the meaning,
+    # like when we have "VERBOSE=1". We our escape our full string
+    # Escape everything except for ASCII, digits, hyphen, underscore,
+    # and a few other whitelisted characters.
+
+    # This is 4 backslashes, which becomes 2 on the command line.
+    esc1 = re.sub(r"\\", r"\\\\\\\\", string)
+    # This is 2 escaped backslashes, which becomes 1 on the command line.
+    esc2 = re.sub(r"\"", r"\\\\\"", esc1)
+    # Now need to escape every other character with a single backslash.
+    # This means it will be passed as a value to the command-line.
+    return re.sub(r"([^\\\"A-Za-z0-9%+./:=@_-])", r"\\\1", esc2)
+
+def escape_path(path):
+    # We want to quote here, since we don't want **any** globs,
+    # or special characters, since this is the most important part.
+    # This should **always** be valid.
+    if "'" in path:
+        raise ValueError("Invalid quote in path, path is not valid.")
+    return path
+
+def main():
+    '''Entry point'''
+
+    current_dir = pathlib.PurePath(os.getcwd())
+    root = current_dir.root
+
+    # Normalize our arguments.
+    args.target = args.target or os.environ.get('TARGET')
+    args.dir = args.dir or os.environ.get('CROSSDIR')
+    args.dir = args.dir or root
+    if args.username is None:
+        args.username = os.environ.get('USERNAME')
+    if args.username is None:
+        args.username = 'ahuszagh'
+    args.repository = args.repository or os.environ.get('REPOSITORY')
+    args.repository = args.repository or 'cross'
+    args.docker = args.docker or os.environ.get('DOCKER')
+    args.docker = args.docker or 'docker'
+
+    # Validate our arguments.
+    if not unknown:
+        error('Must provide at least an argument for the command')
+    if args.target is None or not validate_target(args.target):
+        error('Must provide a valid target')
+    if args.username is None or not validate_username(args.username):
+        error('Must provide a valid Docker Hub username')
+    if args.repository is None or not validate_repository(args.repository):
+        error('Must provide a valid Docker Hub repository')
+
+    # Need to add a toolchain if we don't have one with CMake.
+    if any(i == 'cmake' for i in unknown):
+        if not any(i.startswith('-DCMAKE_TOOLCHAIN_FILE') for i in unknown):
+            unknown.append('-DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake')
+
+    # Normalize our paths here.
+    parent_dir = pathlib.PurePath(os.path.realpath(args.dir))
+    if not os.path.isdir(parent_dir):
+        error('`dir` is not a directory')
+    if not current_dir.is_relative_to(parent_dir):
+        error('`dir` must be a parent of the current working directory')
+    relpath = current_dir.relative_to(parent_dir).as_posix()
+
+    # Process our environment variables.
+    args.env = args.env or []
+    env = [item for e in args.env for item in e.split(',')]
+
+    # Process our subprocess call.
+    # We need to escape every custom argument, so we
+    # can ensure the args are properly passed if they
+    # have spaces. We use single-quotes for the path,
+    # and escape any characters and use double-quotes
+    # for the command, to ensure we avoid any malicious
+    # escapes. This allows us to have internal `'` characters
+    # in our commands, without actually providing a dangerous escape.
+    image = f'{args.repository}:{args.target}'
+    if args.username:
+        image = f'{args.username}/{image}'
+    command = ['docker', 'run']
+    for var in env:
+        command += ['--env', var]
+    command += ['--volume', f'{parent_dir}:/src']
+    command.append(image)
+    chdir = f'cd \'/src/{escape_path(relpath)}\''
+    nonroot = f'su crosstoolng -c "{" ".join(map(escape, unknown))}"'
+    cmd = f'{chdir} && {nonroot}'
+    command += ['/bin/bash', '-c', cmd]
+    code = subprocess.call(
+        command,
+        shell=False,
+        stdout=sys.stdout,
+        stderr=sys.stderr
+    )
+    sys.exit(code)
+
+if __name__ == '__main__':
+    main()

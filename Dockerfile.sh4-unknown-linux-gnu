@@ -1,14 +1,14 @@
-FROM ahuszagh/cross:base
+FROM ahuszagh/cross:qemu
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-sh4-linux-gnu \
     libc6-sh4-cross
 
 # Add symlinks
-COPY symlink/exec.sh /
+COPY symlink/shortcut.sh /
 COPY symlink/sh4-unknown-linux-gnu.sh /
 RUN /sh4-unknown-linux-gnu.sh
-RUN rm /exec.sh /sh4-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /sh4-unknown-linux-gnu.sh
 
 # Add toolchains
 COPY cmake/sh4-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
