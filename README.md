@@ -164,13 +164,13 @@ before_install:
 script:
   - |
     mkdir build && cd build
-    magic=
+    xcross=
     if [ "$TARGET" != "" ] ; then
-      magic=../xcross
+      xcross=../xcross
     fi
-    $magic cmake .. --target="$TARGET"
-    $magic make -j 5
-    $magic run tests/test
+    $xcross cmake .. --target="$TARGET"
+    $xcross make -j 5
+    $xcross run tests/test
 ```
 
 # Using xcross
