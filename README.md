@@ -193,7 +193,7 @@ Install Python3.6+, then download [xcross](https://raw.githubusercontent.com/Ale
 ```bash
 # Download the file and make it executable.
 wget https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross \
-    -P ~/bin
+    -O ~/bin/xcross
 chmod +x ~/bin/xcross
 # Add it to the path for the current and all future shells.
 export PATH="$PATH:~/bin"
