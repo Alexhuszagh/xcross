@@ -10,6 +10,7 @@ Docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts 
 - [Motivation](#motivation)
 - [Getting Started](#getting-started)
     - [xcross](#xcross)
+    - [run](#run)
     - [Docker](#docker)
 - [Travis CI Example](#travis-ci-example)
 - [Using xcross](#using-xcross)
@@ -28,6 +29,8 @@ Docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts 
 Unlike 10 years ago, we no longer live in an x86 world. ARM architectures are nearly ubiquitous in mobile devices, and popular in embedded devices, servers, and game systems. IBM's POWER and z/Architecture can run some high-end servers. PowerPC systems are popular in embedded devices, and used to be popular architectures for game systems, desktops, and servers. MIPS has been integral to autonomous driving systems and other embedded systems. RISC-V is rapidly being adopted for a wide variety of use-cases. The IoT market has lead to an explosion in embedded devices.
 
 At the same time, modern software design builds upon a body of open source work. It is more important than ever to ensure that foundational libraries are portable, and can run on a wide variety of devices. However, few open source developers can afford a large selection of hardware to test code on, and most pre-packaged cross-compilers only support a few, common architectures.
+
+Normally, cross compilers are limited by long compile times (to build the cross-compiler) and non-portable toolchain files, since the toolchain cannot be added to the path.
 
 Using Docker images simplifies this, since the cross-compilers are pre-packaged in a compact image, enabling building, testing, and deploying cross-compiled code in seconds, rather than hours. Each image comes with a toolchain installed on-path, making it work with standard build tools without any configuration. And, [xcross](xcross) allows you to cross-compile code with zero setup required.
 
@@ -53,7 +56,6 @@ file helloworld
 
 # We can also use environment variables for the target and dir.
 export TARGET=alpha-unknown-linux-gnu
-export CROSSDIR=$(realpath .)
 
 # Let's try CMake. Here, we have to tell Docker where to 
 # mount the directory, since we need to share the parent's files.
@@ -70,8 +72,14 @@ xcross g++ helloworld.cc -o hello
 xcross run hello
 
 # We also support environment variable passthrough.
-xcross -E CXX=g++ \$CXX helloworld.cc -o hello
+# Please note that if you use `$CXX`, it will evaluate
+# on the host, so we must escape it.
+xcross -E CXX=g++ '$CXX' helloworld.cc -o hello
 ```
+
+## run
+
+`run` is a command inside the docker image that invokes Qemu with the correct arguments to execute the binary, whether statically or dynamically-linked. `run hello` is analogous to running `./hello` as a native binary.
 
 ## Docker
 
@@ -153,7 +161,6 @@ matrix:
         - TARGET="mips64"
 
 before_install:
-  - eval "${COMPILER}"
   - |
     if [ "$TARGET" != "" ] ; then
       wget https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross
@@ -166,9 +173,9 @@ script:
     mkdir build && cd build
     xcross=
     if [ "$TARGET" != "" ] ; then
-      xcross=../xcross
+      xcross=../xcross --target="$TARGET"
     fi
-    $xcross cmake .. --target="$TARGET"
+    $xcross cmake ..
     $xcross make -j 5
     $xcross run tests/test
 ```
@@ -178,6 +185,20 @@ script:
 Most of the magic happens via xcross, which allows you to transparently execute commands in a Docker container. Although xcross provides simple, easy-to-use defaults, it has more configuration options for extensible cross-platform builds. Most of these command-line arguments may be provided as environment variables.
 
 > **WARNING** By default, the root directory is shared with the Docker container, for maximum compatibility. In order to mitigate any security vulnerabilities, we run any build commands as a non-root user, and ensure all commands are properly escaped to avoid any script injections. If you are worried about a malicious build system, you may further restrict this using the `--dir` option.
+
+### Installing
+
+Install Python3.6+, then download [xcross](https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross) and add it to the path. For example, on Unix systems:
+
+```bash
+# Download the file and make it executable.
+wget https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross \
+    -P ~/bin
+chmod +x ~/bin/xcross
+# Add it to the path for the current and all future shells.
+export PATH="$PATH:~/bin"
+echo 'export PATH="$PATH:~/bin"' >> ~/.bashrc
+```
 
 ### Arguments
 
@@ -189,13 +210,13 @@ xcross --target=alpha-unknown-linux-gnu ...
 TARGET=alpha-unknown-linux-gnu xcross ...
 ```
 
-- `--dir`, `CROSSDIR`: The target architecture to compile to.
+- `--dir`, `CROSS_DIR`: The target architecture to compile to.
 
 ```bash
 # These two are identical, and share only from the 
 # current working directory.
 xcross --dir=. ...
-CROSSDIR=. xcross ...
+CROSS_DIR=. xcross ...
 ```
 
 - `-E`, `--env`: Pass environment variables to the container.
@@ -207,6 +228,36 @@ If no value is passed for the variable, it exports the variable from the current
 xcross -E VAR1 -E VAR2=x -E VAR3=y
 xcross -E VAR1 -E VAR2=x,VAR3=y
 xcross -E VAR1,VAR2=x,VAR3=y
+```
+
+- `--cpu`, `CROSS_CPU`: Set the CPU model to compile/run code for.
+
+If not provided, it defaults to a generic processor model for the architecture. If provided, it will set the register usage and instruction scheduling parameters in addition to the generic processor model.
+
+```bash
+# Build for the PowerPC e500mc line.
+export TARGET=ppc-unknown-linux-gnu
+xcross --cpu=e500mc c++ helloworld.cc -o hello
+xcross --cpu=e500mc run hello
+```
+
+In order to determine valid CPU model types for the cross-compiler, you may use either of the following commands:
+
+```bash
+# Check GCC for the valid CPU types, using an obviously false CPU type.
+export TARGET=ppc-unknown-linux-gnu
+xcross cc -mcpu=unknown
+# error: unrecognized argument in option '-mcpu=unknown'
+# gcc: note: valid arguments to '-mcpu=' are: 401 403...
+
+# Check Qemu for known CPU types.
+# The second column contains the desired data.
+xcross run -cpu help
+# PowerPC 601_v1           PVR 00010001
+# PowerPC 601_v0           PVR 00010001
+# ...
+# PowerPC e500mc           PVR 80230020
+# ...
 ```
 
 - `--username`, `USERNAME`: The Docker Hub username for the Docker image.
@@ -421,9 +472,7 @@ shortcut_util
 ```cmake
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
-SET(ARCH 32)
 
-set(CMAKE_COMPILER_PREFIX "arm-unknown-linux-gnueabi-")
 set(CMAKE_FIND_ROOT_PATH "home/crosstoolng/x-tools/arm-unknown-linux-gnueabi/")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
@@ -438,9 +487,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 cmake_policy(SET CMP0065 NEW)
-set(ARCH 32)
 
-set(CMAKE_COMPILER_PREFIX "arm-unknown-eabi-")
 set(CMAKE_FIND_ROOT_PATH "/home/crosstoolng/x-tools/arm-unknown-eabi/")
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

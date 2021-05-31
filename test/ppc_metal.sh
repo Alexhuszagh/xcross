@@ -6,8 +6,10 @@ set -e
 git clone https://github.com/Alexhuszagh/ppc_hw
 cd ppc_hw
 make
+make dis_test
 
 export DEBIAN_FRONTEND="noninteractive"
+apt-get update
 apt-get install --assume-yes qemu-system-ppc
 
 # Run our kernel program.

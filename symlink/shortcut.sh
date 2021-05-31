@@ -9,7 +9,15 @@
 shortcut() {
     if command -v "$1" &> /dev/null; then
         echo '#!/bin/bash' >> "$2"
-        echo "$1 $ARGS \"\$@\"" >> "$2"
+        echo "args=\"$ARGS\"" >> "$2"
+        for value in "${FLAGS[@]}"; do
+            local flag="${value%\/*}"
+            local ident="${value#*\/}"
+            echo "if [ \"\$$ident\" != \"\" ]; then" >> "$2"
+            echo "    args=\"\$args $flag\$$ident\"" >> "$2"
+            echo "fi" >> "$2"
+        done
+        echo "$1 \$args \"\$@\"" >> "$2"
         chmod +x "$2"
         for file in "${@:3}"; do
             ln -s "$2" "$file"
@@ -35,12 +43,12 @@ shortcut_gcc() {
         gcc="$prefix"-gcc
         gxx="$prefix"-g++
     fi
-    ARGS="$CFLAGS" shortcut "$gcc" "/usr/bin/gcc" "/usr/bin/cc"
-    ARGS="$CFLAGS" shortcut "$gxx" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
+    ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$gcc" "/usr/bin/gcc" "/usr/bin/cc"
+    ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$gxx" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
 
     if [ "$VER" != "" ]; then
-        ARGS="$CFLAGS" shortcut "$gcc"-"$VER" "/usr/bin/gcc" "/usr/bin/cc"
-        ARGS="$CFLAGS" shortcut "$gxx"-"$VER" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
+        ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$gcc"-"$VER" "/usr/bin/gcc" "/usr/bin/cc"
+        ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$gxx"-"$VER" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
     fi
 }
 
@@ -62,12 +70,12 @@ shortcut_clang() {
         clang="$prefix"-clang
         clangxx="$prefix"-clang++
     fi
-    ARGS="$CFLAGS" shortcut "$clang" "/usr/bin/clang" "/usr/bin/cc"
-    ARGS="$CFLAGS" shortcut "$clangxx" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
+    ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$clang" "/usr/bin/clang" "/usr/bin/cc"
+    ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$clangxx" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
 
     if [ "$VER" != "" ]; then
-        ARGS="$CFLAGS" shortcut "$clang"-"$VER" "/usr/bin/clang" "/usr/bin/cc"
-        ARGS="$CFLAGS" shortcut "$clangxx"-"$VER" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
+        ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$clang"-"$VER" "/usr/bin/clang" "/usr/bin/cc"
+        ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$clangxx"-"$VER" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
     fi
 }
 
@@ -132,5 +140,5 @@ shortcut_run() {
         # Add support for executables linked to a shared libc/libc++.
         ARGS="-L $LIBPATH"
     fi
-    ARGS="$ARGS" shortcut "$qemu" "/usr/bin/run"
+    ARGS="$ARGS" FLAGS="-cpu /CPU" shortcut "$qemu" "/usr/bin/run"
 }

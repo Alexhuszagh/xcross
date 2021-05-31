@@ -20,7 +20,7 @@ Ex: `--target=alpha-unknown-linux-gnu`.''',
 parser.add_argument(
     '--dir',
     help='''The directory to share to the docker image.
-This may also be supplied via the environment variable `CROSSDIR`.
+This may also be supplied via the environment variable `CROSS_DIR`.
 This directory may be an absolute path or relative to
 the current working directory. Both the input and output arguments
 must be relative to this. Defaults to `/`.
@@ -35,6 +35,16 @@ May be provided multiple times, or as a comma-separated list of values.
 If an argument is provided without a value, it's passed through using
 the value in the current shell.
 Ex: `-E=CXX=/usr/bin/c++,CC=/usr/bin/cc,AR`''',
+)
+parser.add_argument(
+    '--cpu',
+    help='''Set the CPU model for the compiler/Qemu emulator.
+This may also be supplied via the environment variable `CROSS_CPU`.
+A single CPU type may be provided. To enumerate valid CPU types
+for the cross compiler, you may run `cc -mcpu=x`, where `x` is an
+invalid CPU type. To enumerate valid CPU types for the Qemu emulator,
+you may run `run -cpu help`.
+Ex: `--cpu=e500mc`''',
 )
 parser.add_argument(
     '--username',
@@ -56,12 +66,12 @@ Ex: `--docker=docker`''',
 )
 args, unknown = parser.parse_known_args()
 
-def error(message):
+def error(message, code=126):
     '''Print message, help, and exit on error.'''
 
     sys.stderr.write(f'error: {message}.\n')
     parser.print_help()
-    sys.exit(2)
+    sys.exit(code)
 
 def validate_username(username):
     return re.match('^[A-Za-z0-9_-]*$', username)
@@ -91,7 +101,7 @@ def escape_path(path):
     # or special characters, since this is the most important part.
     # This should **always** be valid.
     if "'" in path:
-        raise ValueError("Invalid quote in path, path is not valid.")
+        error('Invalid quote in path `{path}`, path is not valid')
     return path
 
 def main():
@@ -102,8 +112,9 @@ def main():
 
     # Normalize our arguments.
     args.target = args.target or os.environ.get('TARGET')
-    args.dir = args.dir or os.environ.get('CROSSDIR')
     args.dir = args.dir or root
+    args.cpu = args.cpu or os.environ.get('CROSS_DIR')
+    args.cpu = args.cpu or os.environ.get('CROSS_CPU')
     if args.username is None:
         args.username = os.environ.get('USERNAME')
     if args.username is None:
@@ -137,6 +148,9 @@ def main():
     relpath = current_dir.relative_to(parent_dir).as_posix()
 
     # Process our environment variables.
+    # We don't need to escape these, since we aren't
+    # using a shell. For example, `VAR1="Some Thing"`
+    # and `VAR1=Some Thing` will both be passed correctly.
     args.env = args.env or []
     env = [item for e in args.env for item in e.split(',')]
 
@@ -157,7 +171,10 @@ def main():
     command += ['--volume', f'{parent_dir}:/src']
     command.append(image)
     chdir = f'cd \'/src/{escape_path(relpath)}\''
-    nonroot = f'su crosstoolng -c "{" ".join(map(escape, unknown))}"'
+    escaped = f'{" ".join(map(escape, unknown))}'
+    if args.cpu:
+        escaped = f'CPU={args.cpu} {escaped}'
+    nonroot = f'su crosstoolng -c "{escaped}"'
     cmd = f'{chdir} && {nonroot}'
     command += ['/bin/bash', '-c', cmd]
     code = subprocess.call(

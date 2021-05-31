@@ -5,7 +5,7 @@ source "$scriptdir/shortcut.sh"
 
 export PREFIX=sparc64-linux-gnu
 export VER=10
-export ARCH=alpha
+export ARCH=sparc64
 export LIBPATH="/usr/$PREFIX"
 
 shortcut_gcc
