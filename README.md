@@ -184,7 +184,7 @@ script:
 
 Most of the magic happens via xcross, which allows you to transparently execute commands in a Docker container. Although xcross provides simple, easy-to-use defaults, it has more configuration options for extensible cross-platform builds. Most of these command-line arguments may be provided as environment variables.
 
-> **WARNING** By default, the root directory is shared with the Docker container, for maximum compatibility. In order to mitigate any security vulnerabilities, we run any build commands as a non-root user, and ensure all commands are properly escaped to avoid any script injections. If you are worried about a malicious build system, you may further restrict this using the `--dir` option.
+> **WARNING** By default, the root directory is shared with the Docker container, for maximum compatibility. In order to mitigate any security vulnerabilities, we run any build commands as a non-root user, and escape input in an attempt to avoid any script injections. If you are worried about a malicious build system, you may further restrict this using the `--dir` option.
 
 ### Installing
 
@@ -244,21 +244,17 @@ xcross --cpu=e500mc run hello
 In order to determine valid CPU model types for the cross-compiler, you may use either of the following commands:
 
 ```bash
-# Check GCC for the valid CPU types, using an obviously false CPU type.
+# Here, we probe GCC for valid CPU names for the cross-compiler.
 export TARGET=ppc-unknown-linux-gnu
-xcross cc -mcpu=unknown
-# error: unrecognized argument in option '-mcpu=unknown'
-# gcc: note: valid arguments to '-mcpu=' are: 401 403...
+xcross cc-cpu-list
+# 401 403 405 405fp ... e500mc ... rs64 titan
 
-# Check Qemu for known CPU types.
-# The second column contains the desired data.
-xcross run -cpu help
-# PowerPC 601_v1           PVR 00010001
-# PowerPC 601_v0           PVR 00010001
-# ...
-# PowerPC e500mc           PVR 80230020
-# ...
+# Here, we probe Qemu for the valid CPU names for the emulation.
+xcross run-cpu-list
+# 401 401a1 401b2 401c2 ... e500mc ... x2vp50 x2vp7
 ```
+
+These are convenience functions around `gcc -mcpu=unknown` and `qemu-ppc -cpu help`, listing only the sorted CPU types. Note that the CPU types might not be identical for both, so it's up to the caller to known identify the proper CPU types.
 
 - `--username`, `USERNAME`: The Docker Hub username for the Docker image.
 
@@ -328,11 +324,11 @@ ls -lh cpp-helloworld/build-alpha/hello
 
 # Building/Running Dockerfiles
 
-To build all Docker images, run `build.sh`. To build and run a single docker image, use
+To build all Docker images, run `docker/build.sh`. To build and run a single docker image, use
 
 ```bash
 image=ppcle-unknown-linux-gnu
-docker build -t "ahuszagh/cross:$image" . --file "Dockerfile.$image"
+docker build -t "ahuszagh/cross:$image" . --file "docker/Dockerfile.$image"
 docker run -it "ahuszagh/cross:$image" /bin/bash
 ```
 
@@ -437,7 +433,7 @@ To add your own toolchain, the general workflow is as follows:
 After the toolchain is created, the source environment file, CMake toolchain file, and Dockerfile may be created via:
 
 ```bash
-BITNESS=32 OS=Linux TARGET=arm-unknown-linux-gnueabi ./new-image.sh
+BITNESS=32 OS=Linux TARGET=arm-unknown-linux-gnueabi docker/new-image.sh
 ```
 
 **Configure Toolchain**

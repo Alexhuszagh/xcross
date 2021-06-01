@@ -1,0 +1,22 @@
+FROM ahuszagh/cross:base
+
+# Build GCCCOPY ct-ng/avr.config /ct-ng/
+COPY ct-ng/powerpcle-unknown-elf.config /ct-ng/
+COPY docker/gcc.sh /ct-ng/
+RUN ARCH=powerpcle-unknown-elf /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/ppcle-unknown-elf.sh /
+RUN /ppcle-unknown-elf.sh
+RUN rm /shortcut.sh /ppcle-unknown-elf.sh
+
+# Add toolchains
+COPY cmake/ppcle-unknown-elf.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

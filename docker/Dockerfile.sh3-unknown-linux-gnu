@@ -1,0 +1,22 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/sh3-unknown-linux-gnu.config /ct-ng/
+COPY docker/gcc.sh /ct-ng/
+RUN ARCH=sh3-unknown-linux-gnu /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/sh3-unknown-linux-gnu.sh /
+RUN /sh3-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /sh3-unknown-linux-gnu.sh
+
+# Add toolchains
+COPY cmake/sh3-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

@@ -82,27 +82,24 @@ def validate_repository(repository):
 def validate_target(target):
     return re.match('^[A-Za-z0-9_-]+$', target)
 
-def escape(string):
-    # Avoid quoting, since this can change the meaning,
-    # like when we have "VERBOSE=1". We our escape our full string
-    # Escape everything except for ASCII, digits, hyphen, underscore,
-    # and a few other whitelisted characters.
-
-    # This is 4 backslashes, which becomes 2 on the command line.
+def quote(string):
+    # We first need to properly escape all backslashes, so each
+    # is transformed into 2 backslashes `\\` when passed into
+    # the shell. 8 backslashes is turned into 2 for `bash -c`,
+    # which is then read as 1. Likewise, 4 quotes for
+    # `"` is then read as 1 in `bash -c`, which provides a
+    # literal escape. The rest can be provided as a literal escape.
     esc1 = re.sub(r"\\", r"\\\\\\\\", string)
-    # This is 2 escaped backslashes, which becomes 1 on the command line.
     esc2 = re.sub(r"\"", r"\\\\\"", esc1)
-    # Now need to escape every other character with a single backslash.
-    # This means it will be passed as a value to the command-line.
-    return re.sub(r"([^\\\"A-Za-z0-9%+./:=@_-])", r"\\\1", esc2)
+    return re.sub(r"([^\\\"A-Za-z0-9%+.|/:=@_-])", r"\\\1", esc2)
 
-def escape_path(path):
+def quote_path(path):
     # We want to quote here, since we don't want **any** globs,
     # or special characters, since this is the most important part.
     # This should **always** be valid.
     if "'" in path:
         error('Invalid quote in path `{path}`, path is not valid')
-    return path
+    return f"'{path}'"
 
 def main():
     '''Entry point'''
@@ -165,17 +162,17 @@ def main():
     image = f'{args.repository}:{args.target}'
     if args.username:
         image = f'{args.username}/{image}'
-    command = ['docker', 'run']
+    command = ['docker', 'run', '-t']
     for var in env:
         command += ['--env', var]
     command += ['--volume', f'{parent_dir}:/src']
     command.append(image)
-    chdir = f'cd \'/src/{escape_path(relpath)}\''
-    escaped = f'{" ".join(map(escape, unknown))}'
+    chdir = f'cd /src/{quote_path(relpath)}'
+    escaped = f'{" ".join(map(quote, unknown))}'
     if args.cpu:
-        escaped = f'CPU={args.cpu} {escaped}'
+        escaped = f'export CPU={args.cpu}; {escaped}'
     nonroot = f'su crosstoolng -c "{escaped}"'
-    cmd = f'{chdir} && {nonroot}'
+    cmd = f'{chdir} && echo "{escaped}" && {nonroot}'
     command += ['/bin/bash', '-c', cmd]
     code = subprocess.call(
         command,

@@ -4,7 +4,7 @@
 set -ex
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/../images.sh"
+source "$scriptdir/../docker/images.sh"
 
 for image in "${OS_IMAGES[@]}"; do
     "$scriptdir/docker-run.sh" helloworld "$image"

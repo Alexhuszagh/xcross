@@ -25,8 +25,22 @@ shortcut() {
     fi
 }
 
-# Shortcut for a GCC-based compiler.
-shortcut_gcc() {
+# Create a utility to list the CPUs for the compiler.
+shortcut_cc_cpu_list() {
+    echo '#!/bin/bash' >> "/usr/bin/cc-cpu-list"
+    echo "cpus=\$(echo \"int main() { return 0; }\" | CPU=unknown c++ -x c++ - 2>&1)" >> "/usr/bin/cc-cpu-list"
+    echo "filtered=\$(echo \"\$cpus\" | grep note)" >> "/usr/bin/cc-cpu-list"
+    echo "names=(\${filtered#* are: })" >> "/usr/bin/cc-cpu-list"
+    echo "IFS=$'\n' sorted=(\$(sort <<<\"\${names[*]}\"))" >> "/usr/bin/cc-cpu-list"
+    echo "echo \"\${sorted[@]}\"" >> "/usr/bin/cc-cpu-list"
+    chmod +x "/usr/bin/cc-cpu-list"
+}
+
+# Generate the shortcut for any compiler.
+shortcut_compiler() {
+    local cc_base="$1"
+    local cxx_base="$2"
+
     local prefix
     if [ "$DIR" = "" ]; then
         prefix="$PREFIX"
@@ -34,49 +48,39 @@ shortcut_gcc() {
         prefix="$DIR/bin/$PREFIX"
     fi
 
-    local gcc
-    local gxx
-    if [ "$PREFIX" = "" ]; then
-        gcc=gcc
-        gxx=g++
-    else
-        gcc="$prefix"-gcc
-        gxx="$prefix"-g++
+    local cc="$cc_base"
+    local cxx="$cxx_base"
+    if [ "$PREFIX" != "" ]; then
+        cc="$prefix"-"$cc"
+        cxx="$prefix"-"$cxx"
     fi
-    ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$gcc" "/usr/bin/gcc" "/usr/bin/cc"
-    ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$gxx" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
+
+    # -mcpu is deprecated on x86.
+    local cpu="mcpu"
+    if [ "$PREFIX" = i[3-7]86-* ] || [[ "$PREFIX" = x86_64-* ]] || [ "$PREFIX" = "" ]; then
+        cpu="march"
+    fi
+
+    cc_alias=("/usr/bin/$cc_base" "/usr/bin/cc")
+    cxx_alias=("/usr/bin/$cxx_base" "/usr/bin/c++" "/usr/bin/cpp")
+    ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cc" "${cc_alias[@]}"
+    ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cxx" "${cxx_alias[@]}"
 
     if [ "$VER" != "" ]; then
-        ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$gcc"-"$VER" "/usr/bin/gcc" "/usr/bin/cc"
-        ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$gxx"-"$VER" "/usr/bin/g++" "/usr/bin/c++" "/usr/bin/cpp"
+        ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cc"-"$VER" "${cc_alias[@]}"
+        ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cxx"-"$VER" "${cxx_alias[@]}"
     fi
+    shortcut_cc_cpu_list
+}
+
+# Shortcut for a GCC-based compiler.
+shortcut_gcc() {
+    shortcut_compiler "gcc" "g++"
 }
 
 # Shortcut for a Clang-based compiler.
 shortcut_clang() {
-    local prefix
-    if [ "$DIR" = "" ]; then
-        prefix="$PREFIX"
-    else
-        prefix="$DIR/bin/$PREFIX"
-    fi
-
-    local clang
-    local clangxx
-    if [ "$PREFIX" = "" ]; then
-        clang=clang
-        clangxx=clang++
-    else
-        clang="$prefix"-clang
-        clangxx="$prefix"-clang++
-    fi
-    ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$clang" "/usr/bin/clang" "/usr/bin/cc"
-    ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$clangxx" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
-
-    if [ "$VER" != "" ]; then
-        ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$clang"-"$VER" "/usr/bin/clang" "/usr/bin/cc"
-        ARGS="$CFLAGS" FLAGS="-mcpu=/CPU" shortcut "$clangxx"-"$VER" "/usr/bin/clang++" "/usr/bin/c++" "/usr/bin/cpp"
-    fi
+    shortcut_compiler "clang" "clang++"
 }
 
 # Shortcut for all the utilities.
@@ -93,38 +97,64 @@ shortcut_util() {
         prefix="$DIR/bin/$PREFIX"
     fi
 
+    # Make arrays of all our arguments.
+    local ver_utils=("gcov" "gcov-dump" "gcov-tool" "lto-dump")
+    local utils=(
+        "${ver_utils[@]}"
+        "addr2line"
+        "ar"
+        "as"
+        "c++filt"
+        "dwp"
+        "elfedit"
+        "embedspu"
+        "gcov"
+        "gcov-dump"
+        "gcov-tool"
+        "gprof"
+        "ld"
+        "ld.bfd"
+        "ld.gold"
+        "lto-dump"
+        "nm"
+        "objcopy"
+        "objdump"
+        "ranlib"
+        "readelf"
+        "size"
+        "strings"
+        "strip"
+    )
+
     # Some of these might not exist, but it's fine.
     # Shortcut does nothing if the file doesn't exist.
-    shortcut "$prefix"-addr2line "/usr/bin/addr2line"
-    shortcut "$prefix"-ar "/usr/bin/ar"
-    shortcut "$prefix"-as "/usr/bin/as"
-    shortcut "$prefix"-c++filt "/usr/bin/c++filt"
-    shortcut "$prefix"-dwp "/usr/bin/dwp"
-    shortcut "$prefix"-elfedit "/usr/bin/elfedit"
-    shortcut "$prefix"-embedspu "/usr/bin/embedspu"
-    shortcut "$prefix"-gcov "/usr/bin/gcov"
-    shortcut "$prefix"-gcov-dump "/usr/bin/gcov-dump"
-    shortcut "$prefix"-gcov-tool "/usr/bin/gcov-tool"
-    shortcut "$prefix"-gprof "/usr/bin/gprof"
-    shortcut "$prefix"-ld "/usr/bin/ld"
-    shortcut "$prefix"-ld.bfd "/usr/bin/ld.bfd"
-    shortcut "$prefix"-ld.gold "/usr/bin/ld.gold"
-    shortcut "$prefix"-lto-dump "/usr/bin/lto-dump"
-    shortcut "$prefix"-nm "/usr/bin/nm"
-    shortcut "$prefix"-objcopy "/usr/bin/objcopy"
-    shortcut "$prefix"-objdump "/usr/bin/objdump"
-    shortcut "$prefix"-ranlib "/usr/bin/ranlib"
-    shortcut "$prefix"-readelf "/usr/bin/readelf"
-    shortcut "$prefix"-size "/usr/bin/size"
-    shortcut "$prefix"-strings "/usr/bin/strings"
-    shortcut "$prefix"-strip "/usr/bin/strip"
-
+    for util in "${utils[@]}"; do
+        shortcut "$prefix"-"$util" "/usr/bin/$util"
+    done
     if [ "$VER" != "" ]; then
-        shortcut "$prefix"-gcov-"$VER" "/usr/bin/gcov"
-        shortcut "$prefix"-gcov-dump-"$VER" "/usr/bin/gcov-dump"
-        shortcut "$prefix"-gcov-tool-"$VER" "/usr/bin/gcov-tool"
-        shortcut "$prefix"-lto-dump-"$VER" "/usr/bin/lto-dump"
+        for util in "${ver_utils[@]}"; do
+            shortcut "$prefix"-"$util"-"$VER" "/usr/bin/$util"
+        done
     fi
+}
+
+# Create a utility to list the CPUs for Qemu emulation.
+shortcut_run_cpu_list() {
+    echo '#!/bin/bash' >> "/usr/bin/run-cpu-list"
+    echo "cpus=\"\$(run -cpu help)\"" >> "/usr/bin/run-cpu-list"
+    echo "readarray -t lines <<<\"\$cpus\"" >> "/usr/bin/run-cpu-list"
+    echo "names=()" >> "/usr/bin/run-cpu-list"
+    echo "for line in \"\${lines[@]:1}\"; do" >> "/usr/bin/run-cpu-list"
+    echo "    if [ \"\$line\" != \"\" ]; then" >> "/usr/bin/run-cpu-list"
+    echo "        names+=(\$(echo \"\$line\" | cut -d ' ' -f 2))" >> "/usr/bin/run-cpu-list"
+    echo "    else" >> "/usr/bin/run-cpu-list"
+    echo "        break" >> "/usr/bin/run-cpu-list"
+    echo "    fi" >> "/usr/bin/run-cpu-list"
+    echo "done" >> "/usr/bin/run-cpu-list"
+    echo "" >> "/usr/bin/run-cpu-list"
+    echo "IFS=$'\n' sorted=(\$(sort <<<\"\${names[*]}\"))" >> "/usr/bin/run-cpu-list"
+    echo "echo \"\${sorted[@]}\"" >> "/usr/bin/run-cpu-list"
+    chmod +x "/usr/bin/run-cpu-list"
 }
 
 # Create a runner for the Qemu binary.
@@ -134,11 +164,11 @@ shortcut_run() {
         exit 1
     fi
 
-    local qemu="qemu-$ARCH"
-    local ARGS
+    local args=
     if [ "$LIBPATH" != "" ]; then
         # Add support for executables linked to a shared libc/libc++.
-        ARGS="-L $LIBPATH"
+        args="-L $LIBPATH"
     fi
-    ARGS="$ARGS" FLAGS="-cpu /CPU" shortcut "$qemu" "/usr/bin/run"
+    FLAGS="-cpu /CPU" ARGS="$args" shortcut "qemu-$ARCH" "/usr/bin/run"
+    shortcut_run_cpu_list
 }
