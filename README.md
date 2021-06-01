@@ -188,10 +188,13 @@ Most of the magic happens via xcross, which allows you to transparently execute 
 
 ### Installing
 
-Install Python3.6+, then download [xcross](https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross) and add it to the path. For example, on Unix systems:
+Install Python3.6+, then download [xcross](https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross) and add it to the path. 
+
+**Unix**
 
 ```bash
 # Download the file and make it executable.
+mkdir -p ~/bin
 wget https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross \
     -O ~/bin/xcross
 chmod +x ~/bin/xcross
@@ -199,6 +202,24 @@ chmod +x ~/bin/xcross
 export PATH="$PATH:~/bin"
 echo 'export PATH="$PATH:~/bin"' >> ~/.bashrc
 ```
+
+**Windows**
+
+```batch
+:: Download the file and make sure we add the `.py` suffix.
+:: Windows doesn't have an idea of xdg_open, so it uses suffixes.
+mkdir %userprofile%\bin
+curl --output %userprofile%\bin\xcross.py ^
+  --url https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross
+
+:: Add it to the path
+set PATH=%PATH%;%userprofile%\bin
+
+:: Optionally add Python scripts to be invoked without adding `.py`.
+set PATHEXT=%PATHEXT%;.py
+```
+
+Please note that these environment variable changes will only persist for the current shell, to persist changes you must edit [Environment Variables](https://superuser.com/a/985947/384687) in System Properties.
 
 ### Arguments
 
@@ -211,17 +232,17 @@ All arguments that are not recognized, as follows, are passed to the Docker cont
 If they are not properly escaped, they will be evaluated on the host, often giving unexpected results.
 
 ```bash
-# This works on POSIX, since we have no environment variables that might
-# be evaluated, and we've escaped the `|`.
+# This works in POSIX shells, since we have no environment variables that 
+# might be evaluated, and we've escaped the `|`.
 xcross echo "int main() { return 0; }" '|' c++ -x c++ -
 
-# On Windows, we need to escape the `|` as follows:
+# In Windows CMD, we need to escape the `|` as follows:
 xcross echo "int main() { return 0; }" ^| c++ -x c++ -
 
-# Escape environment variables on POSIX to evaluate them in the container.
+# Escape environment variables in POSIX shells to evaluate them in the container.
 xcross -E CXX=cpp '$CXX' main.c -o main
 
-# This does not work on POSIX, since it evaluates `$CXX` in the local shell.
+# This does not work in POSIX shells, since it evaluates `$CXX` in the local shell.
 xcross -E CXX=cpp $CXX main.c -o main
 ```
 
@@ -240,7 +261,7 @@ xcross c++ main.c -o test/basic
 # We don't know what this is used for, so we can't convert this.
 xcross -E VAR1=cpp ^%VAR1^% main.c -o main
 
-# Works on Windows, since $X doesn't expand.
+# Works in Windows CMD, since $X doesn't expand.
 xcross -E VAR1=cpp $VAR1 main.c -o main
 ```
 

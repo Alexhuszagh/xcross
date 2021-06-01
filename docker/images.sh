@@ -41,9 +41,11 @@ export OS_IMAGES=(
     #"xtensale-unknown-linux-uclibc"
 
     # MUSL
+    "i686-multilib-linux-musl"
     "x86_64-multilib-linux-musl"
 
     # UCLIBC
+    "i686-unknown-linux-uclibc"
     "x86_64-unknown-linux-uclibc"
 
     # Android
