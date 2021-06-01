@@ -254,7 +254,7 @@ xcross run-cpu-list
 # 401 401a1 401b2 401c2 ... e500mc ... x2vp50 x2vp7
 ```
 
-These are convenience functions around `gcc -mcpu=unknown` and `qemu-ppc -cpu help`, listing only the sorted CPU types. Note that the CPU types might not be identical for both, so it's up to the caller to known identify the proper CPU types.
+These are convenience functions around `gcc -mcpu=unknown` and `qemu-ppc -cpu help`, listing only the sorted CPU types. Note that the CPU types might not be identical for both, so it's up to the caller to properly match the CPU types.
 
 - `--username`, `USERNAME`: The Docker Hub username for the Docker image.
 
@@ -500,7 +500,7 @@ FROM ahuszagh/cross:base
 # This is done in a single step, so the docker image is much more
 # compact, to avoid storing any layers with intermediate files.
 COPY ct-ng/arm-unknown-linux-gnueabi.config /ct-ng/
-COPY gcc.sh /ct-ng/
+COPY docker/gcc.sh /ct-ng/
 RUN ARCH=arm-unknown-linux-gnueabi /ct-ng/gcc.sh
 
 # Remove GCC build scripts and config.
@@ -520,7 +520,7 @@ COPY env/shared /env/
 COPY env/static /env/
 ```
 
-For a bare-metal example, see `Dockerfile.ppcle-unknown-elf`. For a Linux example, see `Dockerfile.ppcle-unknown-linux-gnu`. Be sure to add your new toolchain to `images.sh`, and run the test suite with the new toolchain image.
+For a bare-metal example, see `docker/Dockerfile.ppcle-unknown-elf`. For a Linux example, see `docker/Dockerfile.ppcle-unknown-linux-gnu`. Be sure to add your new toolchain to `images.sh`, and run the test suite with the new toolchain image.
 
 # Platform Support
 
