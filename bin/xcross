@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Cross-compile C/C++ with a single 
 parser.add_argument(
     '--target',
     help='''The target triple for the cross-compiled architecture.
-This may also be supplied via the environment variable `TARGET`.
+This may also be supplied via the environment variable `CROSS_TARGET`.
 Ex: `--target=alpha-unknown-linux-gnu`.''',
 )
 parser.add_argument(
@@ -49,19 +49,19 @@ Ex: `--cpu=e500mc`''',
 parser.add_argument(
     '--username',
     help='''The username for the Docker Hub image.
-This may also be supplied via the environment variable `USERNAME`.
+This may also be supplied via the environment variable `CROSS_USERNAME`.
 Ex: `--username=ahuszagh`''',
 )
 parser.add_argument(
     '--repository',
     help='''The repository for the Docker Hub image.
-This may also be supplied via the environment variable `REPOSITORY`.
+This may also be supplied via the environment variable `CROSS_REPOSITORY`.
 Ex: `--repository=cross`''',
 )
 parser.add_argument(
     '--docker',
     help='''The path or name of the Docker binary.
-This may also be supplied via the environment variable `DOCKER`.
+This may also be supplied via the environment variable `CROSS_DOCKER`.
 Ex: `--docker=docker`''',
 )
 args, unknown = parser.parse_known_args()
@@ -108,17 +108,17 @@ def main():
     root = current_dir.root
 
     # Normalize our arguments.
-    args.target = args.target or os.environ.get('TARGET')
+    args.target = args.target or os.environ.get('CROSS_TARGET')
     args.dir = args.dir or root
     args.cpu = args.cpu or os.environ.get('CROSS_DIR')
     args.cpu = args.cpu or os.environ.get('CROSS_CPU')
     if args.username is None:
-        args.username = os.environ.get('USERNAME')
+        args.username = os.environ.get('CROSS_USERNAME')
     if args.username is None:
         args.username = 'ahuszagh'
-    args.repository = args.repository or os.environ.get('REPOSITORY')
+    args.repository = args.repository or os.environ.get('CROSS_REPOSITORY')
     args.repository = args.repository or 'cross'
-    args.docker = args.docker or os.environ.get('DOCKER')
+    args.docker = args.docker or os.environ.get('CROSS_DOCKER')
     args.docker = args.docker or 'docker'
 
     # Validate our arguments.

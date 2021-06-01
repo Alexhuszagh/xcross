@@ -55,7 +55,7 @@ file helloworld
 # helloworld: ELF 64-bit LSB executable, Alpha (unofficial)
 
 # We can also use environment variables for the target and dir.
-export TARGET=alpha-unknown-linux-gnu
+export CROSS_TARGET=alpha-unknown-linux-gnu
 
 # Let's try CMake. Here, we have to tell Docker where to 
 # mount the directory, since we need to share the parent's files.
@@ -202,12 +202,56 @@ echo 'export PATH="$PATH:~/bin"' >> ~/.bashrc
 
 ### Arguments
 
-- `--target`, `TARGET`: The target architecture to compile to.
+**Fallthrough**
+
+All arguments that are not recognized, as follows, are passed to the Docker container, with a few caveats.
+
+- Escape all control characters for the local shell.
+
+If they are not properly escaped, they will be evaluated on the host, often giving unexpected results.
+
+```bash
+# This works on POSIX, since we have no environment variables that might
+# be evaluated, and we've escaped the `|`.
+xcross echo "int main() { return 0; }" '|' c++ -x c++ -
+
+# On Windows, we need to escape the `|` as follows:
+xcross echo "int main() { return 0; }" ^| c++ -x c++ -
+
+# Escape environment variables on POSIX to evaluate them in the container.
+xcross -E CXX=cpp '$CXX' main.c -o main
+
+# This does not work on POSIX, since it evaluates `$CXX` in the local shell.
+xcross -E CXX=cpp $CXX main.c -o main
+```
+
+- Any environment variables and paths should be passed in POSIX style.
+
+Although non-trivial paths that exist on Windows will be translated to POSIX style, ideally you should not rely on this.
+
+```bash
+# Doesn't work, since we use a Windows-style path to an output file.
+xcross c++ main.c -o test\basic
+
+# This does work, since it uses a POSIX-style path for the output.
+xcross c++ main.c -o test/basic
+
+# This won't work, since we use a Windows-style environment variable.
+# We don't know what this is used for, so we can't convert this.
+xcross -E VAR1=cpp ^%VAR1^% main.c -o main
+
+# Works on Windows, since $X doesn't expand.
+xcross -E VAR1=cpp $VAR1 main.c -o main
+```
+
+**xcross Arguments**
+
+- `--target`, `CROSS_TARGET`: The target architecture to compile to.
 
 ```bash
 # These two are identical, and build for Alpha on Linux/glibc
 xcross --target=alpha-unknown-linux-gnu ...
-TARGET=alpha-unknown-linux-gnu xcross ...
+CROSS_TARGET=alpha-unknown-linux-gnu xcross ...
 ```
 
 - `--dir`, `CROSS_DIR`: The target architecture to compile to.
@@ -235,17 +279,18 @@ xcross -E VAR1,VAR2=x,VAR3=y
 If not provided, it defaults to a generic processor model for the architecture. If provided, it will set the register usage and instruction scheduling parameters in addition to the generic processor model.
 
 ```bash
-# Build for the PowerPC e500mc line.
-export TARGET=ppc-unknown-linux-gnu
+# Build for the PowerPC e500mc CPU.
+export CROSS_TARGET=ppc-unknown-linux-gnu
 xcross --cpu=e500mc c++ helloworld.cc -o hello
 xcross --cpu=e500mc run hello
+CROSS_CPU=e500mc xcross run hello
 ```
 
 In order to determine valid CPU model types for the cross-compiler, you may use either of the following commands:
 
 ```bash
 # Here, we probe GCC for valid CPU names for the cross-compiler.
-export TARGET=ppc-unknown-linux-gnu
+export CROSS_TARGET=ppc-unknown-linux-gnu
 xcross cc-cpu-list
 # 401 403 405 405fp ... e500mc ... rs64 titan
 
@@ -256,34 +301,34 @@ xcross run-cpu-list
 
 These are convenience functions around `gcc -mcpu=unknown` and `qemu-ppc -cpu help`, listing only the sorted CPU types. Note that the CPU types might not be identical for both, so it's up to the caller to properly match the CPU types.
 
-- `--username`, `USERNAME`: The Docker Hub username for the Docker image.
+- `--username`, `CROSS_USERNAME`: The Docker Hub username for the Docker image.
 
 This defaults to `ahuszagh` if not provided, however, it may be explicit set to an empty string. If the username is not empty, the image has the format `$username/$repository:$target`, otherwise, it has the format `$repository:$target`.
 
 ```bash
 # These are all identical.
 xcross --username=ahuszagh ...
-USERNAME=ahuszagh xcross ...
+CROSS_USERNAME=ahuszagh xcross ...
 ```
 
-- `--repository`, `REPOSITORY`: The name of the repository for the image.
+- `--repository`, `CROSS_REPOSITORY`: The name of the repository for the image.
 
 This default to `cross` if not provided or is empty.
 
 ```bash
 # These are all identical.
 xcross --repository=cross ...
-REPOSITORY=cross xcross ...
+CROSS_REPOSITORY=cross xcross ...
 ```
 
-- `--docker`, `DOCKER`: The command for the Docker executable.
+- `--docker`, `CROSS_DOCKER`: The command for the Docker executable.
 
 This default to `docker` if not provided or is empty.
 
 ```bash
 # These are all identical.
 xcross --docker=docker ...
-DOCKER=docker xcross ...
+CROSS_DOCKER=docker xcross ...
 ```
 
 # Sharing Binaries To Host
@@ -337,6 +382,7 @@ docker run -it "ahuszagh/cross:$image" /bin/bash
 For a list of pre-built images, see [DockerHub](https://hub.docker.com/r/ahuszagh/cross). To remove local, installed images from the pre-built, cross toolchains, run:
 
 ```bash
+# On a POSIX shell.
 docker rmi $(docker images | grep 'ahuszagh/cross')
 ```
 
