@@ -144,6 +144,24 @@ def main():
         error('`dir` must be a parent of the current working directory')
     relpath = current_dir.relative_to(parent_dir).as_posix()
 
+    # Normalize our arguments for paths on Windows.
+    # We want to be very... lenient here.
+    # Backslash characters are **generally** not valid
+    # in most cases, except for paths on Windows.
+    #
+    # Only change the value if:
+    #   1. The path exists
+    #   2. The path contains backslashes (IE, isn't a simple command).
+    #   3. The path is relative to the parent dir shared to Docker.
+    if os.name == 'nt':
+        for index in range(len(unknown)):
+            value = unknown[index]
+            if '\\' in value and os.path.exists(value):
+                path = pathlib.PurePath(os.path.realpath(value))
+                if path.is_relative_to(parent_dir):
+                    relative = os.path.relpath(path, start=current_dir)
+                    unknown[index] = pathlib.PurePath(relative).as_posix()
+
     # Process our environment variables.
     # We don't need to escape these, since we aren't
     # using a shell. For example, `VAR1="Some Thing"`
@@ -172,7 +190,7 @@ def main():
     if args.cpu:
         escaped = f'export CPU={args.cpu}; {escaped}'
     nonroot = f'su crosstoolng -c "{escaped}"'
-    cmd = f'{chdir} && echo "{escaped}" && {nonroot}'
+    cmd = f'{chdir} && {nonroot}'
     command += ['/bin/bash', '-c', cmd]
     code = subprocess.call(
         command,
