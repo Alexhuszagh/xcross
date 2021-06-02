@@ -8,4 +8,15 @@ RUN ARCH=ppc64-unknown-elf /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# TODO(ahuszagh) Add symlinks and toolchains
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/ppc64-unknown-elf.sh /
+RUN /ppc64-unknown-elf.sh
+RUN rm /shortcut.sh /ppc64-unknown-elf.sh
+
+# Add toolchains
+COPY cmake/ppc64-unknown-elf.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

@@ -169,6 +169,6 @@ shortcut_run() {
         # Add support for executables linked to a shared libc/libc++.
         args="-L $LIBPATH"
     fi
-    FLAGS="-cpu /CPU" ARGS="$args" shortcut "qemu-$ARCH" "/usr/bin/run"
+    FLAGS="-cpu /CPU" ARGS="$args" shortcut "qemu-$ARCH-static" "/usr/bin/run"
     shortcut_run_cpu_list
 }

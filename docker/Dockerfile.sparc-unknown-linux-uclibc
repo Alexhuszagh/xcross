@@ -1,0 +1,27 @@
+FROM ahuszagh/cross:base
+
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=sparc /qemu-apt.sh
+RUN rm /qemu-apt.sh
+
+# Build GCC
+COPY ct-ng/sparc-unknown-linux-uclibc.config /ct-ng/
+COPY docker/gcc.sh /ct-ng/
+RUN ARCH=sparc-unknown-linux-uclibc /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/sparc-unknown-linux-uclibc.sh /
+RUN /sparc-unknown-linux-uclibc.sh
+RUN rm /shortcut.sh /sparc-unknown-linux-uclibc.sh
+
+# Add toolchains
+COPY cmake/sparc-unknown-linux-uclibc.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

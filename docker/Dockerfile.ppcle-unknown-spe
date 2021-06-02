@@ -8,4 +8,15 @@ RUN ARCH=ppcle-unknown-spe /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# TODO(ahuszagh) Add symlinks and toolchains
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/ppcle-unknown-spe.sh /
+RUN /ppcle-unknown-spe.sh
+RUN rm /shortcut.sh /ppcle-unknown-spe.sh
+
+# Add toolchains
+COPY cmake/ppcle-unknown-spe.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

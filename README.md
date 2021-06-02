@@ -1,6 +1,6 @@
 # Toolchains
 
-Docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts for plug-and-play C/C++ cross-compiling, inspired by [rust-embedded/cross](https://github.com/rust-embedded/cross). Toolchains supports both bare-metal and OS-based compilation, with a wide variety of architectures and C-runtimes supported. Toolchains is ideal for:
+Docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts for plug-and-play C/C++ cross-compiling, inspired by [rust-embedded/cross](https://github.com/rust-embedded/cross). Toolchains supports both bare-metal and OS-based compilation, with a wide variety of architectures and C-runtimes supported. Most images are <500MB, and <200MB compressed. Toolchains is ideal for:
 
 - Testing cross-platform support in CI pipelines.
 - Building and deploying cross-compiled programs.

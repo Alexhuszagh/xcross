@@ -24,6 +24,8 @@ export OS_IMAGES=(
     "ppc64-unknown-linux-gnu"
     "ppc64le-unknown-linux-gnu"
     # rv32i-based targets are not supported
+    # "riscv32-multilib-linux-gnu"  # TODO(ahuszagh) Still beta
+    # "riscv64-multilib-linux-gnu"  # TODO(ahuszagh) Still beta
     "riscv64-unknown-linux-gnu"
     "s390-unknown-linux-gnu"
     "s390x-unknown-linux-gnu"
@@ -33,7 +35,11 @@ export OS_IMAGES=(
     #"sh3e-unknown-linux-gnu"
     "sh4-unknown-linux-gnu"
     "sh4be-unknown-linux-gnu"
+    # glibc 2.23+ do not support only support SPARCv9, and
+    # there's bugs with older versions.
     #"sparc-unknown-linux-gnu"
+    # Requires GCC-8, due to invalid register clobbing with source and dest.
+    "sparc-unknown-linux-uclibc"
     "sparc64-unknown-linux-gnu"
     "x86_64-unknown-linux-gnu"
     # TODO(ahuszagh) Check support for xtensa?
@@ -45,7 +51,7 @@ export OS_IMAGES=(
     "x86_64-multilib-linux-musl"
 
     # UCLIBC
-    "i686-unknown-linux-uclibc"
+    "i686-unknown-linux-uclibc" # TODO(ahuszagh) Still beta.
     "x86_64-unknown-linux-uclibc"
 
     # Android
@@ -110,20 +116,20 @@ export METAL_IMAGES=(
     # ELF
     "ppc-unknown-elf"
     "ppcle-unknown-elf"
-    #"ppc64-unknown-elf"
-    #"ppc64le-unknown-elf"
+    "ppc64-unknown-elf"
+    "ppc64le-unknown-elf"
 
     # EABI
-    #"ppc-unknown-eabi"
+    "ppc-unknown-eabi"
     "ppcle-unknown-eabi"
-    #"ppc64-unknown-eabi"
-    #"ppc64le-unknown-eabi"
+    "ppc64-unknown-eabi"
+    "ppc64le-unknown-eabi"
 
     # SPE
-    #"ppc-unknown-spe"
-    #"ppcle-unknown-spe"
-    #"ppc64-unknown-spe"
-    #"ppc64le-unknown-spe"
+    "ppc-unknown-spe"
+    "ppcle-unknown-spe"
+    "ppc64-unknown-spe"
+    "ppc64le-unknown-spe"
 
     # O32
     #"mips-unknown-o32"

@@ -1,8 +1,13 @@
-FROM ahuszagh/cross:qemu
+FROM ahuszagh/cross:base
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-riscv64-linux-gnu \
     libc6-riscv64-cross
+
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=riscv64 /qemu-apt.sh
+RUN rm /qemu-apt.sh
 
 # Add symlinks
 COPY symlink/shortcut.sh /

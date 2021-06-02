@@ -1,4 +1,9 @@
-FROM ahuszagh/cross:qemu
+FROM ahuszagh/cross:base
+
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=x86_64 /qemu-apt.sh
+RUN rm /qemu-apt.sh
 
 # Build GCC
 COPY ct-ng/x86_64-multilib-linux-musl.config /ct-ng/

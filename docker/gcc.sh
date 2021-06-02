@@ -1,15 +1,25 @@
 #!/bin/bash
 #
-# Clean source files and dependencies.
+# Build a cross-installation of GCC.
 
 set -ex
 
+# Check required environment variables.
+if [ "$ARCH" = "" ]; then
+    echo 'Must set the host architecture via `$ARCH`, quitting.'
+    exit 1
+fi
+
 export DEBIAN_FRONTEND="noninteractive"
 
-# Install dependencies to build ct-ng.
+# Install dependencies. We store the installed
+# dependencies so we don't accidentally delete
+# necessary files, and we get rid of everything
+# that was only required for the build.
 # python3 is for glibc
 # python3-pip and python3-dev for gdb
 apt-get update
+before_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
 apt-get install --assume-yes --no-install-recommends \
     autoconf \
     bison \
@@ -27,6 +37,18 @@ apt-get install --assume-yes --no-install-recommends \
     unzip \
     wget \
     xz-utils
+after_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
+
+# Calculate the packages we need to remove later.
+diff=()
+for i in "${after_installed[@]}"; do
+    skip=
+    for j in "${before_installed[@]}"; do
+        [[ $i == $j ]] && { skip=1; break; }
+    done
+    [[ -n $skip ]] || diff+=("$i")
+done
+declare -p diff
 
 # Create a source directory for easy cleanup.
 mkdir -p src && cd src
@@ -39,12 +61,6 @@ cd crosstool-ng-"$ctng_version"
 ./configure --prefix=/src/crosstoolng
 make -j 5
 make install
-
-# Copy config files over.
-if [ "$ARCH" = "" ]; then
-    echo 'Must set the host architecture via `$ARCH`, quitting.'
-    exit 1
-fi
 
 # Toolchains can be built using:
 #   ct-ng menuconfig
@@ -75,7 +91,7 @@ fi
 #   # CT_GLIBC_V_2_29 is not set
 #   CT_GLIBC_VERSION="2.31"
 
-# Build our toolchain.
+# Copy config files over and build our toolchain.
 # When debugging, use `CT_DEBUG_CT_SAVE_STEPS=1 ct-ng build`
 # so the build can restart. Find the offending step via
 # `ct-ng list-steps`, and then restart via
@@ -99,22 +115,5 @@ su crosstoolng -c "CT_DEBUG_CT_SAVE_STEPS=1 /src/crosstoolng/bin/ct-ng build.5"
 cd /
 rm -rf /src
 rm -rf /home/crosstoolng/src
-apt-get remove --purge --assume-yes \
-    autoconf \
-    bison \
-    flex \
-    gcc \
-    g++ \
-    gawk \
-    help2man \
-    libncurses-dev \
-    libtool-bin \
-    patch \
-    python3 \
-    python3-dev \
-    python3-pip \
-    texinfo \
-    unzip \
-    wget \
-    xz-utils
+apt-get remove --purge --assume-yes "${diff[@]}"
 apt-get autoremove --assume-yes

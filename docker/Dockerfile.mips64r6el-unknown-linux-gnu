@@ -1,8 +1,13 @@
-FROM ahuszagh/cross:qemu
+FROM ahuszagh/cross:base
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-mipsisa64r6el-linux-gnuabi64 \
     libc6-mips64r6el-cross
+
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=mips64el /qemu-apt.sh
+RUN rm /qemu-apt.sh
 
 # Add symlinks
 COPY symlink/shortcut.sh /

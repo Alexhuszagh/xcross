@@ -1,4 +1,9 @@
-FROM ahuszagh/cross:qemu
+FROM ahuszagh/cross:base
+
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=i386 /qemu-apt.sh
+RUN rm /qemu-apt.sh
 
 # Build GCC
 COPY ct-ng/i686-unknown-linux-uclibc.config /ct-ng/
