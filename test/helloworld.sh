@@ -31,6 +31,12 @@ run_shared=no
 if [ $has_run = yes ] && [ $is_android = no ] && [ $is_musl = no ]; then
     run_shared=yes
 fi
+if [[ "$IMAGE" = xtensa* ]]; then
+    # Bug with Xtensa where Qemu cannot properly emulate it,
+    # even with valid instructions.
+    run_shared=no
+    run_static=no
+fi
 
 # Test CMake.
 mkdir build && cd build

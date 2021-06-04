@@ -47,7 +47,9 @@ export OS_IMAGES=(
     "sparc-unknown-linux-uclibc"
     "sparc64-unknown-linux-gnu"
     "x86_64-unknown-linux-gnu"
-    "xtensa-unknown-linux-uclibc"
+    # Fails with:
+    #   little endian output does not match Xtensa configuration
+    #"xtensa-unknown-linux-uclibc"
     "xtensabe-unknown-linux-uclibc"
 
     # MUSL
@@ -72,8 +74,6 @@ export OS_IMAGES=(
     # Add Musl, uclibc, and elf targets.
     # riscv32-hifive1-elf
     # riscv32-unknown-elf
-    # sparc!
-    # add avr.
     #   Maybe add in a few processors too.
 )
 
