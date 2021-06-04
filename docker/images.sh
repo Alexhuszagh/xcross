@@ -5,6 +5,10 @@
 export OS_IMAGES=(
     # GNU
     "alpha-unknown-linux-gnu"
+    # glibc: configure: error: The arc is not supported
+    #"arc-unknown-linux-gnu"
+    "arc-unknown-linux-uclibc"
+    "arcbe-unknown-linux-uclibc"
     "armel-unknown-linux-gnueabi"
     "armelhf-unknown-linux-gnueabi"
     "arm64-unknown-linux-gnu"
@@ -19,6 +23,7 @@ export OS_IMAGES=(
     "mipsel-unknown-linux-gnu"
     "mipsr6-unknown-linux-gnu"
     "mipsr6el-unknown-linux-gnu"
+    "nios2-unknown-linux-gnu"
     "ppc-unknown-linux-gnu"
     "ppcle-unknown-linux-gnu"
     "ppc64-unknown-linux-gnu"
@@ -42,16 +47,16 @@ export OS_IMAGES=(
     "sparc-unknown-linux-uclibc"
     "sparc64-unknown-linux-gnu"
     "x86_64-unknown-linux-gnu"
-    # TODO(ahuszagh) Check support for xtensa?
-    #"xtensabe-unknown-linux-uclibc"
-    #"xtensale-unknown-linux-uclibc"
+    "xtensa-unknown-linux-uclibc"
+    "xtensabe-unknown-linux-uclibc"
 
     # MUSL
     "i686-multilib-linux-musl"
     "x86_64-multilib-linux-musl"
 
     # UCLIBC
-    "i686-unknown-linux-uclibc" # TODO(ahuszagh) Still beta.
+    # Fails with fatal error: pthread.h: No such file or directory
+    #"i686-unknown-linux-uclibc"
     "x86_64-unknown-linux-uclibc"
 
     # Android
@@ -83,11 +88,11 @@ export METAL_IMAGES=(
     #"alphaev56-unknown"
     #"alphaev6-unknown"
     #"alphaev67-unknown"
-    #"arc-unknown"
-    #"arcle-unknown"
+    "arc-unknown-elf"
+    "arcbe-unknown-elf"
     # TODO(ahuszagh) Need ARM
-    #"m68k-unknown"
-    #"nios2-unknown"
+    "m68k-unknown-elf"
+    "nios2-unknown-elf"
     "sh1-unknown-elf"
     "sh2-unknown-elf"
     "sh2e-unknown-elf"
@@ -116,20 +121,26 @@ export METAL_IMAGES=(
     # ELF
     "ppc-unknown-elf"
     "ppcle-unknown-elf"
-    "ppc64-unknown-elf"
-    "ppc64le-unknown-elf"
+    # GCC does not support PPC64 and PPC64LE with ELF:
+    #    Configuration powerpc64-unknown-elf not supported
+    #"ppc64-unknown-elf"
+    #"ppc64le-unknown-elf"
 
     # EABI
     "ppc-unknown-eabi"
     "ppcle-unknown-eabi"
-    "ppc64-unknown-eabi"
-    "ppc64le-unknown-eabi"
+    # Binutils does not support PPC64 and PPC64LE with EABI:
+    #   BFD does not support target powerpc64-unknown-eabi.
+    #"ppc64-unknown-eabi"
+    #"ppc64le-unknown-eabi"
 
     # SPE
-    "ppc-unknown-spe"
-    "ppcle-unknown-spe"
-    "ppc64-unknown-spe"
-    "ppc64le-unknown-spe"
+    # GCC does not support SPEELF:
+    # Configuration powerpc-unknown-elfspe not supported
+    #"ppc-unknown-spe"
+    #"ppcle-unknown-spe"
+    #"ppc64-unknown-spe"
+    #"ppc64le-unknown-spe"
 
     # O32
     #"mips-unknown-o32"
