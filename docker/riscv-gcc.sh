@@ -17,6 +17,7 @@ export DEBIAN_FRONTEND="noninteractive"
 # necessary files, and we get rid of everything
 # that was only required for the build.
 apt-get update
+apt-get install --assume-yes --no-install-recommends libgmp10 libmpc3
 before_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
 apt-get install --assume-yes --no-install-recommends \
     autoconf \
@@ -97,11 +98,47 @@ fi
 if [[ "$ARCH" = *-linux-gnu ]]; then
     ./configure --prefix=/opt/riscv --enable-linux  --enable-multilib
     make linux -j 5
-    # make install?
 elif [[ "$ARCH" = *-elf ]]; then
     ./configure --prefix=/opt/riscv --disable-linux --enable-multilib
     make
 fi
+
+# Need to strip binaries, since the installer doesn't do that
+strip_shared() {
+    strip=strip
+    if [ "$2" != "" ]; then
+        strip="$2"
+    fi
+    mime=$(file "$1" --mime-type | cut -d ' ' -f 2)
+    # Don't strip archives: we need those symbols.
+    if [ "$mime" = "application/x-sharedlib" ] || [ "$mime" = "application/x-executable" ]; then
+        "$strip" "$1"
+    fi
+}
+
+strip_dir() {
+    files=($(ls "$1"))
+    for f in "${files[@]}"; do
+        strip_shared "$1/$f" "$2"
+    done
+}
+
+home="/opt/riscv"
+strip_native="$home/bin/"$ARCH"-strip"
+strip_dir "$home/bin"
+strip_dir "$home/lib"
+strip_dir "$home/"$ARCH"/bin"
+strip_dir "$home/libexec/gcc/"$ARCH"/10.2.0"
+strip_dir "$home/sysroot/usr/lib64" "$strip_native"
+strip_dir "$home/sysroot/usr/lib64/lp64" "$strip_native"
+strip_dir "$home/sysroot/usr/lib64/lp64/gconv" "$strip_native"
+strip_dir "$home/sysroot/usr/lib64/lp64d" "$strip_native"
+strip_dir "$home/sysroot/usr/lib64/lp64d/gconv" "$strip_native"
+strip_dir "$home/sysroot/usr/lib32" "$strip_native"
+strip_dir "$home/sysroot/usr/lib32/ilp32" "$strip_native"
+strip_dir "$home/sysroot/usr/lib32/ilp32/gconv" "$strip_native"
+strip_dir "$home/sysroot/usr/lib32/ilp32d" "$strip_native"
+strip_dir "$home/sysroot/usr/lib32/ilp32d/gconv" "$strip_native"
 
 # Remove all dependencies, to ensure we have a small image.
 cd /

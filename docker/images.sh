@@ -29,8 +29,8 @@ export OS_IMAGES=(
     "ppc64-unknown-linux-gnu"
     "ppc64le-unknown-linux-gnu"
     # rv32i-based targets are not supported
-    # "riscv32-multilib-linux-gnu"  # TODO(ahuszagh) Still beta
-    # "riscv64-multilib-linux-gnu"  # TODO(ahuszagh) Still beta
+    "riscv32-multilib-linux-gnu"
+    "riscv64-multilib-linux-gnu"
     "riscv64-unknown-linux-gnu"
     "s390-unknown-linux-gnu"
     "s390x-unknown-linux-gnu"
@@ -50,6 +50,8 @@ export OS_IMAGES=(
     # Fails with:
     #   little endian output does not match Xtensa configuration
     #"xtensa-unknown-linux-uclibc"
+    # Qemu currently fails, but seems to be a Qemu error, since
+    # the instructions seem to all be valid.
     "xtensabe-unknown-linux-uclibc"
 
     # MUSL
