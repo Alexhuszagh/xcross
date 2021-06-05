@@ -5,6 +5,10 @@
 export OS_IMAGES=(
     # GNU
     "alpha-unknown-linux-gnu"
+    "alphaev4-unknown-linux-gnu"
+    "alphaev5-unknown-linux-gnu"    # TODO(ahuszagh) Incomplete, still alpha
+    "alphaev6-unknown-linux-gnu"    # TODO(ahuszagh) Incomplete, still alpha
+    "alphaev7-unknown-linux-gnu"   # TODO(ahuszagh) Incomplete, still alpha
     # glibc: configure: error: The arc is not supported
     #"arc-unknown-linux-gnu"
     "arc-unknown-linux-uclibc"
@@ -28,7 +32,7 @@ export OS_IMAGES=(
     "ppcle-unknown-linux-gnu"
     "ppc64-unknown-linux-gnu"
     "ppc64le-unknown-linux-gnu"
-    # rv32i-based targets are not supported
+    # rv32i-based targets are not supported on stock GCC.
     "riscv32-multilib-linux-gnu"
     "riscv64-multilib-linux-gnu"
     "riscv64-unknown-linux-gnu"
@@ -72,11 +76,6 @@ export OS_IMAGES=(
     # MinGW
     "i386-w64-mingw32"
     "x86_64-w64-mingw32"
-
-    # Add Musl, uclibc, and elf targets.
-    # riscv32-hifive1-elf
-    # riscv32-unknown-elf
-    #   Maybe add in a few processors too.
 )
 
 # Bare-metal machines.
@@ -84,17 +83,17 @@ export OS_IMAGES=(
 export METAL_IMAGES=(
     # TODO(ahuszagh) Add toolchains for commented ones.
     "avr"
-    #"alphaev4-unknown"
-    #"alphaev45-unknown"
-    #"alphaev5-unknown"
-    #"alphaev56-unknown"
-    #"alphaev6-unknown"
-    #"alphaev67-unknown"
+    "alphaev4-unknown-elf"  # TODO(ahuszagh) Incomplete, still alpha
+    "alphaev5-unknown-elf"  # TODO(ahuszagh) Incomplete, still alpha
+    "alphaev6-unknown-elf"  # TODO(ahuszagh) Incomplete, still alpha
+    "alphaev7-unknown-elf" # TODO(ahuszagh) Incomplete, still alpha
     "arc-unknown-elf"
     "arcbe-unknown-elf"
     # TODO(ahuszagh) Need ARM
     "m68k-unknown-elf"
     "nios2-unknown-elf"
+    "riscv32-unknown-elf"
+    "riscv64-unknown-elf"
     "sh1-unknown-elf"
     "sh2-unknown-elf"
     "sh2e-unknown-elf"
@@ -107,13 +106,13 @@ export METAL_IMAGES=(
     "sh4-340-unknown-elf"
     "sh4-500-unknown-elf"
     "sh4a-unknown-elf"
-    #"sparc-unknown"
-    #"sparc64-unknown"
-    #"i386-unknown"
-    #"i486-unknown"
-    #"i586-unknown"
-    #"i686-unknown"
-    #"x86_64-unknown"
+    "sparc-unknown-elf"     # TODO(ahuszagh) Incomplete, still alpha
+    "sparc64-unknown-elf"   # TODO(ahuszagh) Incomplete, still alpha
+    "i386-unknown-elf"      # TODO(ahuszagh) Incomplete, still alpha
+    "i486-unknown-elf"      # TODO(ahuszagh) Incomplete, still alpha
+    "i586-unknown-elf"      # TODO(ahuszagh) Incomplete, still alpha
+    "i686-unknown-elf"      # TODO(ahuszagh) Incomplete, still alpha
+    "x86_64-unknown-elf"    # TODO(ahuszagh) Incomplete, still alpha
 
     # Binutils only supports s390/s390x on Linux.
     # Newlib does not support Xtensa.
@@ -144,6 +143,7 @@ export METAL_IMAGES=(
     #"ppc64-unknown-spe"
     #"ppc64le-unknown-spe"
 
+    # TODO(ahuszagh) Support these MIPS targets.
     # O32
     #"mips-unknown-o32"
     #"mipsel-unknown-o32"

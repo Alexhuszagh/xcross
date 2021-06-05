@@ -1,9 +1,9 @@
 FROM ahuszagh/cross:base
 
 # Build GCC
-COPY ct-ng/alphaev6-unknown.config /ct-ng/
+COPY ct-ng/sparc64-unknown-elf.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
-RUN ARCH=alphaev6-unknown /ct-ng/gcc.sh
+RUN ARCH=sparc64-unknown-elf /ct-ng/gcc.sh
 
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/

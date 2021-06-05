@@ -129,16 +129,19 @@ strip_dir "$home/bin"
 strip_dir "$home/lib"
 strip_dir "$home/"$ARCH"/bin"
 strip_dir "$home/libexec/gcc/"$ARCH"/10.2.0"
-strip_dir "$home/sysroot/usr/lib64" "$strip_native"
-strip_dir "$home/sysroot/usr/lib64/lp64" "$strip_native"
-strip_dir "$home/sysroot/usr/lib64/lp64/gconv" "$strip_native"
-strip_dir "$home/sysroot/usr/lib64/lp64d" "$strip_native"
-strip_dir "$home/sysroot/usr/lib64/lp64d/gconv" "$strip_native"
-strip_dir "$home/sysroot/usr/lib32" "$strip_native"
-strip_dir "$home/sysroot/usr/lib32/ilp32" "$strip_native"
-strip_dir "$home/sysroot/usr/lib32/ilp32/gconv" "$strip_native"
-strip_dir "$home/sysroot/usr/lib32/ilp32d" "$strip_native"
-strip_dir "$home/sysroot/usr/lib32/ilp32d/gconv" "$strip_native"
+if [[ "$ARCH" = *-linux-gnu ]]; then
+    # sysroot and all the linux libraries only exist on linux
+    strip_dir "$home/sysroot/usr/lib64" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib64/lp64" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib64/lp64/gconv" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib64/lp64d" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib64/lp64d/gconv" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib32" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib32/ilp32" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib32/ilp32/gconv" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib32/ilp32d" "$strip_native"
+    strip_dir "$home/sysroot/usr/lib32/ilp32d/gconv" "$strip_native"
+fi
 
 # Remove all dependencies, to ensure we have a small image.
 cd /

@@ -5,16 +5,15 @@ COPY docker/riscv-gcc.sh /
 RUN ARCH=riscv64-unknown-elf /riscv-gcc.sh
 RUN rm /riscv-gcc.sh
 
-# TODO(ahuszagh) Restore...
-## Add symlinks
-#COPY symlink/shortcut.sh /
-#COPY symlink/riscv32-unknown-elf.sh /
-#RUN /riscv32-unknown-elf.sh
-#RUN rm /shortcut.sh /riscv32-unknown-elf.sh
-#
-## Add toolchains
-#COPY cmake/riscv32-unknown-elf.cmake /toolchains/toolchain.cmake
-#COPY cmake/shared.cmake /toolchains/
-#COPY cmake/static.cmake /toolchains/
-#COPY env/shared /env/
-#COPY env/static /env/
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/riscv64-unknown-elf.sh /
+RUN /riscv64-unknown-elf.sh
+RUN rm /shortcut.sh /riscv64-unknown-elf.sh
+
+# Add toolchains
+COPY cmake/riscv64-unknown-elf.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/
