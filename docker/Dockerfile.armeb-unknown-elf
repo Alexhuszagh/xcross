@@ -8,4 +8,15 @@ RUN ARCH=armeb-unknown-elf /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# TODO(ahuszagh) Add symlinks and toolchains
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/armeb-unknown-elf.sh /
+RUN /armeb-unknown-elf.sh
+RUN rm /shortcut.sh /armeb-unknown-elf.sh
+
+# Add toolchains
+COPY cmake/armeb-unknown-elf.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

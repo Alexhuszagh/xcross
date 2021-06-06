@@ -1,6 +1,6 @@
 FROM ahuszagh/cross:base
 
-# Build GCCCOPY ct-ng/avr.config /ct-ng/
+# Build GCC
 COPY ct-ng/powerpcle-unknown-elf.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
 RUN ARCH=powerpcle-unknown-elf /ct-ng/gcc.sh

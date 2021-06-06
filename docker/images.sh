@@ -98,14 +98,23 @@ export METAL_IMAGES=(
     #"alphaev7-unknown-elf"
     "arc-unknown-elf"
     "arcbe-unknown-elf"
-    "arm-unknown-elf"       # TODO(ahuszagh) Incomplete
-    "armbe-unknown-elf"     # TODO(ahuszagh) Incomplete
-    "arm64-unknown-elf"     # TODO(ahuszagh) Incomplete
-    "arm64be-unknown-elf"   # TODO(ahuszagh) Incomplete
+    "arm-unknown-elf"
+    "armeb-unknown-elf"
+    "arm64-unknown-elf"
+    "arm64eb-unknown-elf"
+    "i386-unknown-elf"
+    "i486-unknown-elf"
+    "i586-unknown-elf"
+    "i686-unknown-elf"
     "m68k-unknown-elf"
     "nios2-unknown-elf"
-    #"riscv32-unknown-elf"  # TODO(ahuszagh) Restore..
-    #"riscv64-unknown-elf"  # TODO(ahuszagh) Restore..
+    "riscv32-unknown-elf"
+    "riscv64-unknown-elf"
+    # Fails during building binutils:
+    #   checking for suffix of executables...
+    #   make[2]: *** [Makefile:7088: configure-ld] Error 1
+    #"s390-unknown-elf"
+    #"s390x-unknown-elf"
     "sh1-unknown-elf"
     "sh2-unknown-elf"
     "sh2e-unknown-elf"
@@ -118,20 +127,21 @@ export METAL_IMAGES=(
     "sh4-340-unknown-elf"
     "sh4-500-unknown-elf"
     "sh4a-unknown-elf"
+    # Fails during building libc pass 2:
+    #   "multiple definition of `_errno'".
+    #"shbe-unknown-elf"
     "sparc-unknown-elf"
     # Fails during building newlib due to:
     #   error: argument 'dirp' doesn't match prototype
     #"sparc64-unknown-elf"
-    "i386-unknown-elf"
-    "i486-unknown-elf"
-    "i586-unknown-elf"
-    "i686-unknown-elf"
+    "thumb-unknown-elf"
+    "thumbeb-unknown-elf"
     "x86_64-unknown-elf"
+    # Fails during building libc pass 1:
+    #   Newlib does not support Xtensa.
+    #"xtensa-unknown-elf"
+    #"xtensabe-unknown-elf"
 
-    # Binutils only supports s390/s390x on Linux.
-    # Newlib does not support Xtensa.
-    # Currently fails due to "multiple definition of `_errno'".
-    #"shbe-unknown-elf"
 
     # ELF
     "ppc-unknown-elf"
@@ -151,7 +161,7 @@ export METAL_IMAGES=(
 
     # SPE
     # GCC does not support SPEELF:
-    # Configuration powerpc-unknown-elfspe not supported
+    #   Configuration powerpc-unknown-elfspe not supported
     #"ppc-unknown-spe"
     #"ppcle-unknown-spe"
     #"ppc64-unknown-spe"
@@ -170,11 +180,6 @@ export METAL_IMAGES=(
     # N64
     "mips64-unknown-n64"
     "mips64el-unknown-n64"
-
-    # THUMB
-    # TODO(ahuszagh) These need to build off of arm
-    #"thumbel-unknown-elf"
-    #"thumbeb-unknown-elf"
 )
 
 export IMAGES=(

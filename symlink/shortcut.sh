@@ -1,6 +1,8 @@
 #!/bin/bash
 # Simple shortcuts to call executables.
 
+BIN=/usr/local/bin
+
 # Can't guarantee all files are compiled binaries, might be
 # scripts that use positional arguments. Make it a script
 # that called the argument. Only export shortcut if the
@@ -27,13 +29,13 @@ shortcut() {
 
 # Create a utility to list the CPUs for the compiler.
 shortcut_cc_cpu_list() {
-    echo '#!/bin/bash' >> "/usr/bin/cc-cpu-list"
-    echo "cpus=\$(echo \"int main() { return 0; }\" | CPU=unknown c++ -x c++ - 2>&1)" >> "/usr/bin/cc-cpu-list"
-    echo "filtered=\$(echo \"\$cpus\" | grep note)" >> "/usr/bin/cc-cpu-list"
-    echo "names=(\${filtered#* are: })" >> "/usr/bin/cc-cpu-list"
-    echo "IFS=$'\n' sorted=(\$(sort <<<\"\${names[*]}\"))" >> "/usr/bin/cc-cpu-list"
-    echo "echo \"\${sorted[@]}\"" >> "/usr/bin/cc-cpu-list"
-    chmod +x "/usr/bin/cc-cpu-list"
+    echo '#!/bin/bash' >> "$BIN/cc-cpu-list"
+    echo "cpus=\$(echo \"int main() { return 0; }\" | CPU=unknown c++ -x c++ - 2>&1)" >> "$BIN/cc-cpu-list"
+    echo "filtered=\$(echo \"\$cpus\" | grep note)" >> "$BIN/cc-cpu-list"
+    echo "names=(\${filtered#* are: })" >> "$BIN/cc-cpu-list"
+    echo "IFS=$'\n' sorted=(\$(sort <<<\"\${names[*]}\"))" >> "$BIN/cc-cpu-list"
+    echo "echo \"\${sorted[@]}\"" >> "$BIN/cc-cpu-list"
+    chmod +x "$BIN/cc-cpu-list"
 }
 
 # Generate the shortcut for any compiler.
@@ -61,8 +63,8 @@ shortcut_compiler() {
         cpu="march"
     fi
 
-    cc_alias=("/usr/bin/$cc_base" "/usr/bin/cc")
-    cxx_alias=("/usr/bin/$cxx_base" "/usr/bin/c++" "/usr/bin/cpp")
+    cc_alias=("$BIN/$cc_base" "$BIN/cc")
+    cxx_alias=("$BIN/$cxx_base" "$BIN/c++" "$BIN/cpp")
     ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cc" "${cc_alias[@]}"
     ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cxx" "${cxx_alias[@]}"
 
@@ -129,32 +131,32 @@ shortcut_util() {
     # Some of these might not exist, but it's fine.
     # Shortcut does nothing if the file doesn't exist.
     for util in "${utils[@]}"; do
-        shortcut "$prefix"-"$util" "/usr/bin/$util"
+        shortcut "$prefix"-"$util" "$BIN/$util"
     done
     if [ "$VER" != "" ]; then
         for util in "${ver_utils[@]}"; do
-            shortcut "$prefix"-"$util"-"$VER" "/usr/bin/$util"
+            shortcut "$prefix"-"$util"-"$VER" "$BIN/$util"
         done
     fi
 }
 
 # Create a utility to list the CPUs for Qemu emulation.
 shortcut_run_cpu_list() {
-    echo '#!/bin/bash' >> "/usr/bin/run-cpu-list"
-    echo "cpus=\"\$(run -cpu help)\"" >> "/usr/bin/run-cpu-list"
-    echo "readarray -t lines <<<\"\$cpus\"" >> "/usr/bin/run-cpu-list"
-    echo "names=()" >> "/usr/bin/run-cpu-list"
-    echo "for line in \"\${lines[@]:1}\"; do" >> "/usr/bin/run-cpu-list"
-    echo "    if [ \"\$line\" != \"\" ]; then" >> "/usr/bin/run-cpu-list"
-    echo "        names+=(\$(echo \"\$line\" | cut -d ' ' -f 2))" >> "/usr/bin/run-cpu-list"
-    echo "    else" >> "/usr/bin/run-cpu-list"
-    echo "        break" >> "/usr/bin/run-cpu-list"
-    echo "    fi" >> "/usr/bin/run-cpu-list"
-    echo "done" >> "/usr/bin/run-cpu-list"
-    echo "" >> "/usr/bin/run-cpu-list"
-    echo "IFS=$'\n' sorted=(\$(sort <<<\"\${names[*]}\"))" >> "/usr/bin/run-cpu-list"
-    echo "echo \"\${sorted[@]}\"" >> "/usr/bin/run-cpu-list"
-    chmod +x "/usr/bin/run-cpu-list"
+    echo '#!/bin/bash' >> "$BIN/run-cpu-list"
+    echo "cpus=\"\$(run -cpu help)\"" >> "$BIN/run-cpu-list"
+    echo "readarray -t lines <<<\"\$cpus\"" >> "$BIN/run-cpu-list"
+    echo "names=()" >> "$BIN/run-cpu-list"
+    echo "for line in \"\${lines[@]:1}\"; do" >> "$BIN/run-cpu-list"
+    echo "    if [ \"\$line\" != \"\" ]; then" >> "$BIN/run-cpu-list"
+    echo "        names+=(\$(echo \"\$line\" | cut -d ' ' -f 2))" >> "$BIN/run-cpu-list"
+    echo "    else" >> "$BIN/run-cpu-list"
+    echo "        break" >> "$BIN/run-cpu-list"
+    echo "    fi" >> "$BIN/run-cpu-list"
+    echo "done" >> "$BIN/run-cpu-list"
+    echo "" >> "$BIN/run-cpu-list"
+    echo "IFS=$'\n' sorted=(\$(sort <<<\"\${names[*]}\"))" >> "$BIN/run-cpu-list"
+    echo "echo \"\${sorted[@]}\"" >> "$BIN/run-cpu-list"
+    chmod +x "$BIN/run-cpu-list"
 }
 
 # Create a runner for the Qemu binary.
@@ -171,6 +173,6 @@ shortcut_run() {
             args="$args -L $libpath"
         done
     fi
-    FLAGS="-cpu /CPU" ARGS="$args" shortcut "qemu-$ARCH-static" "/usr/bin/run"
+    FLAGS="-cpu /CPU" ARGS="$args" shortcut "qemu-$ARCH-static" "$BIN/run"
     shortcut_run_cpu_list
 }
