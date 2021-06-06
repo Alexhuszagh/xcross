@@ -1,9 +1,9 @@
 FROM ahuszagh/cross:base
 
 # Build GCC
-COPY ct-ng/mips64el-unknown-n32.config /ct-ng/
+COPY ct-ng/arm64-unknown-elf.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
-RUN ARCH=mips64el-unknown-n32 /ct-ng/gcc.sh
+RUN ARCH=arm64-unknown-elf /ct-ng/gcc.sh
 
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/

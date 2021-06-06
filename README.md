@@ -515,7 +515,7 @@ ct-ng/patch.sh ct-ng/"$image".config
 touch Dockerfile."$image"
 ```
 
-**Source Environment File**
+**Source Environment File - Linux**
 
 ```bash
 #!/bin/bash
@@ -527,6 +527,21 @@ export PREFIX=arm-unknown-linux-gnueabi
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
 shortcut_gcc
+shortcut_util
+```
+
+**Source Environment File - Bare Metal**
+
+```bash
+#!/bin/bash
+
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+source "$scriptdir/shortcut.sh"
+
+export PREFIX=arm-unknown-eabi
+export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
+
+CFLAGS="-nostartfiles" shortcut_gcc
 shortcut_util
 ```
 

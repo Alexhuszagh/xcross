@@ -6,16 +6,19 @@ export OS_IMAGES=(
     # GNU
     "alpha-unknown-linux-gnu"
     "alphaev4-unknown-linux-gnu"
-    "alphaev5-unknown-linux-gnu"    # TODO(ahuszagh) Incomplete, still alpha
-    "alphaev6-unknown-linux-gnu"    # TODO(ahuszagh) Incomplete, still alpha
-    "alphaev7-unknown-linux-gnu"   # TODO(ahuszagh) Incomplete, still alpha
-    # glibc: configure: error: The arc is not supported
+    "alphaev5-unknown-linux-gnu"
+    "alphaev6-unknown-linux-gnu"
+    "alphaev7-unknown-linux-gnu"
+    # Fails in libc build pass 1:
+    #   glibc: configure: error: The arc is not supported
     #"arc-unknown-linux-gnu"
     "arc-unknown-linux-uclibc"
     "arcbe-unknown-linux-uclibc"
     "armel-unknown-linux-gnueabi"
+    "armeb-unknown-linux-gnueabi"
     "armelhf-unknown-linux-gnueabi"
     "arm64-unknown-linux-gnu"
+    "arm64eb-unknown-linux-gnu"     # TODO(ahuszagh) Incomplete
     "hppa-unknown-linux-gnu"
     "i686-unknown-linux-gnu"
     "m68k-unknown-linux-gnu"
@@ -32,7 +35,8 @@ export OS_IMAGES=(
     "ppcle-unknown-linux-gnu"
     "ppc64-unknown-linux-gnu"
     "ppc64le-unknown-linux-gnu"
-    # rv32i-based targets are not supported on stock GCC.
+    # Fails with custom build of stock GCC:
+    #   rv32i-based targets are not supported on stock GCC.
     "riscv32-multilib-linux-gnu"
     "riscv64-multilib-linux-gnu"
     "riscv64-unknown-linux-gnu"
@@ -44,17 +48,21 @@ export OS_IMAGES=(
     #"sh3e-unknown-linux-gnu"
     "sh4-unknown-linux-gnu"
     "sh4be-unknown-linux-gnu"
-    # glibc 2.23+ do not support only support SPARCv9, and
-    # there's bugs with older versions.
+    # Fails in libc build pass 1:
+    #   glibc 2.23+ do not support only support SPARCv9, and
+    #   there's bugs with older glibc versions.
     #"sparc-unknown-linux-gnu"
-    # Requires GCC-8, due to invalid register clobbing with source and dest.
+    # Note: requires GCC-8, due to invalid register clobbing with source and dest.
     "sparc-unknown-linux-uclibc"
     "sparc64-unknown-linux-gnu"
+    "thumbel-unknown-linux-gnueabi"
+    "thumbelhf-unknown-linux-gnueabi"
+    "thumbeb-unknown-linux-gnueabi"
     "x86_64-unknown-linux-gnu"
-    # Fails with:
+    # Fails in libc build pass 2:
     #   little endian output does not match Xtensa configuration
     #"xtensa-unknown-linux-uclibc"
-    # Qemu currently fails, but seems to be a Qemu error, since
+    # Note: Qemu currently fails, but seems to be a Qemu error, since
     # the instructions seem to all be valid.
     "xtensabe-unknown-linux-uclibc"
 
@@ -79,21 +87,25 @@ export OS_IMAGES=(
 )
 
 # Bare-metal machines.
-# These don't have allocators, so these do not support system allocators.
+# These don't use newlibs nanomalloc, so these do not support system allocators.
 export METAL_IMAGES=(
-    # TODO(ahuszagh) Add toolchains for commented ones.
     "avr"
-    "alphaev4-unknown-elf"  # TODO(ahuszagh) Incomplete, still alpha
-    "alphaev5-unknown-elf"  # TODO(ahuszagh) Incomplete, still alpha
-    "alphaev6-unknown-elf"  # TODO(ahuszagh) Incomplete, still alpha
-    "alphaev7-unknown-elf" # TODO(ahuszagh) Incomplete, still alpha
+    # Alpha images fail with:
+    #   checking iconv.h usability... make[2]: *** [Makefile:7091: configure-ld] Error 1
+    #"alphaev4-unknown-elf"
+    #"alphaev5-unknown-elf"
+    #"alphaev6-unknown-elf"
+    #"alphaev7-unknown-elf"
     "arc-unknown-elf"
     "arcbe-unknown-elf"
-    # TODO(ahuszagh) Need ARM
+    "arm-unknown-elf"       # TODO(ahuszagh) Incomplete
+    "armbe-unknown-elf"     # TODO(ahuszagh) Incomplete
+    "arm64-unknown-elf"     # TODO(ahuszagh) Incomplete
+    "arm64be-unknown-elf"   # TODO(ahuszagh) Incomplete
     "m68k-unknown-elf"
     "nios2-unknown-elf"
-    "riscv32-unknown-elf"
-    "riscv64-unknown-elf"
+    #"riscv32-unknown-elf"  # TODO(ahuszagh) Restore..
+    #"riscv64-unknown-elf"  # TODO(ahuszagh) Restore..
     "sh1-unknown-elf"
     "sh2-unknown-elf"
     "sh2e-unknown-elf"
@@ -106,13 +118,15 @@ export METAL_IMAGES=(
     "sh4-340-unknown-elf"
     "sh4-500-unknown-elf"
     "sh4a-unknown-elf"
-    "sparc-unknown-elf"     # TODO(ahuszagh) Incomplete, still alpha
-    "sparc64-unknown-elf"   # TODO(ahuszagh) Incomplete, still alpha
-    "i386-unknown-elf"      # TODO(ahuszagh) Incomplete, still alpha
-    "i486-unknown-elf"      # TODO(ahuszagh) Incomplete, still alpha
-    "i586-unknown-elf"      # TODO(ahuszagh) Incomplete, still alpha
-    "i686-unknown-elf"      # TODO(ahuszagh) Incomplete, still alpha
-    "x86_64-unknown-elf"    # TODO(ahuszagh) Incomplete, still alpha
+    "sparc-unknown-elf"
+    # Fails during building newlib due to:
+    #   error: argument 'dirp' doesn't match prototype
+    #"sparc64-unknown-elf"
+    "i386-unknown-elf"
+    "i486-unknown-elf"
+    "i586-unknown-elf"
+    "i686-unknown-elf"
+    "x86_64-unknown-elf"
 
     # Binutils only supports s390/s390x on Linux.
     # Newlib does not support Xtensa.
@@ -143,18 +157,24 @@ export METAL_IMAGES=(
     #"ppc64-unknown-spe"
     #"ppc64le-unknown-spe"
 
-    # TODO(ahuszagh) Support these MIPS targets.
     # O32
-    #"mips-unknown-o32"
-    #"mipsel-unknown-o32"
+    "mips-unknown-o32"
+    "mipsel-unknown-o32"
 
     # N32
+    # Fails during configuring GCC pass 2 due to:
+    #    error: cannot compute suffix of object files: cannot compile
     #"mips64-unknown-n32"
     #"mips64el-unknown-n32"
 
     # N64
-    #"mips64-unknown-n64"
-    #"mips64el-unknown-n64"
+    "mips64-unknown-n64"
+    "mips64el-unknown-n64"
+
+    # THUMB
+    # TODO(ahuszagh) These need to build off of arm
+    #"thumbel-unknown-elf"
+    #"thumbeb-unknown-elf"
 )
 
 export IMAGES=(

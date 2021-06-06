@@ -1,9 +1,9 @@
 FROM ahuszagh/cross:base
 
 # Build GCC
-COPY ct-ng/alphaev7-unknown-elf.config /ct-ng/
+COPY ct-ng/armeb-unknown-elf.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
-RUN ARCH=alphaev7-unknown-elf /ct-ng/gcc.sh
+RUN ARCH=armeb-unknown-elf /ct-ng/gcc.sh
 
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/

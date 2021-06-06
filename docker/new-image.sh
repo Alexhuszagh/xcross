@@ -60,9 +60,13 @@ source "$scriptdir/shortcut.sh"
 ' > "$env"
 echo "export PREFIX=$TARGET" >> "$env"
 echo 'export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
-
-shortcut_gcc
-shortcut_util' >> "$env"
+'
+if [ "$OS" = "Generic" ]; then
+    echo 'CFLAGS="-nostartfiles" shortcut_gcc' >> "$env"
+else
+    echo 'shortcut_gcc' >> "$env"
+fi
+echo 'shortcut_util' >> "$env"
 
 # Create our dockerfile.
 dockerfile="$scriptdir/Dockerfile.$FILENAME"

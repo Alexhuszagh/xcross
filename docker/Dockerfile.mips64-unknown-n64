@@ -8,4 +8,15 @@ RUN ARCH=mips64-unknown-n64 /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# TODO(ahuszagh) Add symlinks and toolchains
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/mips64-unknown-n64.sh /
+RUN /mips64-unknown-n64.sh
+RUN rm /shortcut.sh /mips64-unknown-n64.sh
+
+# Add toolchains
+COPY cmake/mips64-unknown-n64.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

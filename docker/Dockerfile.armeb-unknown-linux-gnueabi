@@ -1,0 +1,27 @@
+FROM ahuszagh/cross:base
+
+# Build GCC
+COPY ct-ng/armeb-unknown-linux-gnueabi.config /ct-ng/
+COPY docker/gcc.sh /ct-ng/
+RUN ARCH=armeb-unknown-linux-gnueabi /ct-ng/gcc.sh
+
+# Remove GCC build scripts and config.
+RUN rm -rf /ct-ng/
+
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=armeb /qemu-apt.sh
+RUN rm /qemu-apt.sh
+
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/armeb-unknown-linux-gnueabi.sh /
+RUN /armeb-unknown-linux-gnueabi.sh
+RUN rm /shortcut.sh /armeb-unknown-linux-gnueabi.sh
+
+# Add toolchains
+COPY cmake/armeb-unknown-linux-gnueabi.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

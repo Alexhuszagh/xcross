@@ -6,5 +6,5 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=avr
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
-shortcut_gcc
+CFLAGS="-nostartfiles" shortcut_gcc
 shortcut_util
