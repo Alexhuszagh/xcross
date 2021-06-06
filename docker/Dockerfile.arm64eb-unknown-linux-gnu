@@ -8,4 +8,20 @@ RUN ARCH=arm64eb-unknown-linux-gnu /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# TODO(ahuszagh) Add symlinks and toolchains
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=aarch64_be /qemu-apt.sh
+RUN rm /qemu-apt.sh
+
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/arm64eb-unknown-linux-gnu.sh /
+RUN /arm64eb-unknown-linux-gnu.sh
+RUN rm /shortcut.sh /arm64eb-unknown-linux-gnu.sh
+
+# Add toolchains
+COPY cmake/arm64eb-unknown-linux-gnu.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

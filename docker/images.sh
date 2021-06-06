@@ -18,7 +18,7 @@ export OS_IMAGES=(
     "armeb-unknown-linux-gnueabi"
     "armelhf-unknown-linux-gnueabi"
     "arm64-unknown-linux-gnu"
-    "arm64eb-unknown-linux-gnu"     # TODO(ahuszagh) Incomplete
+    "arm64eb-unknown-linux-gnu"
     "hppa-unknown-linux-gnu"
     "i686-unknown-linux-gnu"
     "m68k-unknown-linux-gnu"
