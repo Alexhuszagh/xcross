@@ -8,6 +8,11 @@ RUN ARCH=sh4be-unknown-linux-gnu /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=sh4eb /qemu-apt.sh
+RUN rm /qemu-apt.sh
+
 # Add symlinks
 COPY symlink/shortcut.sh /
 COPY symlink/sh4be-unknown-linux-gnu.sh /

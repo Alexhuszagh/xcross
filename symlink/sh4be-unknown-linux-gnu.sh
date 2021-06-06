@@ -5,6 +5,9 @@ source "$scriptdir/shortcut.sh"
 
 export PREFIX=sh4eb-unknown-linux-gnu
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
+export ARCH=sh4eb
+export LIBPATH="$DIR$PREFIX"/sysroot
 
 shortcut_gcc
 shortcut_util
+shortcut_run
