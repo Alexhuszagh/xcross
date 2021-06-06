@@ -59,7 +59,11 @@ shortcut_compiler() {
 
     # -mcpu is deprecated on x86.
     local cpu="mcpu"
-    if [ "$PREFIX" = i[3-7]86-* ] || [[ "$PREFIX" = x86_64-* ]] || [ "$PREFIX" = "" ]; then
+    if [[ "$PREFIX" = i[3-7]86-* ]] || [[ "$PREFIX" = x86_64-* ]] || [ "$PREFIX" = "" ]; then
+        cpu="march"
+    fi
+    # only -march works on MIPS architectures.
+    if [[ "$PREFIX" = mips* ]]; then
         cpu="march"
     fi
 

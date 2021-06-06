@@ -6,10 +6,13 @@ set -e
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 echo "$scriptdir"
 
-cmd="$1"
+command="/test/$1.sh"
 image="$2"
+if [ "$3" != "" ]; then
+    command="export CPU=$3; $command"
+fi
 
 docker run -v "$scriptdir:/test" \
     --env IMAGE="$image" \
     ahuszagh/cross:"$image" \
-    /bin/bash -c "/test/$cmd.sh"
+    /bin/bash -c "$command"
