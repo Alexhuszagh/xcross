@@ -8,4 +8,15 @@ RUN ARCH=arm64eb-unknown-elf /ct-ng/gcc.sh
 # Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
-# TODO(ahuszagh) Add symlinks and toolchains
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/arm64eb-unknown-elf.sh /
+RUN /arm64eb-unknown-elf.sh
+RUN rm /shortcut.sh /arm64eb-unknown-elf.sh
+
+# Add toolchains
+COPY cmake/arm64eb-unknown-elf.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

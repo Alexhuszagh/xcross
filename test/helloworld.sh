@@ -32,11 +32,11 @@ if [[ "$IMAGE" = sh4be-* ]]; then
     is_sh4be=yes
 fi
 run_static=no
-if [ $has_run = yes ] && [ $is_ppc32 = no ]; then
+if [ "$has_run" = yes ] && [ "$is_ppc32" = no ]; then
     run_static=yes
 fi
 run_shared=no
-if [ $has_run = yes ] && [ $is_android = no ] && [ $is_musl = no ] && [ $is_armeb = no ] && [ $sh4be = no ]; then
+if [ "$has_run" = yes ] && [ "$is_android" = no ] && [ "$is_musl" = no ] && [ "$is_armeb" = no ] && [ "$sh4be" = no ]; then
     run_shared=yes
 fi
 if [[ "$IMAGE" = xtensa* ]]; then

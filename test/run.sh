@@ -6,13 +6,25 @@ set -ex
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/../docker/images.sh"
 
+has_started=yes
+if [ "$1" != "" ]; then
+    has_started=no
+    start="$1"
+fi
+
 # Generic tests
 for image in "${OS_IMAGES[@]}"; do
-    "$scriptdir/docker-run.sh" helloworld "$image"
+    if [ "$has_started" = yes ] || [ "$start" = "$image" ]; then
+        has_started=yes
+        "$scriptdir/docker-run.sh" helloworld "$image"
+    fi
 done
 
 for image in "${METAL_IMAGES[@]}"; do
-    "$scriptdir/docker-run.sh" add "$image"
+    if [ "$has_started" = yes ] || [ "$start" = "$image" ]; then
+        has_started=yes
+        "$scriptdir/docker-run.sh" add "$image"
+    fi
 done
 
 # Extensive custom OS tests.

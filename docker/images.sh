@@ -152,8 +152,11 @@ export METAL_IMAGES=(
     #"ppc64le-unknown-elf"
 
     # EABI
-    "ppc-unknown-eabi"
-    "ppcle-unknown-eabi"
+    # Fails during compiling due to:
+    #   undefined reference to `__init'
+    # Adding -msim or -mads does not fix it.
+    #"ppc-unknown-eabi"
+    #"ppcle-unknown-eabi"
     # Binutils does not support PPC64 and PPC64LE with EABI:
     #   BFD does not support target powerpc64-unknown-eabi.
     #"ppc64-unknown-eabi"
