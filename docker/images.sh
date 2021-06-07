@@ -22,6 +22,8 @@ export OS_IMAGES=(
     "hppa-unknown-linux-gnu"
     "i686-unknown-linux-gnu"
     "m68k-unknown-linux-gnu"
+    "microblaze-xilinx-linux-gnu"   # TODO(ahuszagh) Still beta.
+    "microblazeel-xilinx-linux-gnu"
     "mips-unknown-linux-gnu"
     "mips64-unknown-linux-gnu"
     "mips64el-unknown-linux-gnu"
@@ -107,6 +109,8 @@ export METAL_IMAGES=(
     "i586-unknown-elf"
     "i686-unknown-elf"
     "m68k-unknown-elf"
+    "microblaze-xilinx-elf"     # TODO(ahuszagh) Incomplete
+    "microblazeel-xilinx-elf"   # TODO(ahuszagh) Incomplete
     "nios2-unknown-elf"
     "riscv32-unknown-elf"
     "riscv64-unknown-elf"

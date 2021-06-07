@@ -441,11 +441,13 @@ For example, the following image names decompose to the following triples:
 
 If an `$arch-unknown-linux-gnu` is available, then `$arch` is an alias for `$arch-unknown-linux-gnu`.
 
-**OS Support**
+**OS/Architecture Support**
 
 In general, the focus of these images is to provide support for a wide variety of architectures, not operating systems. We will gladly accept Dockerfiles/scripts to support more operating systems, like FreeBSD.
 
 We do not support Darwin/iOS for licensing reasons, since reproduction of the macOS SDK is expressly forbidden. If you would like to build a Darwin cross-compiler, see [osxcross](https://github.com/tpoechtrager/osxcross).
+
+We also do not support certain cross-compilers for popular architectures, like Hexagon, due to proprietary linkers (which would be needed for LLVM support).
 
 **Versioning**
 
@@ -625,6 +627,8 @@ We therefore support:
 - i386-i686 (Bare-Metal)
 - i686 (Linux, MinGW, Android)
 - m68k (Linux)
+- MicroBlaze (Linux)
+- MicroBlaze-LE (Linux)
 - MIPS (Linux, Bare-Metal)
 - MIPS-LE (Linux, Bare-Metal)
 - MIPS64 (Linux, Bare-Metal)
