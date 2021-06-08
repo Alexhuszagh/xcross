@@ -6,5 +6,5 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=sh-unknown-elf
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
-CFLAGS="-m3e -nostartfiles" shortcut_gcc
+CFLAGS="-m3e" shortcut_gcc
 shortcut_util

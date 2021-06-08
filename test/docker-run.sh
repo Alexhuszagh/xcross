@@ -14,5 +14,6 @@ fi
 
 docker run -v "$scriptdir:/test" \
     --env IMAGE="$image" \
+    --env FLAGS="$FLAGS" \
     ahuszagh/cross:"$image" \
     /bin/bash -c "$command"

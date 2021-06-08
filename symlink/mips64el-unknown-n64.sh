@@ -6,5 +6,5 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=mips64el-unknown-elf
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
-CFLAGS="-mabi=32 -nostartfiles" shortcut_gcc
+CFLAGS="-mabi=32" shortcut_gcc
 shortcut_util

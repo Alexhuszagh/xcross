@@ -1,9 +1,11 @@
-# Toolchains
+# xcross
 
-Docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts for plug-and-play C/C++ cross-compiling, inspired by [rust-embedded/cross](https://github.com/rust-embedded/cross). Toolchains supports both bare-metal and OS-based compilation, with a wide variety of architectures and C-runtimes supported. Most images are <500MB, and <200MB compressed. Toolchains is ideal for:
+Docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts for plug-and-play C/C++ cross-compiling, inspired by [rust-embedded/cross](https://github.com/rust-embedded/cross). xcross supports both bare-metal and OS-based compilation, with a wide variety of architectures and C-runtimes supported. Most images are <500MB, and <200MB compressed. xcross is ideal for:
 
 - Testing cross-platform support in CI pipelines.
 - Building and deploying cross-compiled programs.
+
+Note that this project is similar to [dockercross](https://github.com/dockcross/dockcross), however, xcross supports many more CPU architectures than dockcross. If you need Docker images of common architectures, dockcross may have better support.
 
 **Table of Contents**
 
@@ -200,7 +202,7 @@ wget https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross \
 chmod +x ~/bin/xcross
 # Add it to the path for the current and all future shells.
 export PATH="$PATH:~/bin"
-echo 'export PATH="$PATH:~/bin"' >> ~/.bashrc
+echo 'export PATH="$PATH:~/bin"' >> ~/.profile
 ```
 
 **Windows**
@@ -413,7 +415,7 @@ There are two types of images:
 - Images with an OS layer, such as `ppcle-unknown-linux-gnu`.
 - Bare metal images, such as `ppcle-unknown-elf`.
 
-The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and do not link to a memory allocator.
+The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and do not link to a memory allocator. Please note that not all bare-metal images provide complete startup routines (crt0), and therefore might need to be linked against standlone flags (`-nostartfiles`, `-nostdlib`, `-nodefaultlibs`, or `-ffreestanding`) with a custom `_start` or equivalent routine or a custom `crt0` must be provided.
 
 The other images use a C-runtime that depends on a POSIX-like OS (such as Linux, FreeBSD, or MinGW for Windows), and can be used with:
 
@@ -543,7 +545,7 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=arm-unknown-eabi
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
-CFLAGS="-nostartfiles" shortcut_gcc
+shortcut_gcc
 shortcut_util
 ```
 
@@ -613,6 +615,7 @@ Currently, we only create images that are supported by:
 - crosstool-NG with official sources
 - Debian packages
 - Android NDK's
+- RISCV GNU utils.
 
 We therefore support:
 
@@ -633,6 +636,8 @@ We therefore support:
 - MIPS-LE (Linux, Bare-Metal)
 - MIPS64 (Linux, Bare-Metal)
 - MIPS64-LE (Linux, Bare-Metal)
+- Moxie (Bare-Metal: Moxiebox and ELF)
+- Moxie-BE (Bare-Metal: ELF-only)
 - NIOS2 (Linux, Bare-Metal)
 - PowerPC (Linux, Bare-Metal)
 - PowerPC-LE (Linux, Bare-Metal)
@@ -659,4 +664,4 @@ These licenses are only relevant if you distribute a toolchain as part of a prop
 
 # Contributing
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in toolchains by you, will be unlicensed (free and unencumbered software released into the public domain).
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in xcross by you, will be unlicensed (free and unencumbered software released into the public domain).

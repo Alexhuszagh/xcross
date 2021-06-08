@@ -23,7 +23,7 @@ done
 for image in "${METAL_IMAGES[@]}"; do
     if [ "$has_started" = yes ] || [ "$start" = "$image" ]; then
         has_started=yes
-        "$scriptdir/docker-run.sh" add "$image"
+        FLAGS="-nostartfiles" "$scriptdir/docker-run.sh" add "$image"
     fi
 done
 

@@ -11,13 +11,13 @@ cd cpp-add
 
 # Test CMake.
 mkdir build && cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake -DCMAKE_CXX_FLAGS="$FLAGS"
 make
 
 # Test Makefile.
 cd ..
 source /env/static
-make
+CXXFLAGS="$FLAGS" make
 
 # Test symbolic links
-c++ add.cc -static
+c++ add.cc -static $FLAGS

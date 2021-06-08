@@ -6,5 +6,5 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=armeb-unknown-eabi
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
-CFLAGS="-mthumb -nostartfiles" shortcut_gcc
+CFLAGS="-mthumb" shortcut_gcc
 shortcut_util

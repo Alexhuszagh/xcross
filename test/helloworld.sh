@@ -52,7 +52,7 @@ fi
 
 # Test CMake.
 mkdir build && cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/shared.cmake
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/shared.cmake -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
 make
 if [ "$run_shared" = yes ]; then
     make run
@@ -60,7 +60,7 @@ if [ "$run_shared" = yes ]; then
 fi
 
 rm -rf ./*
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
 make
 if [ "$run_static" = yes ]; then
     make run
@@ -70,25 +70,25 @@ fi
 # Test Makefile.
 cd ..
 source /env/shared
-make
+CXXFLAGS="$CXXFLAGS $FLAGS" make
 if [ "$run_shared" = yes ]; then
     run helloworld
 fi
 
 make clean
 source /env/static
-make
+CXXFLAGS="$CXXFLAGS $FLAGS" make
 if [ "$run_static" = yes ]; then
     run helloworld
 fi
 
 # Test symbolic links
-c++ helloworld.cc -fPIC -o hello
+c++ helloworld.cc -fPIC -o hello $FLAGS
 if [ "$run_shared" = yes ]; then
     run hello
 fi
 
-c++ helloworld.cc -static -o hello
+c++ helloworld.cc -static -o hello $FLAGS
 if [ "$run_static" = yes ]; then
     run hello
 fi

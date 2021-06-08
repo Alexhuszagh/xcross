@@ -6,5 +6,5 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=arc-unknown-elf
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
-CFLAGS="-nostartfiles" shortcut_gcc
+shortcut_gcc
 shortcut_util

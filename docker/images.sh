@@ -22,7 +22,7 @@ export OS_IMAGES=(
     "hppa-unknown-linux-gnu"
     "i686-unknown-linux-gnu"
     "m68k-unknown-linux-gnu"
-    "microblaze-xilinx-linux-gnu"   # TODO(ahuszagh) Still beta.
+    "microblaze-xilinx-linux-gnu"
     "microblazeel-xilinx-linux-gnu"
     "mips-unknown-linux-gnu"
     "mips64-unknown-linux-gnu"
@@ -32,6 +32,10 @@ export OS_IMAGES=(
     "mipsel-unknown-linux-gnu"
     "mipsr6-unknown-linux-gnu"
     "mipsr6el-unknown-linux-gnu"
+    # Fails during building binutils:
+    #   BFD does not support target moxie-unknown-linux-gnu.
+    #"moxie-unknown-linux-gnu"
+    #"moxieel-unknown-linux-gnu"
     "nios2-unknown-linux-gnu"
     "ppc-unknown-linux-gnu"
     "ppcle-unknown-linux-gnu"
@@ -86,6 +90,9 @@ export OS_IMAGES=(
     # MinGW
     "i386-w64-mingw32"
     "x86_64-w64-mingw32"
+
+    # Wasm
+    "wasm"
 )
 
 # Bare-metal machines.
@@ -109,8 +116,19 @@ export METAL_IMAGES=(
     "i586-unknown-elf"
     "i686-unknown-elf"
     "m68k-unknown-elf"
-    "microblaze-xilinx-elf"     # TODO(ahuszagh) Incomplete
-    "microblazeel-xilinx-elf"   # TODO(ahuszagh) Incomplete
+    # Fails during compiling due to:
+    #   bin/ld: cannot find -lxil
+    #   This is the xilinx standard library, but we compiled against
+    #   newlib.
+    #"microblaze-xilinx-elf"
+    #"microblazeel-xilinx-elf"
+    "moxiebox-none-moxie"       # TODO(ahuszagh) Incomplete
+    # Fails during building libc pass 2:
+    #   moxie-none-moxiebox-cc: error: this target is little-endian
+    #   Expected since moxiebox only supports LE.
+    #"moxieboxeb-none-moxie"
+    "moxie-none-elf"     # TODO(ahuszagh) Incomplete
+    "moxieeb-none-elf"     # TODO(ahuszagh) Incomplete
     "nios2-unknown-elf"
     "riscv32-unknown-elf"
     "riscv64-unknown-elf"
@@ -145,7 +163,6 @@ export METAL_IMAGES=(
     #   Newlib does not support Xtensa.
     #"xtensa-unknown-elf"
     #"xtensabe-unknown-elf"
-
 
     # ELF
     "ppc-unknown-elf"

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Get the current toolchains version.
+
+export VERSION_MAJOR=^VERSION_MAJOR^
+export VERSION_MINOR=^VERSION_MINOR^
+export VERSION_PATCH=^VERSION_PATCH^
+export VERSION_BUILD=^VERSION_BUILD^
+export VERSION_INFO=^VERSION_INFO^
+export VERSION=^VERSION^
