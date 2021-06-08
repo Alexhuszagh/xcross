@@ -122,13 +122,13 @@ export METAL_IMAGES=(
     #   newlib.
     #"microblaze-xilinx-elf"
     #"microblazeel-xilinx-elf"
-    "moxiebox-none-moxie"       # TODO(ahuszagh) Incomplete
+    "moxiebox-none-moxie"
     # Fails during building libc pass 2:
     #   moxie-none-moxiebox-cc: error: this target is little-endian
     #   Expected since moxiebox only supports LE.
     #"moxieboxeb-none-moxie"
-    "moxie-none-elf"     # TODO(ahuszagh) Incomplete
-    "moxieeb-none-elf"     # TODO(ahuszagh) Incomplete
+    "moxie-none-elf"
+    "moxieeb-none-elf"
     "nios2-unknown-elf"
     "riscv32-unknown-elf"
     "riscv64-unknown-elf"

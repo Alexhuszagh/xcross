@@ -3,7 +3,7 @@
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/shortcut.sh"
 
-export PREFIX=moxie-none-elf
+export PREFIX=moxie-unknown-elf
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
 shortcut_gcc

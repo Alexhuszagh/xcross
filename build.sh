@@ -1,6 +1,8 @@
 #!/bin/bash
 # Scripts to automatically build new versions.
 
+set -ex
+
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 cd "$scriptdir"
 

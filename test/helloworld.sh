@@ -52,7 +52,9 @@ fi
 
 # Test CMake.
 mkdir build && cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/shared.cmake -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/shared.cmake \
+    -DCMAKE_C_FLAGS="$CFLAGS $FLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
 make
 if [ "$run_shared" = yes ]; then
     make run
@@ -60,7 +62,9 @@ if [ "$run_shared" = yes ]; then
 fi
 
 rm -rf ./*
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake \
+    -DCMAKE_C_FLAGS="$CFLAGS $FLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
 make
 if [ "$run_static" = yes ]; then
     make run
