@@ -190,38 +190,19 @@ Most of the magic happens via xcross, which allows you to transparently execute 
 
 ### Installing
 
-Install Python3.6+, then download [xcross](https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross) and add it to the path. 
-
-**Unix**
+xcross may be installed via PyPi via:
 
 ```bash
-# Download the file and make it executable.
-mkdir -p ~/bin
-wget https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross \
-    -O ~/bin/xcross
-chmod +x ~/bin/xcross
-# Add it to the path for the current and all future shells.
-export PATH="$PATH:~/bin"
-echo 'export PATH="$PATH:~/bin"' >> ~/.profile
+pip install xcross --user
 ```
 
-**Windows**
+Or xcross may be installed via git:
 
-```batch
-:: Download the file and make sure we add the `.py` suffix.
-:: Windows doesn't have an idea of xdg_open, so it uses suffixes.
-mkdir %userprofile%\bin
-curl --output %userprofile%\bin\xcross.py ^
-  --url https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross
-
-:: Add it to the path
-set PATH=%PATH%;%userprofile%\bin
-
-:: Optionally add Python scripts to be invoked without adding `.py`.
-set PATHEXT=%PATHEXT%;.py
+```bash
+git clone https://github.com/Alexhuszagh/xcross
+cd xcross
+python setup.py install --user
 ```
-
-Please note that these environment variable changes will only persist for the current shell, to persist changes you must edit [Environment Variables](https://superuser.com/a/985947/384687) in System Properties.
 
 ### Arguments
 
@@ -658,7 +639,7 @@ Platform-specific details:
 
 # License
 
-This is free and unencumbered software released into the public domain. This project, however, does derive off of projects that are not necessarily public domain software, such as [crosstool-NG](https://github.com/crosstool-ng/crosstool-ng), the [Android NDK](https://android.googlesource.com/platform/prebuilts/ndk/+/master/NOTICE), as well as build off of GCC, the Linux kernel headers, and the relevant C-runtime (glibc, musl, uClibc-ng).
+This is free and unencumbered software released into the public domain. This project, however, does derive off of projects that are not necessarily public domain software, such as [crosstool-NG](https://github.com/crosstool-ng/crosstool-ng), the [Android NDK](https://android.googlesource.com/platform/prebuilts/ndk/+/master/NOTICE), as well as build off of GCC, the Linux kernel headers, and the relevant C-runtime (glibc, musl, uClibc-ng). Therefore, distributing any images will be subject to the GPLv3 or later (for GCC), and GPLv2 for the Linux headers.
 
 These licenses are only relevant if you distribute a toolchain as part of a proprietary system: for merely compiling and linking code as part of a standard toolchain, the usual linking exceptions apply.
 

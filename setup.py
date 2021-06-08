@@ -102,7 +102,7 @@ setuptools.setup(
     scripts=[f'{HOME}/bin/xcross'],
     long_description=long_description,
     long_description_content_type='text/markdown',
-    python_requires='>3.7.0',
+    python_requires='>3.6.0',
     description="Zero-setup cross compilation.",
     license="Unlicense",
     keywords="compilers cross-compilation embedded",
