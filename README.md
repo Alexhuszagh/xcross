@@ -11,9 +11,10 @@ Note that this project is similar to [dockercross](https://github.com/dockcross/
 
 - [Motivation](#motivation)
 - [Getting Started](#getting-started)
-    - [xcross](#xcross)
-    - [run](#run)
-    - [Docker](#docker)
+  - [Installing](#installing)
+  - [xcross](#xcross)
+  - [run](#run)
+  - [Docker](#docker)
 - [Travis CI Example](#travis-ci-example)
 - [Using xcross](#using-xcross)
 - [Sharing Binaries To Host](#sharing-binaries-to-host)
@@ -40,7 +41,23 @@ It just works.
 
 # Getting Started
 
-This shows a simple example of building and running a C++ project on PowerPC64, a big-endian system:
+This shows a simple example of building and running a C++ project on PowerPC64, a big-endian system.
+
+## Installing
+
+xcross may be installed via PyPi via:
+
+```bash
+pip install xcross --user
+```
+
+Or xcross may be installed via git:
+
+```bash
+git clone https://github.com/Alexhuszagh/xcross
+cd xcross
+python setup.py install --user
+```
 
 ## xcross
 
@@ -151,6 +168,13 @@ dist: bionic
 services:
   - docker
 
+addons:
+  apt:
+    update: true
+    packages:
+      - python3
+      - python3-pip
+
 # Use a matrix with both native toolchains and cross-toolchain images.
 matrix:
   include:
@@ -165,21 +189,20 @@ matrix:
 before_install:
   - |
     if [ "$TARGET" != "" ] ; then
-      wget https://raw.githubusercontent.com/Alexhuszagh/toolchains/main/bin/xcross
-      chmod +x xcross
+      pip install xcross
       docker pull ahuszagh/cross:"$TARGET"
     fi
 
 script:
   - |
     mkdir build && cd build
-    xcross=
+    build=
     if [ "$TARGET" != "" ] ; then
-      xcross=../xcross --target="$TARGET"
+      build=xcross --target="$TARGET"
     fi
-    $xcross cmake ..
-    $xcross make -j 5
-    $xcross run tests/test
+    $build cmake ..
+    $build make -j 5
+    $build run tests/test
 ```
 
 # Using xcross
@@ -187,22 +210,6 @@ script:
 Most of the magic happens via xcross, which allows you to transparently execute commands in a Docker container. Although xcross provides simple, easy-to-use defaults, it has more configuration options for extensible cross-platform builds. Most of these command-line arguments may be provided as environment variables.
 
 > **WARNING** By default, the root directory is shared with the Docker container, for maximum compatibility. In order to mitigate any security vulnerabilities, we run any build commands as a non-root user, and escape input in an attempt to avoid any script injections. If you are worried about a malicious build system, you may further restrict this using the `--dir` option.
-
-### Installing
-
-xcross may be installed via PyPi via:
-
-```bash
-pip install xcross --user
-```
-
-Or xcross may be installed via git:
-
-```bash
-git clone https://github.com/Alexhuszagh/xcross
-cd xcross
-python setup.py install --user
-```
 
 ### Arguments
 
@@ -641,7 +648,7 @@ Platform-specific details:
 
 This is free and unencumbered software released into the public domain. This project, however, does derive off of projects that are not necessarily public domain software, such as [crosstool-NG](https://github.com/crosstool-ng/crosstool-ng), the [Android NDK](https://android.googlesource.com/platform/prebuilts/ndk/+/master/NOTICE), as well as build off of GCC, the Linux kernel headers, and the relevant C-runtime (glibc, musl, uClibc-ng). Therefore, distributing any images will be subject to the GPLv3 or later (for GCC), and GPLv2 for the Linux headers.
 
-These licenses are only relevant if you distribute a toolchain as part of a proprietary system: for merely compiling and linking code as part of a standard toolchain, the usual linking exceptions apply.
+These licenses are only relevant if you distribute a toolchain: for merely compiling and linking code as part of a standard toolchain, the usual linking exceptions apply.
 
 # Contributing
 
