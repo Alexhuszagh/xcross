@@ -1,8 +1,22 @@
-import distutils.cmd
 import re
 import os
 import setuptools
 import shutil
+import sys
+
+try:
+    from setuptools import setup, Command
+    has_setuptools = True
+except ImportError:
+    from distutils.core import setup, Command
+    has_setuptools = False
+from distutils.command.build_py import build_py
+try:
+    import py2exe
+except ImportError:
+    if len(sys.argv) >= 2 and sys.argv[1] == 'py2exe':
+        print('Cannot import py2exe', file=sys.stderr)
+        exit(1)
 
 HOME = os.path.dirname(os.path.realpath(__file__))
 
@@ -21,13 +35,15 @@ with open(f'{HOME}/version', 'r') as file:
         version = f'{version}.{patch}'
     if build != '':
         version = f'{version}-{build}'
+    py2exe_version = f'{major}.{minor}.{patch}'
 
 # Read the long description.
+description = 'Zero-setup cross compilation.'
 with open(f'{HOME}/README.md') as file:
     long_description = file.read()
 
 
-class CleanCommand(distutils.cmd.Command):
+class CleanCommand(Command):
     '''A custom command to clean any previous builds.'''
 
     description = 'clean all previous builds'
@@ -47,12 +63,11 @@ class CleanCommand(distutils.cmd.Command):
         shutil.rmtree(f'{HOME}/xcross.egg-info', ignore_errors=True)
 
 
-class ConfigureCommand(distutils.cmd.Command):
+class ConfigureCommand(Command):
     '''A custom command to configure any template files.'''
 
     description = 'configure template files'
     user_options = []
-
 
     def initialize_options(self):
         pass
@@ -64,7 +79,7 @@ class ConfigureCommand(distutils.cmd.Command):
         '''Modify configuration files.'''
 
         # Read contents.
-        xcross = f'{HOME}/bin/xcross'
+        xcross = f'{HOME}/xcross/__init__.py'
         shell = f'{HOME}/docker/version.sh'
         with open(f'{xcross}.in', 'r') as file:
             xcross_contents = file.read()
@@ -94,26 +109,75 @@ class ConfigureCommand(distutils.cmd.Command):
             file.write(shell_contents)
 
 
+class BuildPy(build_py):
+    """Override build.py to configure builds."""
+
+    def run(self):
+        self.run_command('configure')
+        build_py.run(self)
+
+
+script = f'{HOME}/bin/xcross'
+if len(sys.argv) >= 2 and sys.argv[1] == 'py2exe':
+    params = {
+        'console': [{
+            'script': f'{HOME}/xcross/__main__.py',
+            'dest_base': 'xcross',
+            #'version': py2exe_version,
+            'description': description,
+            'comments': long_description,
+            'product_name': 'xcross',
+            #'product_version': py2exe_version,
+        }],
+        'options': {
+            'py2exe': {
+                'bundle_files': 1,
+                'compressed': 1,
+                'optimize': 2,
+                'dist_dir': f'{HOME}/dist',
+                'dll_excludes': [],
+            }
+        },
+        'zipfile': None
+    }
+elif has_setuptools:
+    params = {
+        'entry_points': {
+            'console_scripts': ['xcross = xcross:main']
+        }
+    }
+else:
+    params = {
+        'scripts': [f'{HOME}/bin/xcross']
+    }
+
 setuptools.setup(
     name="xcross",
     author="Alex Huszagh",
     author_email="ahuszagh@gmail.com",
     version=version,
-    scripts=[f'{HOME}/bin/xcross'],
+    packages=['xcross'],
+    **params,
+    description=description,
     long_description=long_description,
     long_description_content_type='text/markdown',
     python_requires='>3.6.0',
-    description="Zero-setup cross compilation.",
-    license="Unlicense",
-    keywords="compilers cross-compilation embedded",
-    url="https://github.com/Alexhuszagh/xcross",
+    license='Unlicense',
+    keywords='compilers cross-compilation embedded',
+    url='https://github.com/Alexhuszagh/xcross',
     classifiers=[
         'Development Status :: 4 - Beta',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'License :: OSI Approved :: The Unlicense (Unlicense)',
         'Topic :: Software Development :: Compilers',
         'Topic :: Software Development :: Embedded Systems',
     ],
     cmdclass={
+        'build_py': BuildPy,
         'clean': CleanCommand,
         'configure': ConfigureCommand,
     },

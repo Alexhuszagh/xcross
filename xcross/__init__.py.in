@@ -1,6 +1,9 @@
-#!/usr/bin/env python3
-#
-# A utility for 1-line builds from the parent host.
+'''
+    xcross
+    ======
+
+    A utility for 1-line builds from the parent host.
+'''
 
 import argparse
 import collections
@@ -214,6 +217,3 @@ def main():
         stderr=sys.stderr
     )
     sys.exit(code)
-
-if __name__ == '__main__':
-    main()
