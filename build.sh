@@ -11,6 +11,5 @@ cd "$scriptdir"
 
 # Run python scripts to clean, configure, build, and publish xcross.
 python3 setup.py clean
-python3 setup.py configure
 python3 setup.py build
-python setup.py sdist bdist_wheel
+python3 setup.py sdist bdist_wheel

@@ -1,3 +1,4 @@
+import glob
 import re
 import os
 import setuptools
@@ -61,6 +62,13 @@ class CleanCommand(Command):
         shutil.rmtree(f'{HOME}/build', ignore_errors=True)
         shutil.rmtree(f'{HOME}/dist', ignore_errors=True)
         shutil.rmtree(f'{HOME}/xcross.egg-info', ignore_errors=True)
+
+        # Clean py2exe files
+        dlls = glob.glob(f'{HOME}/*.dll')
+        exes = glob.glob(f'{HOME}/*.exe')
+        sos = glob.glob(f'{HOME}/*.so')
+        for file in dlls + exes + sos:
+            os.remove(file)
 
 
 class ConfigureCommand(Command):
@@ -134,7 +142,7 @@ if len(sys.argv) >= 2 and sys.argv[1] == 'py2exe':
                 'bundle_files': 1,
                 'compressed': 1,
                 'optimize': 2,
-                'dist_dir': f'{HOME}/dist',
+                'dist_dir': f'{HOME}',
                 'dll_excludes': [],
             }
         },
