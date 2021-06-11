@@ -1,4 +1,4 @@
-SET(CMAKE_SYSTEM_NAME Linux)
+SET(CMAKE_SYSTEM_NAME Android)
 SET(CMAKE_SYSTEM_PROCESSOR aarch64)
 
 SET(CMAKE_FIND_ROOT_PATH "/usr/local/toolchains/llvm/prebuilt/linux-x86_64/")

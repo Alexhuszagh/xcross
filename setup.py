@@ -3,6 +3,7 @@ import re
 import os
 import setuptools
 import shutil
+import stat
 import sys
 
 try:
@@ -89,10 +90,13 @@ class ConfigureCommand(Command):
         # Read contents.
         xcross = f'{HOME}/xcross/__init__.py'
         shell = f'{HOME}/docker/version.sh'
+        cmake = f'{HOME}/cmake/cmake'
         with open(f'{xcross}.in', 'r') as file:
             xcross_contents = file.read()
         with open(f'{shell}.in', 'r') as file:
            shell_contents = file.read()
+        with open(f'{cmake}.in', 'r') as file:
+           cmake_contents = file.read()
 
         # Patch xcross.
         xcross_contents = xcross_contents.replace('^VERSION_MAJOR^', f"'{major}'")
@@ -110,11 +114,23 @@ class ConfigureCommand(Command):
         shell_contents = shell_contents.replace('^VERSION_INFO^', f"('{major}' '{minor}' '{patch}' '{build}')")
         shell_contents = shell_contents.replace('^VERSION^', f"'{version}'")
 
+        # Patch cmake.
+        cmake_contents = cmake_contents.replace('^CMAKE^', f"'/usr/bin/cmake'")
+
         # Write contents
         with open(xcross, 'w') as file:
             file.write(xcross_contents)
         with open(shell, 'w') as file:
             file.write(shell_contents)
+        with open(cmake, 'w') as file:
+            file.write(cmake_contents)
+
+        # Ensure we have proper permissions on the files.
+        # chmod +x on all files, effectively.
+        flags = stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+        for file in [xcross, shell, cmake]:
+            st = os.stat(file)
+            os.chmod(file, st.st_mode | flags)
 
 
 class BuildPy(build_py):

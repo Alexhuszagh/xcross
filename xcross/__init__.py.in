@@ -24,6 +24,19 @@ __version__ = ^VERSION^
 
 # Create our arguments.
 parser = argparse.ArgumentParser(description='Cross-compile C/C++ with a single command.')
+# Note: this can take 1 of 3 forms:
+#   1). No argument provided, have an empty command.
+#   2). Provide a command as a quoted string. This is written to file exactly,
+#       so it can then be called locally.
+#   3). Provide arguments standard on the command-line, as a list of args.
+#       If any special characters are present, it errors out.
+parser.add_argument(
+    dest='command',
+    nargs='*',
+    help='''Build command to pass to the image.
+This may be provided as a list of arguments, however, this will not work if any
+bash control characters are present in the argument list.''',
+)
 parser.add_argument(
     '--target',
     help='''The target triple for the cross-compiled architecture.
@@ -82,13 +95,15 @@ parser.add_argument(
     action='version',
     version=f'%(prog)s {__version__}'
 )
-args, unknown = parser.parse_known_args()
+args = parser.parse_args()
+script_name = f'__ahuszagh_xcross_script_cmd_{__version__}'
 
-def error(message, code=126):
+def error(message, code=126, show_help=True):
     '''Print message, help, and exit on error.'''
 
     sys.stderr.write(f'error: {message}.\n')
-    parser.print_help()
+    if show_help:
+        parser.print_help()
     sys.exit(code)
 
 def validate_username(username):
@@ -100,34 +115,68 @@ def validate_repository(repository):
 def validate_target(target):
     return re.match('^[A-Za-z0-9_-]+$', target)
 
-def quote(string):
-    # We first need to properly escape all backslashes, so each
-    # is transformed into 2 backslashes `\\` when passed into
-    # the shell. 8 backslashes is turned into 2 for `bash -c`,
-    # which is then read as 1. Likewise, 4 quotes for
-    # `"` is then read as 1 in `bash -c`, which provides a
-    # literal escape. The rest can be provided as a literal escape.
-    esc1 = re.sub(r"\\", r"\\\\\\\\", string)
-    esc2 = re.sub(r"\"", r"\\\\\"", esc1)
-    return re.sub(r"([^\\\"A-Za-z0-9%+.|/:=@_-])", r"\\\1", esc2)
+def escape_single_quote(string):
+    '''Escape a single quote in a string to be quoted.'''
 
-def quote_path(path):
-    # We want to quote here, since we don't want **any** globs,
-    # or special characters, since this is the most important part.
-    # This should **always** be valid.
-    if "'" in path:
-        error('Invalid quote in path `{path}`, path is not valid')
-    return f"'{path}'"
+    # We want to quote here, but we want to make sure we don't have
+    # any injections, so we escpae single quotes inside, the only
+    # character which is read in a single-quoted string.
 
-def main():
-    '''Entry point'''
+    # Since escaping quotes inside single-quotes doesn't work...
+    # we use that string concatenation works for adjacent values.
+    # 'aaa''bbb' is the same as 'aaabbb', so 'aaa'\''bbb' works as
+    # "aaa\'bbb"
+    escaped = string.replace("'", "'\\''")
+    return f"'{escaped}'"
 
-    current_dir = pathlib.PurePath(os.getcwd())
-    root = current_dir.root
+def normpath(command, parent_dir, current_dir):
+    '''Normalize our arguments for paths on Windows.'''
+
+    # We want to be very... lenient here.
+    # Backslash characters are **generally** not valid
+    # in most cases, except for paths on Windows.
+    #
+    # Only change the value if:
+    #   1. The path exists
+    #   2. The path contains backslashes (IE, isn't a simple command).
+    #   3. The path is relative to the parent dir shared to Docker.
+    if os.name == 'nt':
+        for index in range(len(command)):
+            value = command[index]
+            if '\\' in value and os.path.exists(value):
+                path = pathlib.PurePath(os.path.realpath(value))
+                if path.is_relative_to(parent_dir):
+                    relative = os.path.relpath(path, start=current_dir)
+                    command[index] = pathlib.PurePath(relative).as_posix()
+
+def image_command(parent_dir, current_dir):
+    '''Create the image command from the argument list.'''
+
+    if args.command is None:
+        return ''
+    elif len(args.command) == 1:
+        return args.command[0]
+
+    # Now need to validate our arguments: are any control characters
+    # incorrectly present? We're pretty expansive here, since we can't
+    # tell the difference between `( 'hello)'` and `( hello)` with
+    # `["(", hello)"]`. So, just error if we have any potentially grammatical
+    # character.
+    if any(re.search('[;\n\\$!(){}`]', i) for i in args.command):
+        error('Invalid control characters present: use a quoted string instead', show_help=False)
+
+    # Normalize the paths inside, in case we have Windows-style paths.
+    normpath(args.command, parent_dir, current_dir)
+
+    # No need to escape any characters: we've ensured all values are simple.
+    return ' '.join(args.command)
+
+def validate_arguments(current_dir):
+    '''Validate the parsed arguments.'''
 
     # Normalize our arguments.
     args.target = args.target or os.environ.get('CROSS_TARGET')
-    args.dir = args.dir or root
+    args.dir = args.dir or current_dir.root
     args.cpu = args.cpu or os.environ.get('CROSS_DIR')
     args.cpu = args.cpu or os.environ.get('CROSS_CPU')
     if args.username is None:
@@ -140,7 +189,7 @@ def main():
     args.docker = args.docker or 'docker'
 
     # Validate our arguments.
-    if not unknown:
+    if args.command is None:
         error('Must provide at least an argument for the command')
     if args.target is None or not validate_target(args.target):
         error('Must provide a valid target')
@@ -149,36 +198,15 @@ def main():
     if args.repository is None or not validate_repository(args.repository):
         error('Must provide a valid Docker Hub repository')
 
-    # Need to add a toolchain if we don't have one with CMake.
-    if any(i == 'cmake' for i in unknown):
-        if not any(i.startswith('-DCMAKE_TOOLCHAIN_FILE') for i in unknown):
-            unknown.append('-DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake')
+def docker_command(parent_dir, current_dir):
+    '''Create the docker command to invoke.'''
 
     # Normalize our paths here.
-    parent_dir = pathlib.PurePath(os.path.realpath(args.dir))
     if not os.path.isdir(parent_dir):
         error('`dir` is not a directory')
     if not current_dir.is_relative_to(parent_dir):
         error('`dir` must be a parent of the current working directory')
     relpath = current_dir.relative_to(parent_dir).as_posix()
-
-    # Normalize our arguments for paths on Windows.
-    # We want to be very... lenient here.
-    # Backslash characters are **generally** not valid
-    # in most cases, except for paths on Windows.
-    #
-    # Only change the value if:
-    #   1. The path exists
-    #   2. The path contains backslashes (IE, isn't a simple command).
-    #   3. The path is relative to the parent dir shared to Docker.
-    if os.name == 'nt':
-        for index in range(len(unknown)):
-            value = unknown[index]
-            if '\\' in value and os.path.exists(value):
-                path = pathlib.PurePath(os.path.realpath(value))
-                if path.is_relative_to(parent_dir):
-                    relative = os.path.relpath(path, start=current_dir)
-                    unknown[index] = pathlib.PurePath(relative).as_posix()
 
     # Process our environment variables.
     # We don't need to escape these, since we aren't
@@ -203,17 +231,52 @@ def main():
         command += ['--env', var]
     command += ['--volume', f'{parent_dir}:/src']
     command.append(image)
-    chdir = f'cd /src/{quote_path(relpath)}'
-    escaped = f'{" ".join(map(quote, unknown))}'
+    chdir = f'cd /src/{escape_single_quote(relpath)}'
+
+    script = f"/bin/bash {escape_single_quote(script_name)}"
     if args.cpu:
-        escaped = f'export CPU={args.cpu}; {escaped}'
-    nonroot = f'su crosstoolng -c "{escaped}"'
+        script = f"export CPU={escape_single_quote(args.cpu)}; {script}"
+    nonroot = f'su crosstoolng -c "{script}"'
     cmd = f'{chdir} && {nonroot}'
     command += ['/bin/bash', '-c', cmd]
-    code = subprocess.call(
-        command,
-        shell=False,
-        stdout=sys.stdout,
-        stderr=sys.stderr
-    )
+
+    return command
+
+def main():
+    '''Entry point'''
+
+    # Validate arguments and process paths.
+    current_dir = pathlib.PurePath(os.getcwd())
+    validate_arguments(current_dir)
+    parent_dir = pathlib.PurePath(os.path.realpath(args.dir))
+
+    # Try to write the command to a script,
+    # Do not use `exists` or `isfile`, then open, since
+    # it could be written in between the time it was queried
+    # and then written.
+    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+    try:
+        command = image_command(parent_dir, current_dir)
+        fd = os.open(script_name, flags)
+        with os.fdopen(fd, 'w') as file:
+            file.write(command)
+    except OSError as err:
+        if err.errno == errno.EEXIST:
+            error(f'file {script_name} already exists. if you believe this is an error, delete {script_name}', show_help=False)
+        else:
+            # Unexpected error.
+            raise
+
+    # Create our docker command and call the script.
+    try:
+        code = subprocess.call(
+            docker_command(parent_dir, current_dir),
+            shell=False,
+            stdout=sys.stdout,
+            stderr=sys.stderr
+        )
+    finally:
+        # Guarantee we cleanup the script afterwards.
+        os.remove(script_name)
+
     sys.exit(code)

@@ -1,0 +1,37 @@
+#!/bin/bash
+# Wrapper script for CMake to allow adding toolchain files on-the-fly.
+
+# CMake has a few different forms of commands, but it's very simple
+# due to how CMake handles commands.
+#
+#   cmake --build .                     # Works, invokes build
+#   cmake --config Release --build .    # Fails, must use --build first.
+#
+# This makes it really simple, since we only need to know if the first
+# argument is `--build`, `--install`, etc.
+#
+# Configure commands have the following signature:
+#   cmake [<options>] <path-to-source>
+#   cmake [<options>] <path-to-existing-build>
+#   cmake [<options>] -S <path-to-source> -B <path-to-build>
+#
+# Non-configure commands have the following signature.
+#   cmake --build <dir> [<options>] [-- <build-tool-options>]
+#   cmake --install <dir> [<options>]
+#   cmake --open <dir>
+#   cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+#   cmake -E <command> [<options>]
+#   cmake --find-package [<options>]
+#   cmake --help[-<topic>]
+
+# Check to see if our first argument is a configure command.
+# If it is, add a default toolchain file.
+cmake='/usr/local/bin/cmake'
+case "$1" in
+  --build | --install | --open | -E | --find-package | --help)
+    "$cmake" "$@"
+    ;;
+  *)
+    "$cmake" -DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake "$@"
+    ;;
+esac
