@@ -3,23 +3,24 @@
 
 # Images with an OS layer.
 export OS_IMAGES=(
-    # GNU
+    "aarch64-unknown-linux-android"
     "alpha-unknown-linux-gnu"
     "alphaev4-unknown-linux-gnu"
     "alphaev5-unknown-linux-gnu"
     "alphaev6-unknown-linux-gnu"
     "alphaev7-unknown-linux-gnu"
-    # Fails in libc build pass 1:
-    #   glibc: configure: error: The arc is not supported
-    #"arc-unknown-linux-gnu"
     "arc-unknown-linux-uclibc"
     "arcbe-unknown-linux-uclibc"
-    "armel-unknown-linux-gnueabi"
-    "armeb-unknown-linux-gnueabi"
-    "armelhf-unknown-linux-gnueabi"
     "arm64-unknown-linux-gnu"
     "arm64eb-unknown-linux-gnu"
+    "armeb-unknown-linux-gnueabi"
+    "armel-unknown-linux-gnueabi"
+    "armelhf-unknown-linux-gnueabi"
+    "armv7a-unknown-linux-androideabi"
     "hppa-unknown-linux-gnu"
+    "i386-w64-mingw32"
+    "i686-multilib-linux-musl"
+    "i686-unknown-linux-android"
     "i686-unknown-linux-gnu"
     "m68k-unknown-linux-gnu"
     "microblaze-xilinx-linux-gnu"
@@ -29,20 +30,14 @@ export OS_IMAGES=(
     "mips64el-unknown-linux-gnu"
     "mips64r6-unknown-linux-gnu"
     "mips64r6el-unknown-linux-gnu"
+    "mipsel"
     "mipsel-unknown-linux-gnu"
     "mipsr6-unknown-linux-gnu"
-    "mipsr6el-unknown-linux-gnu"
-    # Fails during building binutils:
-    #   BFD does not support target moxie-unknown-linux-gnu.
-    #"moxie-unknown-linux-gnu"
-    #"moxieel-unknown-linux-gnu"
     "nios2-unknown-linux-gnu"
     "ppc-unknown-linux-gnu"
-    "ppcle-unknown-linux-gnu"
     "ppc64-unknown-linux-gnu"
-    "ppc64le-unknown-linux-gnu"
-    # Fails with custom build of stock GCC:
-    #   rv32i-based targets are not supported on stock GCC.
+    "ppc64le"
+    "ppcle-unknown-linux-gnu"
     "riscv32-multilib-linux-gnu"
     "riscv64-multilib-linux-gnu"
     "riscv64-unknown-linux-gnu"
@@ -50,160 +45,64 @@ export OS_IMAGES=(
     "s390x-unknown-linux-gnu"
     "sh3-unknown-linux-gnu"
     "sh3be-unknown-linux-gnu"
-    # Currently fails due to undefined reference to `__fpscr_values`.
-    #"sh3e-unknown-linux-gnu"
     "sh4-unknown-linux-gnu"
     "sh4be-unknown-linux-gnu"
-    # Fails in libc build pass 1:
-    #   glibc 2.23+ do not support only support SPARCv9, and
-    #   there's bugs with older glibc versions.
-    #"sparc-unknown-linux-gnu"
-    # Note: requires GCC-8, due to invalid register clobbing with source and dest.
     "sparc-unknown-linux-uclibc"
     "sparc64-unknown-linux-gnu"
+    "thumbeb-unknown-linux-gnueabi"
     "thumbel-unknown-linux-gnueabi"
     "thumbelhf-unknown-linux-gnueabi"
-    "thumbeb-unknown-linux-gnueabi"
-    "x86_64-unknown-linux-gnu"
-    # Fails in libc build pass 2:
-    #   little endian output does not match Xtensa configuration
-    #"xtensa-unknown-linux-uclibc"
-    # Note: Qemu currently fails, but seems to be a Qemu error, since
-    # the instructions seem to all be valid.
-    "xtensabe-unknown-linux-uclibc"
-
-    # MUSL
-    "i686-multilib-linux-musl"
     "x86_64-multilib-linux-musl"
-
-    # UCLIBC
-    # Fails with fatal error: pthread.h: No such file or directory
-    #"i686-unknown-linux-uclibc"
-    "x86_64-unknown-linux-uclibc"
-
-    # Android
-    "aarch64-unknown-linux-android"
-    "armv7a-unknown-linux-androideabi"
-    "i686-unknown-linux-android"
     "x86_64-unknown-linux-android"
-
-    # MinGW
-    "i386-w64-mingw32"
+    "x86_64-unknown-linux-gnu"
+    "x86_64-unknown-linux-uclibc"
     "x86_64-w64-mingw32"
-
-    # Wasm
-    "wasm"
+    "xtensabe-unknown-linux-uclibc"
 )
 
 # Bare-metal machines.
 # These don't use newlibs nanomalloc, so these do not support system allocators.
 export METAL_IMAGES=(
-    "avr"
-    # Alpha images fail with:
-    #   checking iconv.h usability... make[2]: *** [Makefile:7091: configure-ld] Error 1
-    #"alphaev4-unknown-elf"
-    #"alphaev5-unknown-elf"
-    #"alphaev6-unknown-elf"
-    #"alphaev7-unknown-elf"
     "arc-unknown-elf"
     "arcbe-unknown-elf"
     "arm-unknown-elf"
-    "armeb-unknown-elf"
     "arm64-unknown-elf"
     "arm64eb-unknown-elf"
+    "armeb-unknown-elf"
+    "avr"
     "i386-unknown-elf"
     "i486-unknown-elf"
     "i586-unknown-elf"
     "i686-unknown-elf"
     "m68k-unknown-elf"
-    # Fails during compiling due to:
-    #   bin/ld: cannot find -lxil
-    #   This is the xilinx standard library, but we compiled against
-    #   newlib.
-    #"microblaze-xilinx-elf"
-    #"microblazeel-xilinx-elf"
-    "moxiebox-none-moxie"
-    # Fails during building libc pass 2:
-    #   moxie-none-moxiebox-cc: error: this target is little-endian
-    #   Expected since moxiebox only supports LE.
-    #"moxieboxeb-none-moxie"
+    "mips-unknown-o32"
+    "mips64-unknown-n64"
+    "mips64el-unknown-n64"
+    "mipsel-unknown-o32"
     "moxie-none-elf"
+    "moxie-none-moxiebox"
     "moxieeb-none-elf"
-    "nios2-unknown-elf"
+    "nios2-none-elf"
+    "ppc-unknown-elf"
+    "ppcle-unknown-elf"
     "riscv32-unknown-elf"
     "riscv64-unknown-elf"
-    # Fails during building binutils:
-    #   checking for suffix of executables...
-    #   make[2]: *** [Makefile:7088: configure-ld] Error 1
-    #"s390-unknown-elf"
-    #"s390x-unknown-elf"
     "sh1-unknown-elf"
     "sh2-unknown-elf"
     "sh2e-unknown-elf"
     "sh3-unknown-elf"
     "sh3e-unknown-elf"
-    "sh4-unknown-elf"
     "sh4-100-unknown-elf"
     "sh4-200-unknown-elf"
     "sh4-300-unknown-elf"
     "sh4-340-unknown-elf"
     "sh4-500-unknown-elf"
+    "sh4-unknown-elf"
     "sh4a-unknown-elf"
-    # Fails during building libc pass 2:
-    #   "multiple definition of `_errno'".
-    #"shbe-unknown-elf"
     "sparc-unknown-elf"
-    # Fails during building newlib due to:
-    #   error: argument 'dirp' doesn't match prototype
-    #"sparc64-unknown-elf"
     "thumb-unknown-elf"
     "thumbeb-unknown-elf"
     "x86_64-unknown-elf"
-    # Fails during building libc pass 1:
-    #   Newlib does not support Xtensa.
-    #"xtensa-unknown-elf"
-    #"xtensabe-unknown-elf"
-
-    # ELF
-    "ppc-unknown-elf"
-    "ppcle-unknown-elf"
-    # GCC does not support PPC64 and PPC64LE with ELF:
-    #    Configuration powerpc64-unknown-elf not supported
-    #"ppc64-unknown-elf"
-    #"ppc64le-unknown-elf"
-
-    # EABI
-    # Fails during compiling due to:
-    #   undefined reference to `__init'
-    # Adding -msim or -mads does not fix it.
-    #"ppc-unknown-eabi"
-    #"ppcle-unknown-eabi"
-    # Binutils does not support PPC64 and PPC64LE with EABI:
-    #   BFD does not support target powerpc64-unknown-eabi.
-    #"ppc64-unknown-eabi"
-    #"ppc64le-unknown-eabi"
-
-    # SPE
-    # GCC does not support SPEELF:
-    #   Configuration powerpc-unknown-elfspe not supported
-    #"ppc-unknown-spe"
-    #"ppcle-unknown-spe"
-    #"ppc64-unknown-spe"
-    #"ppc64le-unknown-spe"
-
-    # O32
-    "mips-unknown-o32"
-    "mipsel-unknown-o32"
-
-    # N32
-    # Fails during configuring GCC pass 2 due to:
-    #    error: cannot compute suffix of object files: cannot compile
-    #"mips64-unknown-n32"
-    #"mips64el-unknown-n32"
-
-    # N64
-    "mips64-unknown-n64"
-    "mips64el-unknown-n64"
 )
 
 export IMAGES=(

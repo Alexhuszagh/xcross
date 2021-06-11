@@ -1,0 +1,4 @@
+# Install build packages
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    ^G++^ \
+    ^LIBC^

@@ -1,0 +1,14 @@
+#!/bin/bash
+# Get the list of all image names, bare metal and with OSes.
+
+# Images with an OS layer.
+export OS_IMAGES=(^OS_IMAGES^)
+
+# Bare-metal machines.
+# These don't use newlibs nanomalloc, so these do not support system allocators.
+export METAL_IMAGES=(^METAL_IMAGES^)
+
+export IMAGES=(
+    "${OS_IMAGES[@]}"
+    "${METAL_IMAGES[@]}"
+)

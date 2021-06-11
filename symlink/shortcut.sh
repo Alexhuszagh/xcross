@@ -1,7 +1,8 @@
 #!/bin/bash
 # Simple shortcuts to call executables.
 
-BIN=/usr/local/bin
+# Store in /opt/bin, so it can technically be removed from the path.
+BIN=/opt/bin
 
 # Can't guarantee all files are compiled binaries, might be
 # scripts that use positional arguments. Make it a script
@@ -267,6 +268,6 @@ shortcut_run() {
             args="$args -L $libpath"
         done
     fi
-    FLAGS="-cpu /CPU" ARGS="$args" shortcut "qemu-$ARCH-static" "$BIN/run"
+    FLAGS="-cpu /CPU" ARGS="$args" shortcut "$BIN/qemu-$ARCH-static" "$BIN/run"
     ARCH="$ARCH" HARDCODED="$HARDCODED" shortcut_run_cpu_list
 }

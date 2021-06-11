@@ -63,28 +63,3 @@ echo 'export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
 shortcut_gcc
 shortcut_util'
-
-# Create our dockerfile.
-dockerfile="$scriptdir/Dockerfile.$FILENAME"
-echo "FROM ahuszagh/cross:base
-
-# Build GCC
-COPY ct-ng/$TARGET.config /ct-ng/
-COPY gcc.sh /ct-ng/
-RUN ARCH=$TARGET /ct-ng/gcc.sh
-
-# Remove GCC build scripts and config.
-RUN rm -rf /ct-ng/
-
-# Add symlinks
-COPY symlink/shortcut.sh /
-COPY symlink/$FILENAME.sh /
-RUN /$FILENAME.sh
-RUN rm /shortcut.sh /$FILENAME.sh
-
-# Add toolchains
-COPY cmake/$FILENAME.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains/
-COPY cmake/static.cmake /toolchains/
-COPY env/shared /env/
-COPY env/static /env/" > "$dockerfile"

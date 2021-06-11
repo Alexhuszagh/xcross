@@ -4,8 +4,6 @@ FROM ahuszagh/cross:base
 COPY ct-ng/alphaev7-unknown-linux-gnu.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
 RUN ARCH=alphaev7-unknown-linux-gnu /ct-ng/gcc.sh
-
-# Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
 # Add Qemu binaries.
@@ -25,4 +23,3 @@ COPY cmake/shared.cmake /toolchains/
 COPY cmake/static.cmake /toolchains/
 COPY env/shared /env/
 COPY env/static /env/
-

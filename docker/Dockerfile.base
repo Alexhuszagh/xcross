@@ -4,13 +4,21 @@ FROM ubuntu:20.04
 
 RUN apt update
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    autoconf \
+    ca-certificates \
     cmake \
     git \
-    ca-certificates \
-    make
+    make \
+    ninja-build
 
-RUN mkdir -p /toolchains
 RUN mkdir -p /env
+RUN mkdir -p /opt/bin
+RUN mkdir -p /toolchains
+COPY docker/entrypoint.sh /opt/bin/
+COPY cmake/cmake /opt/bin/
 
-# Add non-root user to build libraries to and for x-cross.
+# Add non-root user to build libraries to and for xcross.
 RUN adduser --disabled-password --gecos "" crosstoolng
+
+# Ensure we source our environment files when entering the container.
+ENTRYPOINT ["/opt/bin/entrypoint.sh"]

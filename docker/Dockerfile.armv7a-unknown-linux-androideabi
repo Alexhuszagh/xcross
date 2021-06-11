@@ -13,7 +13,7 @@ RUN rm /shortcut.sh /armv7a-unknown-linux-androideabi.sh
 
 # Add toolchains
 COPY cmake/armv7a-unknown-linux-androideabi.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains
-COPY cmake/static.cmake /toolchains
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
 COPY env/shared /env/
 COPY env/static /env/

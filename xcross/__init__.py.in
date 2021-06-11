@@ -95,7 +95,6 @@ parser.add_argument(
     action='version',
     version=f'%(prog)s {__version__}'
 )
-args = parser.parse_args()
 script_name = f'__ahuszagh_xcross_script_cmd_{__version__}'
 
 def error(message, code=126, show_help=True):
@@ -105,6 +104,13 @@ def error(message, code=126, show_help=True):
     if show_help:
         parser.print_help()
     sys.exit(code)
+
+def get_current_dir():
+    return pathlib.PurePath(os.getcwd())
+
+def get_parent_dir(args):
+    directory = args.dir or get_current_dir().root
+    return pathlib.PurePath(os.path.realpath(directory))
 
 def validate_username(username):
     return re.match('^[A-Za-z0-9_-]*$', username)
@@ -129,8 +135,11 @@ def escape_single_quote(string):
     escaped = string.replace("'", "'\\''")
     return f"'{escaped}'"
 
-def normpath(command, parent_dir, current_dir):
+def normpath(args):
     '''Normalize our arguments for paths on Windows.'''
+
+    if os.name != 'nt':
+        return
 
     # We want to be very... lenient here.
     # Backslash characters are **generally** not valid
@@ -140,16 +149,17 @@ def normpath(command, parent_dir, current_dir):
     #   1. The path exists
     #   2. The path contains backslashes (IE, isn't a simple command).
     #   3. The path is relative to the parent dir shared to Docker.
-    if os.name == 'nt':
-        for index in range(len(command)):
-            value = command[index]
-            if '\\' in value and os.path.exists(value):
-                path = pathlib.PurePath(os.path.realpath(value))
-                if path.is_relative_to(parent_dir):
-                    relative = os.path.relpath(path, start=current_dir)
-                    command[index] = pathlib.PurePath(relative).as_posix()
+    parent_dir = get_parent_dir(args)
+    current_dir = get_current_dir()
+    for index in range(len(args.command)):
+        value = args.command[index]
+        if '\\' in value and os.path.exists(value):
+            path = pathlib.PureWindowsPath(os.path.realpath(value))
+            if path.is_relative_to(parent_dir):
+                relative = os.path.relpath(path, start=current_dir)
+                args.command[index] = pathlib.PurePath(relative).as_posix()
 
-def image_command(parent_dir, current_dir):
+def image_command(args):
     '''Create the image command from the argument list.'''
 
     if args.command is None:
@@ -166,17 +176,17 @@ def image_command(parent_dir, current_dir):
         error('Invalid control characters present: use a quoted string instead', show_help=False)
 
     # Normalize the paths inside, in case we have Windows-style paths.
-    normpath(args.command, parent_dir, current_dir)
+    normpath(args)
 
     # No need to escape any characters: we've ensured all values are simple.
     return ' '.join(args.command)
 
-def validate_arguments(current_dir):
+def validate_arguments(args):
     '''Validate the parsed arguments.'''
 
     # Normalize our arguments.
     args.target = args.target or os.environ.get('CROSS_TARGET')
-    args.dir = args.dir or current_dir.root
+    args.dir = args.dir or get_current_dir().root
     args.cpu = args.cpu or os.environ.get('CROSS_DIR')
     args.cpu = args.cpu or os.environ.get('CROSS_CPU')
     if args.username is None:
@@ -189,8 +199,6 @@ def validate_arguments(current_dir):
     args.docker = args.docker or 'docker'
 
     # Validate our arguments.
-    if args.command is None:
-        error('Must provide at least an argument for the command')
     if args.target is None or not validate_target(args.target):
         error('Must provide a valid target')
     if args.username is None or not validate_username(args.username):
@@ -198,10 +206,12 @@ def validate_arguments(current_dir):
     if args.repository is None or not validate_repository(args.repository):
         error('Must provide a valid Docker Hub repository')
 
-def docker_command(parent_dir, current_dir):
+def docker_command(args):
     '''Create the docker command to invoke.'''
 
     # Normalize our paths here.
+    parent_dir = get_parent_dir(args)
+    current_dir = get_current_dir()
     if not os.path.isdir(parent_dir):
         error('`dir` is not a directory')
     if not current_dir.is_relative_to(parent_dir):
@@ -242,13 +252,12 @@ def docker_command(parent_dir, current_dir):
 
     return command
 
-def main():
+def main(argv=None):
     '''Entry point'''
 
-    # Validate arguments and process paths.
-    current_dir = pathlib.PurePath(os.getcwd())
-    validate_arguments(current_dir)
-    parent_dir = pathlib.PurePath(os.path.realpath(args.dir))
+    # Parse and validate command-line options.
+    args = parser.parse_args(argv)
+    validate_arguments(args)
 
     # Try to write the command to a script,
     # Do not use `exists` or `isfile`, then open, since
@@ -256,7 +265,7 @@ def main():
     # and then written.
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     try:
-        command = image_command(parent_dir, current_dir)
+        command = image_command(args)
         fd = os.open(script_name, flags)
         with os.fdopen(fd, 'w') as file:
             file.write(command)
@@ -270,7 +279,7 @@ def main():
     # Create our docker command and call the script.
     try:
         code = subprocess.call(
-            docker_command(parent_dir, current_dir),
+            docker_command(args),
             shell=False,
             stdout=sys.stdout,
             stderr=sys.stderr

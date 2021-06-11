@@ -4,9 +4,7 @@ FROM ahuszagh/cross:base
 COPY ct-ng/avr.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
 RUN ARCH=avr /ct-ng/gcc.sh
-
-# Remove GCC build scripts and config.
-RUN rm -rf /ct-ng
+RUN rm -rf /ct-ng/
 
 # Add symlinks
 COPY symlink/shortcut.sh /

@@ -2,7 +2,7 @@ FROM ahuszagh/cross:base
 
 # Build GCC
 COPY docker/riscv-gcc.sh /
-RUN ARCH=riscv64-unknown-elf /riscv-gcc.sh
+RUN ARCH=riscv64-unknown-linux-gnu /riscv-gcc.sh
 RUN rm /riscv-gcc.sh
 
 # Add symlinks

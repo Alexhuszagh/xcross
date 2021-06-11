@@ -4,8 +4,6 @@ FROM ahuszagh/cross:base
 COPY ct-ng/sh4be-unknown-linux-gnu.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
 RUN ARCH=sh4be-unknown-linux-gnu /ct-ng/gcc.sh
-
-# Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
 # Add Qemu binaries.

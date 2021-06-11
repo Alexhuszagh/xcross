@@ -4,8 +4,6 @@ FROM ahuszagh/cross:base
 COPY ct-ng/arcbe-unknown-elf.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
 RUN ARCH=arcbe-unknown-elf /ct-ng/gcc.sh
-
-# Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
 # Add symlinks

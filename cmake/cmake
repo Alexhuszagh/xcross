@@ -26,12 +26,32 @@
 
 # Check to see if our first argument is a configure command.
 # If it is, add a default toolchain file.
-cmake='/usr/local/bin/cmake'
+cmake='/usr/bin/cmake'
 case "$1" in
-  --build | --install | --open | -E | --find-package | --help)
-    "$cmake" "$@"
-    ;;
-  *)
-    "$cmake" -DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake "$@"
-    ;;
+    --build | --install | --open | -E | --find-package | --help)
+        if [ "$VERBOSE" != "" ]; then
+            echo "$cmake" "$@"
+        fi
+        "$cmake" "$@"
+        ;;
+    *)
+        # Only add our toolchain file if it isn't provided
+        has_toolchain=no
+        for arg in "$@"; do
+            if [[ "$arg" = "-DCMAKE_TOOLCHAIN_FILE="* ]]; then
+                has_toolchain=yes
+                break
+            fi
+        done
+
+        toolchain=
+        if [ "$has_toolchain" = no ]; then
+            toolchain=-DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake
+        fi
+
+        if [ "$VERBOSE" != "" ]; then
+            echo "$cmake" "$toolchain" "$@"
+        fi
+        "$cmake" "$toolchain" "$@"
+        ;;
 esac

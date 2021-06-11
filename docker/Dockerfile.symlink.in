@@ -1,0 +1,5 @@
+# Add symlinks
+COPY symlink/shortcut.sh /
+COPY symlink/^TARGET^.sh /
+RUN /^TARGET^.sh
+RUN rm /shortcut.sh /^TARGET^.sh

@@ -4,8 +4,6 @@ FROM ahuszagh/cross:base
 COPY ct-ng/x86_64-w64-mingw32.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
 RUN ARCH=x86_64-w64-mingw32 /ct-ng/gcc.sh
-
-# Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
 
 # Add symlinks

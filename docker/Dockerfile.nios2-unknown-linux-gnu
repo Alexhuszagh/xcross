@@ -1,17 +1,15 @@
 FROM ahuszagh/cross:base
 
-# Add Qemu binaries.
-COPY docker/qemu-apt.sh /
-RUN ARCH=nios2 /qemu-apt.sh
-RUN rm /qemu-apt.sh
-
 # Build GCC
 COPY ct-ng/nios2-unknown-linux-gnu.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
 RUN ARCH=nios2-unknown-linux-gnu /ct-ng/gcc.sh
-
-# Remove GCC build scripts and config.
 RUN rm -rf /ct-ng/
+
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=nios2 /qemu-apt.sh
+RUN rm /qemu-apt.sh
 
 # Add symlinks
 COPY symlink/shortcut.sh /

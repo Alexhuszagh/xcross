@@ -1,0 +1,6 @@
+# Add toolchains
+COPY cmake/^TARGET^.cmake /toolchains/toolchain.cmake
+COPY cmake/shared.cmake /toolchains/
+COPY cmake/static.cmake /toolchains/
+COPY env/shared /env/
+COPY env/static /env/

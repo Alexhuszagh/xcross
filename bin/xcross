@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import xcross
+import sys
 
 if __name__ == '__main__':
     xcross.main()

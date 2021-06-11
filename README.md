@@ -487,9 +487,9 @@ To add your own toolchain, the general workflow is as follows:
 4. Patch the config file.
 5. Create a source environment file.
 6. Create a CMake toolchain file.
-7. Create a `Dockerfile`.
+7. Add the image to `setup.py`.
 
-After the toolchain is created, the source environment file, CMake toolchain file, and Dockerfile may be created via:
+After the toolchain is created, the source environment file and CMake toolchain file may be created via:
 
 ```bash
 BITNESS=32 OS=Linux TARGET=arm-unknown-linux-gnueabi docker/new-image.sh
@@ -564,34 +564,13 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 ```
 
-**Dockerfile**
+**setup.py**
 
-```dockerfile
-# Base image
-FROM ahuszagh/cross:base
-
-# Copy our config files and build GCC.
-# This is done in a single step, so the docker image is much more
-# compact, to avoid storing any layers with intermediate files.
-COPY ct-ng/arm-unknown-linux-gnueabi.config /ct-ng/
-COPY docker/gcc.sh /ct-ng/
-RUN ARCH=arm-unknown-linux-gnueabi /ct-ng/gcc.sh
-
-# Remove GCC build scripts and config.
-RUN rm -rf /ct-ng/
-
- Add symlinks
-COPY symlink/shortcut.sh /
-COPY symlink/arm-unknown-linux-gnueabi.sh /
-RUN /arm-unknown-linux-gnueabi.sh
-RUN rm /shortcut.sh /arm-unknown-linux-gnueabi.sh
-
-# Add toolchains
-COPY cmake/arm-unknown-linux-gnueabi.cmake /toolchains/toolchain.cmake
-COPY cmake/shared.cmake /toolchains/
-COPY cmake/static.cmake /toolchains/
-COPY env/shared /env/
-COPY env/static /env/
+```python
+with_qemu = True
+crosstool_images = [
+  ('arm-unknown-linux-gnueabi', with_qemu),
+]
 ```
 
 For a bare-metal example, see `docker/Dockerfile.ppcle-unknown-elf`. For a Linux example, see `docker/Dockerfile.ppcle-unknown-linux-gnu`. Be sure to add your new toolchain to `images.sh`, and run the test suite with the new toolchain image.

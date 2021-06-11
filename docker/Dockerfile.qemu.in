@@ -1,0 +1,4 @@
+# Add Qemu binaries.
+COPY docker/qemu-apt.sh /
+RUN ARCH=^ARCH^ /qemu-apt.sh
+RUN rm /qemu-apt.sh

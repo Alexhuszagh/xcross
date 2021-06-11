@@ -27,5 +27,7 @@ bins=($(ls /usr/bin/qemu-* | grep qemu))
 for bin in "${bins[@]}"; do
     if [ "$bin" != /usr/bin/qemu-"$ARCH"-static ]; then
         rm -f "$bin"
+    else
+        mv "$bin" /opt/bin
     fi
 done
