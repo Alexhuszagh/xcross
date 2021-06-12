@@ -157,7 +157,11 @@ def normpath(args):
             path = pathlib.PureWindowsPath(os.path.realpath(value))
             if path.is_relative_to(parent_dir):
                 relative = os.path.relpath(path, start=current_dir)
-                args.command[index] = pathlib.PurePath(relative).as_posix()
+                posix = pathlib.PurePath(relative).as_posix()
+                # Quote the path, to avoid valid paths with variable
+                # substitution from occurring. `${a}bc` is a valid path
+                # on Windows, believe it or not.
+                args.command[index] = escape_single_quote(posix)
 
 def image_command(args):
     '''Create the image command from the argument list.'''
@@ -165,6 +169,8 @@ def image_command(args):
     if args.command is None:
         return ''
     elif len(args.command) == 1:
+        # This could still be a path, but we allow any escape characters here.
+        normpath(args)
         return args.command[0]
 
     # Now need to validate our arguments: are any control characters

@@ -42,7 +42,8 @@ def test_normpath_windows():
         return
     run_normpath([], [])
     run_normpath(['cmake'], ['cmake'])
-    run_normpath(['cmake', '..\\..'], ['cmake', '../..'])
+    run_normpath(['cmake', '..\\..'], ['cmake', "'../..'"])
+    run_normpath(['..\\..\\cmake'], ["'../../cmake'"])
 
 def test_control_characters():
     run_image_command(['$(echo `whoami`)'], '$(echo `whoami`)')
