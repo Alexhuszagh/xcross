@@ -1,11 +1,19 @@
 # xcross
 
-Docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts for plug-and-play C/C++ cross-compiling, inspired by [rust-embedded/cross](https://github.com/rust-embedded/cross). xcross supports both bare-metal and OS-based compilation, with a wide variety of architectures and C-runtimes supported. Most images are <500MB, and <200MB compressed. xcross is ideal for:
+Compact docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts for plug-and-play C/C++ cross-compiling, inspired by [rust-embedded/cross](https://github.com/rust-embedded/cross). xcross supports both bare-metal and OS-based compilation, with a wide variety of architectures and C-runtimes supported. xcross is ideal for:
 
 - Testing cross-platform support in CI pipelines.
 - Building and deploying cross-compiled programs.
 
-Note that this project is similar to [dockercross](https://github.com/dockcross/dockcross), however, xcross supports many more CPU architectures than dockcross. If you need Docker images of common architectures, dockcross may have better support.
+Each Docker image comes pre-installed with:
+
+- C and C++ cross compiler and standard library
+- Autotools
+- Binutils
+- CMake
+- Ninja
+
+Note that this project is similar to [dockercross](https://github.com/dockcross/dockcross), however, xcross supports many more CPU architectures than dockcross. If you need Docker images of common architectures, dockcross should have better support.
 
 **Table of Contents**
 
@@ -13,6 +21,7 @@ Note that this project is similar to [dockercross](https://github.com/dockcross/
 - [Getting Started](#getting-started)
   - [Installing](#installing)
   - [xcross](#xcross)
+  - [Build Tools](#build-tools)
   - [run](#run)
   - [Docker](#docker)
 - [Travis CI Example](#travis-ci-example)
