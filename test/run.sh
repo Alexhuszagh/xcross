@@ -7,23 +7,35 @@ scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/../docker/images.sh"
 
 has_started=yes
-if [ "$1" != "" ]; then
+has_stopped=no
+if [ "$START" != "" ]; then
     has_started=no
-    start="$1"
 fi
 
 # Generic tests
 for image in "${OS_IMAGES[@]}"; do
-    if [ "$has_started" = yes ] || [ "$start" = "$image" ]; then
+    if [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
         "$scriptdir/docker-run.sh" helloworld "$image"
+    fi
+
+    if [ "$STOP" = "$image" ]; then
+        has_stopped=yes
+        break
     fi
 done
 
 for image in "${METAL_IMAGES[@]}"; do
-    if [ "$has_started" = yes ] || [ "$start" = "$image" ]; then
+    if [ "$has_stopped" = yes ]; then
+        break
+    elif [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
         FLAGS="-nostartfiles" "$scriptdir/docker-run.sh" add "$image"
+    fi
+
+    if [ "$STOP" = "$image" ]; then
+        has_stopped=yes
+        break
     fi
 done
 
