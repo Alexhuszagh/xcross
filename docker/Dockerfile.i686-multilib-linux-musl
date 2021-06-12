@@ -1,9 +1,9 @@
 FROM ahuszagh/cross:base
 
 # Build GCC
-COPY ct-ng/i686-multilib-linux-musl.config /ct-ng/
+COPY ct-ng/x86_64-multilib-linux-musl.config /ct-ng/
 COPY docker/gcc.sh /ct-ng/
-RUN ARCH=i686-multilib-linux-musl /ct-ng/gcc.sh
+RUN ARCH=x86_64-multilib-linux-musl /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/
 
 # Add Qemu binaries.

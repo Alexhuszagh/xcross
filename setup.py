@@ -203,7 +203,7 @@ crosstool_images = [
     image(True, ('i386-w64-mingw32', 'i386', False, 'x86_64-w64-mingw32')),
     image(False, ('i486-unknown-elf', 'i386', False)),
     image(False, ('i586-unknown-elf', 'i386', False)),
-    image(True, ('i686-multilib-linux-musl', 'i386', True)),
+    image(True, ('i686-multilib-linux-musl', 'i386', True, 'x86_64-multilib-linux-musl')),
     image(False, ('i686-unknown-elf', 'i386', False)),
     # Fails with fatal error: pthread.h: No such file or directory
     #image(True, ('i686-unknown-linux-uclibc', 'i386', True)),
