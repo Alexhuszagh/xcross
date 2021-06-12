@@ -12,6 +12,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import uuid
 
 version_info = collections.namedtuple('version_info', 'major minor patch build')
 
@@ -95,7 +96,7 @@ parser.add_argument(
     action='version',
     version=f'%(prog)s {__version__}'
 )
-script_name = f'__ahuszagh_xcross_script_cmd_{__version__}'
+base_script_name = '__ahuszagh_xcross_uuid_'
 
 def error(message, code=126, show_help=True):
     '''Print message, help, and exit on error.'''
@@ -249,7 +250,7 @@ def docker_command(args):
     command.append(image)
     chdir = f'cd /src/{escape_single_quote(relpath)}'
 
-    script = f"/bin/bash {escape_single_quote(script_name)}"
+    script = f"/bin/bash {escape_single_quote(args.script_name)}"
     if args.cpu:
         script = f"export CPU={escape_single_quote(args.cpu)}; {script}"
     nonroot = f'su crosstoolng -c "{script}"'
@@ -263,21 +264,24 @@ def main(argv=None):
 
     # Parse and validate command-line options.
     args = parser.parse_args(argv)
+    args.script_name = f'{base_script_name}{uuid.uuid4().hex}'
     validate_arguments(args)
 
     # Try to write the command to a script,
     # Do not use `exists` or `isfile`, then open, since
     # it could be written in between the time it was queried
-    # and then written.
-    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+    # and then written. We don't actually care enough to use
+    # mkstemp, and since we create the file only if it doesn't
+    # exist, in practice it's identical to mkstemp.
+    open_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     try:
         command = image_command(args)
-        fd = os.open(script_name, flags)
+        fd = os.open(args.script_name, open_flags)
         with os.fdopen(fd, 'w') as file:
             file.write(command)
     except OSError as err:
         if err.errno == errno.EEXIST:
-            error(f'file {script_name} already exists. if you believe this is an error, delete {script_name}', show_help=False)
+            error(f'file {args.script_name} already exists. if you believe this is an error, delete {args.script_name}', show_help=False)
         else:
             # Unexpected error.
             raise
@@ -292,6 +296,6 @@ def main(argv=None):
         )
     finally:
         # Guarantee we cleanup the script afterwards.
-        os.remove(script_name)
+        os.remove(args.script_name)
 
     sys.exit(code)

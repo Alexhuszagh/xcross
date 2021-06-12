@@ -23,8 +23,8 @@ def run_validate_arguments(argv):
 
 def run_normpath(argv, expected):
     args = xcross.parser.parse_args(argv)
-    xcross.normpath(args, testing=True)
-    assert args == xcross.parser.parse_args(expected)
+    xcross.normpath(args)
+    assert args.command == expected
 
 def run_image_command(argv, expected):
     args = xcross.parser.parse_args(argv)
@@ -43,7 +43,8 @@ def test_normpath_windows():
     run_normpath([], [])
     run_normpath(['cmake'], ['cmake'])
     run_normpath(['cmake', '..\\..'], ['cmake', "'../..'"])
-    run_normpath(['..\\..\\cmake'], ["'../../cmake'"])
+    run_normpath(['.\\xcross'], ["'xcross'"])
+    run_normpath(['.\\env\\shared'], ["'env/shared'"])
 
 def test_control_characters():
     run_image_command(['$(echo `whoami`)'], '$(echo `whoami`)')
