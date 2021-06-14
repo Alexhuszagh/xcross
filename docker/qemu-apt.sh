@@ -17,6 +17,7 @@ fi
 
 # Install qemu-user-static, and remove everything
 # besides our desired architecture.
+apt-get update
 DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     binfmt-support \
     qemu-user-static

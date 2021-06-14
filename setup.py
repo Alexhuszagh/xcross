@@ -235,7 +235,7 @@ crosstool_images = [
     #   moxie-none-moxiebox-cc: error: this target is little-endian
     #   Expected since moxiebox only supports LE.
     #image(False, ('moxieeb-none-moxiebox', 'moxieeb', False)),
-    image(False, ('nios2-none-elf', 'nios2', False)),
+    image(False, ('nios2-unknown-elf', 'nios2', False)),
     image(True, ('nios2-unknown-linux-gnu', 'nios2', True)),
     image(False, ('ppc-unknown-elf', 'ppc', False)),
     image(False, ('ppcle-unknown-elf', 'ppcle', False)),

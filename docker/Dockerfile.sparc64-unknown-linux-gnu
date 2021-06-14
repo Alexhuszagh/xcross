@@ -1,6 +1,8 @@
 FROM ahuszagh/cross:base
 
 # Install build packages
+
+RUN apt-get update
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
     g++-10-sparc64-linux-gnu \
     libc6-sparc64-cross

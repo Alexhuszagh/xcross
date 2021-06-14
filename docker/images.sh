@@ -82,7 +82,7 @@ export METAL_IMAGES=(
     "moxie-none-elf"
     "moxie-none-moxiebox"
     "moxieeb-none-elf"
-    "nios2-none-elf"
+    "nios2-unknown-elf"
     "ppc-unknown-elf"
     "ppcle-unknown-elf"
     "riscv32-unknown-elf"
