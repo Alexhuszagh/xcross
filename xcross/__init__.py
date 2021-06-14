@@ -18,10 +18,10 @@ version_info = collections.namedtuple('version_info', 'major minor patch build')
 
 __version_major__ = '0'
 __version_minor__ = '1'
-__version_patch__ = '1'
+__version_patch__ = '2'
 __version_build__ = ''
-__version_info__ = version_info(major='0', minor='1', patch='1', build='')
-__version__ = '0.1.1'
+__version_info__ = version_info(major='0', minor='1', patch='2', build='')
+__version__ = '0.1.2'
 
 # Create our arguments.
 parser = argparse.ArgumentParser(description='Cross-compile C/C++ with a single command.')
