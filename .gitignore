@@ -13,6 +13,7 @@ cmake/cmake
 cmake/toolchain/
 ct-ng/patch.sh
 docker/android.sh
+docker/cmake.sh
 docker/entrypoint.sh
 docker/gcc.sh
 docker/images/

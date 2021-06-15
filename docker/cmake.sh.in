@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# Upgrade CMake to the latest version.
+
+set -ex
+
+export DEBIAN_FRONTEND="noninteractive"
+
+# Install dependencies. We store the installed
+# dependencies so we don't accidentally delete
+# necessary files, and we get rid of everything
+# that was only required for the build.
+apt-get update
+before_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
+apt-get install --assume-yes --no-install-recommends \
+    apt-transport-https \
+    ca-certificates \
+    gnupg \
+    software-properties-common \
+    wget
+after_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
+
+# Calculate the packages we need to remove later.
+diff=()
+for i in "${after_installed[@]}"; do
+    skip=
+    for j in "${before_installed[@]}"; do
+        [[ $i == $j ]] && { skip=1; break; }
+    done
+    [[ -n $skip ]] || diff+=("$i")
+done
+declare -p diff
+
+# Add the signing key
+wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add -
+
+# Add the repository and update.
+apt-add-repository 'deb https://apt.kitware.com/ubuntu/ ^UBUNTU_NAME^ main'
+apt-get update
+
+# Upgrade CMake
+apt-get install --assume-yes --no-install-recommends \
+    cmake
+
+# Cleanup
+apt-get remove --purge --assume-yes "${diff[@]}"
+apt-get autoremove --assume-yes

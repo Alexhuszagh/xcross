@@ -78,6 +78,7 @@ py2exe_version = f'{major}.{minor}.{patch}'
 # This is the GCC and other utilities version from crosstool-NG.
 ubuntu_major, ubuntu_minor, _, _ = get_version('UBUNTU_VERSION')
 ubuntu_version = f'{ubuntu_major}.{ubuntu_minor}'
+ubuntu_name = version_data['UBUNTU_NAME']
 gcc_major, gcc_minor, gcc_patch, _ = get_version('GCC_VERSION')
 gcc_version = f'{gcc_major}.{gcc_minor}.{gcc_patch}'
 mingw_major, mingw_minor, mingw_patch, _ = get_version('MINGW_VERSION')
@@ -452,6 +453,7 @@ class ConfigureCommand(VersionCommand):
         '''Configure the build scripts.'''
 
         android = f'{HOME}/docker/android.sh'
+        cmake = f'{HOME}/docker/cmake.sh'
         entrypoint = f'{HOME}/docker/entrypoint.sh'
         gcc = f'{HOME}/docker/gcc.sh'
         qemu = f'{HOME}/docker/qemu.sh'
@@ -462,6 +464,9 @@ class ConfigureCommand(VersionCommand):
             ('NDK_DIRECTORY', android_ndk_directory),
             ('NDK_VERSION', android_ndk_version),
             ('CLANG_VERSION', android_clang_version),
+        ])
+        self.configure(f'{cmake}.in', cmake, True, [
+            ('UBUNTU_NAME', ubuntu_name),
         ])
         self.configure(f'{entrypoint}.in', entrypoint, True, [
             ('BIN', f'"{bin_directory}"'),

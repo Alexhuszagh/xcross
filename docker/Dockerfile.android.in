@@ -2,3 +2,8 @@
 COPY ["docker/android.sh", "/"]
 RUN ARCH=^ARCH^ /android.sh
 RUN rm /android.sh
+
+# Upgrade the CMake version.
+COPY ["docker/cmake.sh", "/"]
+RUN /cmake.sh
+RUN rm /cmake.sh

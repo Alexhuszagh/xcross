@@ -7,16 +7,4 @@ IF(NOT ANDROID_PLATFORM)
     SET(ANDROID_PLATFORM ^SDK_VERSION^)
 ENDIF()
 
-# Android's CMake is superfluously noisy, suppress those warnings.
-FUNCTION(message)
-    LIST(GET ARGV 0 MessageType)
-    IF(MessageType STREQUAL FATAL_ERROR OR
-        MessageType STREQUAL SEND_ERROR OR
-        MessageType STREQUAL AUTHOR_WARNING OR
-        MessageType STREQUAL NOTICE)
-        LIST(REMOVE_AT ARGV 0)
-        _message(${MessageType} "${ARGV}")
-    ENDIF()
-ENDFUNCTION()
-
 INCLUDE("^NDK_DIRECTORY^/build/cmake/android.toolchain.cmake")

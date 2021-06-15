@@ -24,6 +24,7 @@ VERSION_BUILD=
 UBUNTU_VERSION_MAJOR=20
 UBUNTU_VERSION_MINOR=04
 UBUNTU_VERSION_PATCH=
+UBUNTU_NAME=focal
 
 # GCC Version for **most** images.
 # We still track config files in ct-ng since some images
