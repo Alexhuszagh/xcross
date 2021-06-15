@@ -17,7 +17,7 @@
 # will lead to a version increment.
 VERSION_MAJOR=0
 VERSION_MINOR=1
-VERSION_PATCH=2
+VERSION_PATCH=3
 VERSION_BUILD=
 
 # Ubuntu version for Docker image base.
