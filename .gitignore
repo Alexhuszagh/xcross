@@ -23,6 +23,7 @@ docker/riscv-gcc.sh
 docker/version.sh
 symlink/shortcut.sh
 symlink/toolchain/
+xcross/__init__.py
 
 # Distribution / packaging
 .Python
