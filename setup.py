@@ -20,6 +20,7 @@
 import collections
 import enum
 import glob
+import itertools
 import re
 import os
 import setuptools
@@ -137,6 +138,11 @@ class CleanCommand(Command):
         sos = glob.glob(f'{HOME}/*.so')
         for file in dlls + exes + sos:
             os.remove(file)
+
+        # Need to remove the configured directories.
+        shutil.rmtree(f'{HOME}/cmake/toolchain', ignore_errors=True)
+        shutil.rmtree(f'{HOME}/docker/images', ignore_errors=True)
+        shutil.rmtree(f'{HOME}/symlink/toolchain', ignore_errors=True)
 
 
 class VersionCommand(Command):
@@ -435,11 +441,67 @@ debian_images = [
     debian_image(OperatingSystem.Linux, 'x86_64-unknown-linux-gnu', f'g++-{gcc_major}', 'libc6', 'x86_64'),
 ]
 riscv_images = [
+    # We also have some extensive flags for specific configurations of RISC-V.
+    # The naming follows as this:
+    #   riscv{BITS}-{ARCH}-{ABI}-{vendor}-{os}-{system}
+    #   * `BITS` - 32 or 64
+    #   * `ARCH` - A string of the format imafdc, in order.
+    #       The `I` extension is the base integer instructions.
+    #       The `M` extension is the base multiplication and division instructions.
+    #       The `A` extension is the base atomic instructions.
+    #       The `F` extension is for 32-bit float instructions.
+    #       The `D` extension is for 64-bit float instructions.
+    #       The `C` extension is for compressed instructions.
+    #       The `ima` component is mandatory.
+    #   * `ABI` - ilp32[d] or lp64[d]
+    #       The `D` extension specifies that 64-bit floats should be passed in registers.
+    #       The `F` extension (32-bit floats) is not supported,
+    #           nor is `Q` (128-bit floats)
+    #       The `E` extension (embedded) is only supported on bare-metal machines.
     riscv_image(OperatingSystem.Linux, 'riscv32-multilib-linux-gnu', 'riscv32', True, 'rv32imac', 'ilp32', 'riscv64-unknown-linux-gnu'),
+    riscv_image(OperatingSystem.Linux, 'riscv32-multilib-linux-gnu', 'riscv32', True, 'rv32imac', 'ilp32', 'riscv64-unknown-linux-gnu'),
+    # rv32i or rv64i plus standard extensions (a)tomics, (m)ultiplication and division, (f)loat, (d)ouble, or (g)eneral for MAFD
+    #   -march=rv64imacd
+    #   -mabi=ilp32 ilp32d ilp32e ilp32f lp64 lp64d lp64f
+    # rv32i-ilp32
     riscv_image(OperatingSystem.BareMetal, 'riscv32-unknown-elf', 'riscv32', False, 'rv32imac', 'ilp32', 'riscv64-unknown-elf'),
     riscv_image(OperatingSystem.Linux, 'riscv64-multilib-linux-gnu', 'riscv64', True, 'rv64imac', 'lp64', 'riscv64-unknown-linux-gnu'),
     riscv_image(OperatingSystem.BareMetal, 'riscv64-unknown-elf', 'riscv64', False, 'rv64imac', 'lp64', 'riscv64-unknown-elf'),
 ]
+
+# Add our RISC-V images with extensions.
+def create_riscv_image(system, bits, arch, abi, with_qemu):
+    '''Create a RISC-V image.'''
+
+    triple_prefix = f'riscv{bits}-{arch}-{abi}'
+    if system == OperatingSystem.Linux:
+        target = f'{triple_prefix}-multilib-linux-gnu'
+        riscv_prefix = 'riscv64-unknown-linux-gnu'
+    elif system == OperatingSystem.BareMetal:
+        target = f'{triple_prefix}-unknown-elf'
+        riscv_prefix = 'riscv64-unknown-elf'
+    march = f'rv{bits}{arch}'
+
+    return riscv_image(system, target, triple_prefix, with_qemu, march, abi, riscv_prefix)
+
+riscv_archs = 'fdc'
+for bits in ['32', '64']:
+    # Add Linux images.
+    system = OperatingSystem.Linux
+    abi = {'32': 'ilp32', '64': 'lp64'}[bits]
+    for count in range(len('fdc') + 1):
+        for arch in itertools.combinations(riscv_archs, count):
+            # (os, target, arch, with_qemu, march, mabi, prefix),
+            arch = f'ima{"".join(arch)}'
+            riscv_images.append(create_riscv_image(system, bits, arch, abi, True))
+            if 'd' in arch:
+                riscv_images.append(create_riscv_image(system, bits, arch, f'{abi}d', True))
+
+    # Bare-metal images don't support any other configurations.
+    # Just add the two we support.
+    system = OperatingSystem.BareMetal
+    riscv_images.append(create_riscv_image(system, bits, 'imac', abi, False))
+
 other_images = [
     other_image(OperatingSystem.Web, 'wasm'),
 ]
@@ -721,25 +783,26 @@ class ConfigureCommand(VersionCommand):
     def configure_riscv(self, image):
         '''Configure a RISC-V-based image.'''
 
+        # Get the proper dependent parameters for our image.
+        os = image.os.cmake_string()
+        if image.os == OperatingSystem.Linux:
+            template = f'{HOME}/docker/Dockerfile.riscv-linux.in'
+            cmake_template = f'{HOME}/cmake/riscv-linux.cmake.in'
+            symlink_template = f'{HOME}/symlink/riscv-linux.sh.in'
+        elif image.os == OperatingSystem.BareMetal:
+            template = f'{HOME}/docker/Dockerfile.riscv-elf.in'
+            cmake_template = f'{HOME}/cmake/riscv-elf.cmake.in'
+            symlink_template = f'{HOME}/symlink/riscv-elf.sh.in'
+        else:
+            raise NotImplementedError
+
         # Configure the dockerfile.
-        template = f'{HOME}/docker/Dockerfile.riscv.in'
         self.configure_dockerfile(image.target, template, image.with_qemu, [
             ('ARCH', image.arch),
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('TARGET', image.target),
         ])
-
-        # Get the proper dependent parameters for our image.
-        os = image.os.cmake_string()
-        if image.os == OperatingSystem.Linux:
-            cmake_template = f'{HOME}/cmake/riscv-linux.cmake.in'
-            symlink_template = f'{HOME}/symlink/riscv-linux.sh.in'
-        elif image.os == OperatingSystem.BareMetal:
-            cmake_template = f'{HOME}/cmake/riscv-elf.cmake.in'
-            symlink_template = f'{HOME}/symlink/riscv-elf.sh.in'
-        else:
-            raise NotImplementedError
 
         # Configure the CMake toolchain.
         cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
