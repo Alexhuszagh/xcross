@@ -1,0 +1,15 @@
+# Sources the base toolchain with the CC/CXX flags.
+
+export AR=ar
+export AS=as
+export CC=cc
+export CXX=c++
+export LD=ld
+export NM=nm
+export OBJCOPY=objcopy
+export OBJDUMP=objdump
+export RANLIB=ranlib
+export READELF=readelf
+export SIZE=size
+export STRINGS=strings
+export STRIP=strip

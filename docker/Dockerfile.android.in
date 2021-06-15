@@ -1,4 +1,4 @@
 # Build GCC
-COPY docker/android.sh /
+COPY ["docker/android.sh", "/"]
 RUN ARCH=^ARCH^ /android.sh
 RUN rm /android.sh

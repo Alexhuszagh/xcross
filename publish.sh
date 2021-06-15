@@ -13,8 +13,12 @@ cd "$scriptdir"
 # Test and exit if anything fails
 "$scriptdir/test/run.sh"
 
-# Publish
+# Publish, and allow test uploads for the Python source.
 "$scriptdir/docker/push.sh"
 git push
 git push --force --tags
-twine upload dist/*
+if [ "$TEST" != "" ]; then
+    twine upload --repository testpypi dist/*
+else
+    twine upload dist/*
+fi

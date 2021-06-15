@@ -20,12 +20,17 @@ fi
 for image in "${images[@]}"; do
     if [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
-        docker build -t "ahuszagh/cross:$image" "$scriptdir"/.. --file "$scriptdir/Dockerfile.$image"
-        docker tag "ahuszagh/cross:$image" "ahuszagh/cross:$image"-"$VERSION"
+        username="ahuszagh"
+        repository="cross"
+        image_name="$username/$repository:$image"
+        project_dir="$scriptdir"/..
+        dockerfile="$scriptdir/images/Dockerfile.$image"
+        docker build -t "$image_name" "$project_dir" --file "$dockerfile"
+        docker tag "$image_name" "$image_name"-"$VERSION"
         if [[ "$image" == *-unknown-linux-gnu ]]; then
             base="${image%-unknown-linux-gnu}"
-            docker tag "ahuszagh/cross:$image" "ahuszagh/cross:$base"
-            docker tag "ahuszagh/cross:$image" "ahuszagh/cross:$base"-"$VERSION"
+            docker tag "$image_name" "$username/$repository:$base"
+            docker tag "$image_name" "$username/$repository:$base"-"$VERSION"
         fi
     fi
 

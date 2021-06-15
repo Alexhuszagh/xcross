@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export PATH=^BIN^:"$PATH"
+source env/base
+exec "$@"

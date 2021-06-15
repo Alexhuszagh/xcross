@@ -1,5 +1,5 @@
 # Build GCC
-COPY ct-ng/^CONFIG^.config /ct-ng/
-COPY docker/gcc.sh /ct-ng/
+COPY ["ct-ng/^CONFIG^.config", "/ct-ng/"]
+COPY ["docker/gcc.sh", "/ct-ng/"]
 RUN ARCH=^CONFIG^ /ct-ng/gcc.sh
 RUN rm -rf /ct-ng/

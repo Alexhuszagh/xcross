@@ -1,4 +1,4 @@
 # Build GCC
-COPY docker/riscv-gcc.sh /
+COPY ["docker/riscv-gcc.sh", "/"]
 RUN ARCH=riscv64-unknown-linux-gnu /riscv-gcc.sh
 RUN rm /riscv-gcc.sh

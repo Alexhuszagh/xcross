@@ -9,6 +9,9 @@
 #   avr-libc        2.0.0
 #   uclibc-ng       1.0.31
 #   crosstool-ng    1.24.0
+#   qemu (Debian)   4.2.1
+#   qemu (Source)   6.0.0
+#   android NDK     r22b
 #
 # Incrementing a major version of any of these dependencies
 # will lead to a version increment.
@@ -16,3 +19,67 @@ VERSION_MAJOR=0
 VERSION_MINOR=1
 VERSION_PATCH=2
 VERSION_BUILD=
+
+# Ubuntu version for Docker image base.
+UBUNTU_VERSION_MAJOR=20
+UBUNTU_VERSION_MINOR=04
+UBUNTU_VERSION_PATCH=
+
+# GCC Version for **most** images.
+# We still track config files in ct-ng since some images
+# have to be specially maintained.
+GCC_VERSION_MAJOR=10
+GCC_VERSION_MINOR=2
+GCC_VERSION_PATCH=0
+
+# MinGW version for crosstool-NG builds.
+MINGW_VERSION_MAJOR=8
+MINGW_VERSION_MINOR=0
+MINGW_VERSION_PATCH=0
+
+# Glibc version for crosstool-NG builds.
+GLIBC_VERSION_MAJOR=2
+GLIBC_VERSION_MINOR=31
+GLIBC_VERSION_PATCH=
+
+# Musl libc version for crosstool-NG builds.
+MUSL_VERSION_MAJOR=1
+MUSL_VERSION_MINOR=2
+MUSL_VERSION_PATCH=2
+
+# AVR libc version for crosstool-NG builds.
+AVR_VERSION_MAJOR=2
+AVR_VERSION_MINOR=0
+AVR_VERSION_PATCH=0
+
+# uClibc-NG version for crosstool-NG builds.
+UCLIBC_VERSION_MAJOR=1
+UCLIBC_VERSION_MINOR=0
+UCLIBC_VERSION_PATCH=31
+
+# Expat version for crosstool-NG builds.
+EXPAT_VERSION_MAJOR=2
+EXPAT_VERSION_MINOR=4
+EXPAT_VERSION_PATCH=1
+
+# Get the crosstool-NG version we download.
+CROSSTOOL_VERSION_MAJOR=1
+CROSSTOOL_VERSION_MINOR=24
+CROSSTOOL_VERSION_PATCH=0
+
+# Qemu-from-source version.
+QEMU_VERSION_MAJOR=6
+QEMU_VERSION_MINOR=0
+QEMU_VERSION_PATCH=0
+
+# Android versions.
+ANDROID_NDK_VERSION=r22b
+ANDROID_SDK_VERSION=30
+ANDROID_CLANG_VERSION=11.0.5
+
+# RISCV-GNU-TOOLCHAIN version.
+RISCV_TOOLCHAIN_VERSION=2021.04.23
+RISCV_BINUTILS_VERSION=2.36.1
+RISCV_GDB_VERSION=10.1
+RISCV_GLIBC_VERSION=2.33
+RISCV_NEWLIB_VERSION=4.1.0

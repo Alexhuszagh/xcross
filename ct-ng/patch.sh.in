@@ -1,0 +1,47 @@
+#!/bin/bash
+# Patch a ct-ng config file.
+
+SRC="$1"
+DST="$2"
+if [ -z "$2" ]; then
+    DST="$SRC"
+fi
+
+# Read buffer
+buffer=`cat $SRC`
+# Set the proper GCC version.
+if [ "$DISABLE_GCC" = "" ]; then
+    buffer=$(echo "$buffer" | sed 's/^^GCC_V_OLD^$/^GCC_V_NEW^/')
+    buffer=$(echo "$buffer" | sed 's/^CT_GCC_VERSION="^GCC_OLD^"$/CT_GCC_VERSION="^GCC_NEW^"/')
+fi
+# Set the proper language support (C and C++ only).
+if [ "$DISABLE_LANG_SUPPORT" = "" ]; then
+    buffer=$(echo "$buffer" | sed 's/^# CT_CC_LANG_CXX is not set$/CT_CC_LANG_CXX=y/')
+    buffer=$(echo "$buffer" | sed 's/^CT_CC_LANG_FORTRAN=y$/# CT_CC_LANG_FORTRAN is not set/')
+    buffer=$(echo "$buffer" | sed 's/^CT_CC_LANG_ADA=y$/# CT_CC_LANG_ADA is not set/')
+    buffer=$(echo "$buffer" | sed 's/^CT_CC_LANG_OBJC=y$/# CT_CC_LANG_OBJC is not set/')
+    buffer=$(echo "$buffer" | sed 's/^CT_CC_LANG_OBJCXX=y$/# CT_CC_LANG_OBJCXX is not set/')
+    buffer=$(echo "$buffer" | sed 's/^CT_CC_LANG_GOLANG=y$/# CT_CC_LANG_GOLANG is not set/')
+fi
+# Fix the MinGW version.
+if [ "$DISABLE_MINGW" = "" ]; then
+    buffer=$(echo "$buffer" | sed 's/^^MINGW_V_OLD^$/^MINGW_V_NEW^/')
+    buffer=$(echo "$buffer" | sed 's/^CT_MINGW_W64_VERSION="v^MINGW_OLD^"$/CT_MINGW_W64_VERSION="v^MINGW_NEW^"/')
+fi
+# Fix glibc6 version.
+if [ "$DISABLE_GLIBC" = "" ]; then
+    buffer=$(echo "$buffer" | sed 's/^^GLIBC_V_OLD^$/^GLIBC_V_NEW^/')
+    buffer=$(echo "$buffer" | sed 's/^CT_GLIBC_VERSION="^GLIBC_OLD^"$/CT_GLIBC_VERSION="^GLIBC_NEW^"/')
+fi
+# Fix musl version, fixes security issues.
+if [ "$DISABLE_MUSL" = "" ]; then
+    buffer=$(echo "$buffer" | sed 's/^^MUSL_V_OLD^$/^MUSL_V_NEW^/')
+    buffer=$(echo "$buffer" | sed 's/^CT_MUSL_VERSION="^MUSL_OLD^"$/CT_MUSL_VERSION="^MUSL_NEW^"/')
+fi
+# Fix the expat version.
+# Update to 2.4.1, fixes security issues.
+buffer=$(echo "$buffer" | sed 's/^^EXPAT_V_OLD^$/^EXPAT_V_NEW^/')
+buffer=$(echo "$buffer" | sed 's/^CT_EXPAT_VERSION="^EXPAT_OLD^"$/CT_EXPAT_VERSION="^EXPAT_NEW^"/')
+
+# Write to file.
+echo "$buffer" > "$DST"

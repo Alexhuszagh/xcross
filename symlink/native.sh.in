@@ -1,0 +1,11 @@
+#!/bin/bash
+
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+source "$scriptdir/shortcut.sh"
+
+export PREFIX=
+export VER=^GCC_MAJOR^
+export ARCH=^ARCH^
+
+shortcut_gcc
+shortcut_run
