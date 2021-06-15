@@ -403,7 +403,8 @@ For a list of pre-built images, see [DockerHub](https://hub.docker.com/r/ahuszag
 
 ```bash
 # On a POSIX shell.
-docker rmi $(docker images | grep 'ahuszagh/cross')
+images=$(docker images | grep 'ahuszagh/cross' | tr -s ' ' | cut -d ' ' -f 3)
+docker rmi $images
 ```
 
 **Image Types**
