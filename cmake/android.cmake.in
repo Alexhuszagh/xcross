@@ -1,8 +1,20 @@
+# A minimum wrapper that then called the supported android
+# toolchain from the Android NDK.
 CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
-SET(CMAKE_SYSTEM_NAME ^OS^)
-SET(CMAKE_SYSTEM_PROCESSOR ^PROCESSOR^)
+SET(ANDROID_TOOLCHAIN clang)
+SET(ANDROID_ABI ^ARCH_ABI^)
+SET(ANDROID_PLATFORM ^SDK_VERSION^)
 
-SET(CMAKE_FIND_ROOT_PATH "/usr/local/toolchains/llvm/prebuilt/linux-x86_64/")
-SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+# Android's CMake is superfluously noisy, suppress those warnings.
+FUNCTION(message)
+    LIST(GET ARGV 0 MessageType)
+    IF(MessageType STREQUAL FATAL_ERROR OR
+        MessageType STREQUAL SEND_ERROR OR
+        MessageType STREQUAL AUTHOR_WARNING OR
+        MessageType STREQUAL NOTICE)
+        LIST(REMOVE_AT ARGV 0)
+        _message(${MessageType} "${ARGV}")
+    ENDIF()
+ENDFUNCTION()
+
+INCLUDE("^NDK_DIRECTORY^/build/cmake/android.toolchain.cmake")

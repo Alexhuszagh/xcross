@@ -134,7 +134,7 @@ shortcut_compiler() {
         ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cxx"-"$VER" "${cxx_alias[@]}"
     fi
 
-    # Need to add shortcut for Makefiles and CMake into /usr/local/bin
+    # Need to add shortcut for Makefiles and CMake into "$BIN"
     if command -v "$BIN/cc" &> /dev/null; then
         ln -s "$BIN/cc"
     fi

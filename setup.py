@@ -236,9 +236,11 @@ class OperatingSystem(enum.Enum):
 sysroot = '/opt'
 build_jobs = '5'
 bin_directory = f'{sysroot}/bin/'
+android_ndk_directory = '/usr/local/ndk'
+
 # Template:
-#   (os, target, arch, prefix=arch),
-android_image = collections.namedtuple('android_image', 'os target arch prefix')
+#   (os, target, arch, prefix=arch, arch_abi=arch),
+android_image = collections.namedtuple('android_image', 'os target arch prefix arch_abi')
 # Template:
 #   (os, target, arch, with_qemu, config=target, prefix=target, processor=None, flags=None),
 crosstool_image = collections.namedtuple('crosstool_image', 'os target arch with_qemu config prefix processor flags')
@@ -253,10 +255,10 @@ riscv_image = collections.namedtuple('riscv_image', 'os target arch with_qemu ma
 other_image = collections.namedtuple('other_image', 'os target')
 
 android_images = [
-    android_image(OperatingSystem.Android, 'aarch64-unknown-linux-android', 'aarch64-linux-android', None),
-    android_image(OperatingSystem.Android, 'armv7a-unknown-linux-androideabi', 'armv7a-linux-androideabi', 'arm-linux-androideabi'),
-    android_image(OperatingSystem.Android, 'i686-unknown-linux-android', 'i686-linux-android', None),
-    android_image(OperatingSystem.Android, 'x86_64-unknown-linux-android', 'x86_64-linux-android', None),
+    android_image(OperatingSystem.Android, 'aarch64-unknown-linux-android', 'aarch64-linux-android', None, 'arm64-v8a'),
+    android_image(OperatingSystem.Android, 'armv7a-unknown-linux-androideabi', 'armv7a-linux-androideabi', 'arm-linux-androideabi', 'armeabi-v7a'),
+    android_image(OperatingSystem.Android, 'i686-unknown-linux-android', 'i686-linux-android', None, 'x86'),
+    android_image(OperatingSystem.Android, 'x86_64-unknown-linux-android', 'x86_64-linux-android', None, 'x86_64'),
 ]
 crosstool_images = [
     crosstool_image(OperatingSystem.Linux, 'alphaev4-unknown-linux-gnu', 'alpha', True, None, None, None, None),
@@ -457,6 +459,7 @@ class ConfigureCommand(VersionCommand):
         riscv_gcc = f'{HOME}/docker/riscv-gcc.sh'
         shortcut = f'{HOME}/symlink/shortcut.sh'
         self.configure(f'{android}.in', android, True, [
+            ('NDK_DIRECTORY', android_ndk_directory),
             ('NDK_VERSION', android_ndk_version),
             ('CLANG_VERSION', android_clang_version),
         ])
@@ -610,8 +613,9 @@ class ConfigureCommand(VersionCommand):
         cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
         os = image.os.cmake_string()
         self.configure(cmake_template, cmake, False, [
-            ('PROCESSOR', processor),
-            ('OS', os),
+            ('ARCH_ABI', image.arch_abi or image.arch),
+            ('NDK_DIRECTORY', android_ndk_directory),
+            ('SDK_VERSION', android_sdk_version),
         ])
 
         # Configure the symlinks.
@@ -619,8 +623,9 @@ class ConfigureCommand(VersionCommand):
         symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
         self.configure(symlink_template, symlink, True, [
             ('ARCH', image.arch),
-            ('ANDROID_SDK_VERSION', android_sdk_version),
+            ('NDK_DIRECTORY', android_ndk_directory),
             ('PREFIX', image.prefix or image.arch),
+            ('SDK_VERSION', android_sdk_version),
         ])
 
     def configure_crosstool(self, image):

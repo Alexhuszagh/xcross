@@ -1,0 +1,17 @@
+# Simple script to remove values from an array
+
+replace() {
+    # Replace every instance of an array.
+    local variable="$1"
+    local delete=("${@:2}")
+    local array=(${!variable})
+    for target in "${delete[@]}"; do
+        for i in "${!array[@]}"; do
+            if [[ ${array[i]} = $target ]]; then
+                unset 'array[i]'
+            fi
+        done
+    done
+
+    echo "${array[*]}"
+}

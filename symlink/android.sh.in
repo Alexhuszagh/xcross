@@ -4,7 +4,7 @@ scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/shortcut.sh"
 
 export PREFIX=^PREFIX^
-export DIR="/usr/local/toolchains/llvm/prebuilt/linux-x86_64"
+export DIR="^NDK_DIRECTORY^/toolchains/llvm/prebuilt/linux-x86_64"
 
-PREFIX=^ARCH^^ANDROID_SDK_VERSION^ shortcut_clang
+PREFIX=^ARCH^^SDK_VERSION^ shortcut_clang
 shortcut_util

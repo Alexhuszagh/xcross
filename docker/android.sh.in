@@ -42,11 +42,14 @@ version=^NDK_VERSION^
 wget https://dl.google.com/android/repository/android-ndk-"$version"-linux-x86_64.zip
 unzip android-ndk-"$version"-linux-x86_64.zip
 rm android-ndk-"$version"-linux-x86_64.zip
-mkdir -p /usr/local/toolchains
-cp -r android-ndk-"$version"/toolchains/llvm /usr/local/toolchains
+mkdir -p "^NDK_DIRECTORY^/build/cmake"
+mkdir -p "^NDK_DIRECTORY^/toolchains"
+cp -r android-ndk-"$version"/source.properties "^NDK_DIRECTORY^"
+cp -r android-ndk-"$version"/build/cmake "^NDK_DIRECTORY^/build"
+cp -r android-ndk-"$version"/toolchains/llvm "^NDK_DIRECTORY^/toolchains"
 
 # Need to remove other installed targets.
-prefix=/usr/local/toolchains/llvm/prebuilt/linux-x86_64
+prefix="^NDK_DIRECTORY^/toolchains/llvm/prebuilt/linux-x86_64"
 all_targets=(
     "aarch64-linux-android"
     "armv7a-linux-androideabi"

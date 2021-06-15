@@ -2,12 +2,11 @@
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/base"
+source "$scriptdir/replace"
 
 # Compiler toolchain with shared linking.
-c_flags="${CFLAGS//-fPIC}"
-cxx_flags="${CXXFLAGS//-fPIC}"
-ld_flags="${LDFLAGS//-static}"
-ld_flags="${ld_flags//-shared}"
-export CFLAGS="$c_flags -fPIC"
-export CXXFLAGS="$cxx_flags -fPIC"
-export LDFLAGS="$ld_flags"
+CFLAGS="$(replace CFLAGS -fPIC) -fPIC"
+CXXFLAGS="$(replace CXXFLAGS -fPIC) -fPIC"
+LDFLAGS="$(replace LDFLAGS -static)"
+
+unset replace
