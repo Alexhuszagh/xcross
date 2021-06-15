@@ -494,91 +494,37 @@ To add your own toolchain, the general workflow is as follows:
 2. Configure your toolchain.
 3. Move the config file to `ct-ng`.
 4. Patch the config file.
-5. Create a source environment file.
-6. Create a CMake toolchain file.
-7. Add the image to `setup.py`.
+5. Add the image to `setup.py`.
 
-After the toolchain is created, the source environment file and CMake toolchain file may be created via:
-
-```bash
-BITNESS=32 OS=Linux TARGET=arm-unknown-linux-gnueabi docker/new-image.sh
-```
-
-**Configure Toolchain**
-
-```bash
-ct-ng list-samples
-image=arm-unknown-linux-gnueabi
-ct-ng "$image"
-ct-ng menuconfig
-mv .config ct-ng/"$image".config
-ct-ng/patch.sh ct-ng/"$image".config
-touch Dockerfile."$image"
-```
-
-**Source Environment File - Linux**
-
-```bash
-#!/bin/bash
-
-scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/shortcut.sh"
-
-export PREFIX=arm-unknown-linux-gnueabi
-export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
-
-shortcut_gcc
-shortcut_util
-```
-
-**Source Environment File - Bare Metal**
-
-```bash
-#!/bin/bash
-
-scriptdir=`realpath $(dirname "$BASH_SOURCE")`
-source "$scriptdir/shortcut.sh"
-
-export PREFIX=arm-unknown-eabi
-export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
-
-shortcut_gcc
-shortcut_util
-```
-
-**CMake Toolchain File - Linux**
-
-```cmake
-set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR arm)
-
-set(CMAKE_FIND_ROOT_PATH "home/crosstoolng/x-tools/arm-unknown-linux-gnueabi/")
-SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-```
-
-**CMake Toolchain File - Bare Metal**
-
-```cmake
-# Need to override the system name to allow CMake to configure,
-# otherwise, we get errors on bare-metal systems.
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR arm)
-cmake_policy(SET CMP0065 NEW)
-
-set(CMAKE_FIND_ROOT_PATH "/home/crosstoolng/x-tools/arm-unknown-eabi/")
-SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-```
+After the toolchain is created, all the CMake toolchain files, symlinks, and Dockerfiles may be created with:
 
 **setup.py**
 
 ```python
-with_qemu = True
 crosstool_images = [
-  ('arm-unknown-linux-gnueabi', with_qemu),
+    crosstool_image(
+        # The target.
+        os=OperatingSystem.Linux, 
+        # The triplet for the target.
+        target='alphaev4-unknown-linux-gnu', 
+        # The architecture name for Qemu.
+        arch='alpha', 
+        # Use qemu for an emulated runner.
+        with_qemu=True, 
+        # The name of the crosstool-NG configuration file to use.
+        #   Defaults to `target` if not provided.
+        config=None, 
+        # The prefix of the created binaries.
+        #   Defaults to `config`, then `target`, if not provided.
+        prefix=None, 
+        # The name of the processor for the CMake toolchain file.
+        #   Defaults to `prefix.split('-')[0]` if not provided.
+        processor=None, 
+        # Additional flags to use when compiling.
+        #   Defaults to an empty set of flags.
+        flags=None
+    ),
+    ...
 ]
 ```
 
