@@ -672,6 +672,7 @@ class ConfigureCommand(VersionCommand):
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('TARGET', image.target),
+            ('TRIPLE_ARCH', image.arch_abi or image.arch),
         ])
 
         # Configure the CMake toolchain.
@@ -706,6 +707,7 @@ class ConfigureCommand(VersionCommand):
             ('CONFIG', image.config or image.target),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('TARGET', image.target),
+            ('TRIPLE_ARCH', image.arch),
         ])
 
         # Get the proper dependent parameters for our image.
@@ -751,6 +753,7 @@ class ConfigureCommand(VersionCommand):
             ('G++', image.cxx),
             ('LIBC', image.libc),
             ('TARGET', image.target),
+            ('TRIPLE_ARCH', image.arch),
         ])
 
         # Get the proper dependent parameters for our image.
@@ -802,6 +805,7 @@ class ConfigureCommand(VersionCommand):
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('TARGET', image.target),
+            ('TRIPLE_ARCH', image.arch),
         ])
 
         # Configure the CMake toolchain.
@@ -819,6 +823,15 @@ class ConfigureCommand(VersionCommand):
             ('MARCH', image.march),
             ('PREFIX', image.prefix),
         ])
+
+    def configure_other(self, image):
+        '''Configure a miscellaneous image.'''
+
+        template = f'{HOME}/docker/Dockerfile.{image.target}.in'
+        dockerfile = f'{HOME}/docker/images/Dockerfile.{image.target}'
+        with open(template) as file:
+            contents = file.read()
+        self.write_file(dockerfile, contents, False)
 
     def run(self):
         '''Modify configuration files.'''
@@ -869,9 +882,11 @@ class ConfigureCommand(VersionCommand):
             self.configure_debian(image)
         for image in riscv_images:
             self.configure_riscv(image)
+        for image in other_images:
+            self.configure_other(image)
 
         # Need to write the total image list.
-        images = android_images + crosstool_images + debian_images + riscv_images
+        images = android_images + crosstool_images + debian_images + riscv_images + other_images
         os_images = sorted([i.target for i in images if not i.os.is_baremetal()])
         metal_images = sorted([i.target for i in images if i.os.is_baremetal()])
         start = "\n    \""
