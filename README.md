@@ -571,6 +571,7 @@ We therefore support:
 - s390 (Linux)  
 - s390x (Linux) 
 - SH1-4 (Linux, Bare-Metal)
+- Sparc (Linux)
 - Sparc64 (Linux)
 - x86_64 (Linux, MinGW, Android, Bare-Metal)
 - xtensa (Linux)

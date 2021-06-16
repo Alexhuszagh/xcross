@@ -32,13 +32,6 @@ parser = argparse.ArgumentParser(description='Cross-compile C/C++ with a single 
 #   3). Provide arguments standard on the command-line, as a list of args.
 #       If any special characters are present, it errors out.
 parser.add_argument(
-    dest='command',
-    nargs='*',
-    help='''Build command to pass to the image.
-This may be provided as a list of arguments, however, this will not work if any
-bash control characters are present in the argument list.''',
-)
-parser.add_argument(
     '--target',
     help='''The target triple for the cross-compiled architecture.
 This may also be supplied via the environment variable `CROSS_TARGET`.
@@ -120,7 +113,7 @@ def validate_repository(repository):
     return re.match('^[A-Za-z0-9_-]+$', repository)
 
 def validate_target(target):
-    return re.match('^[A-Za-z0-9_-]+$', target)
+    return re.match('^[A-Za-z0-9._-]+$', target)
 
 def escape_single_quote(string):
     '''Escape a single quote in a string to be quoted.'''
@@ -263,7 +256,8 @@ def main(argv=None):
     '''Entry point'''
 
     # Parse and validate command-line options.
-    args = parser.parse_args(argv)
+    args, unknown = parser.parse_known_args(argv)
+    args.command = unknown
     args.script_name = f'{base_script_name}{uuid.uuid4().hex}'
     validate_arguments(args)
 
