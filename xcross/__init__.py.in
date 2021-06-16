@@ -252,13 +252,20 @@ def docker_command(args):
 
     return command
 
+
+def process_args(argv=None):
+    '''Parse arguments to the script.'''
+
+    args, unknown = parser.parse_known_args(argv)
+    args.command = unknown
+    args.script_name = f'{base_script_name}{uuid.uuid4().hex}'
+    return args
+
 def main(argv=None):
     '''Entry point'''
 
     # Parse and validate command-line options.
-    args, unknown = parser.parse_known_args(argv)
-    args.command = unknown
-    args.script_name = f'{base_script_name}{uuid.uuid4().hex}'
+    args = process_args(argv)
     validate_arguments(args)
 
     # Try to write the command to a script,

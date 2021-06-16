@@ -14,7 +14,7 @@ import xcross
 os.environ['CROSS_TARGET'] = 'alpha-unknown-linux-gnu'
 
 def run_validate_arguments(argv):
-    args = xcross.parser.parse_args(argv)
+    args = xcross.process_args(argv)
     try:
         xcross.validate_arguments(args)
         return True
@@ -22,12 +22,12 @@ def run_validate_arguments(argv):
         return False
 
 def run_normpath(argv, expected):
-    args = xcross.parser.parse_args(argv)
+    args = xcross.process_args(argv)
     xcross.normpath(args)
     assert args.command == expected
 
 def run_image_command(argv, expected):
-    args = xcross.parser.parse_args(argv)
+    args = xcross.process_args(argv)
     actual = xcross.image_command(args)
     assert actual == expected
 
@@ -36,6 +36,10 @@ def test_simple_image_command():
     run_image_command(['make'], 'make')
     run_image_command(['cmake ..'], 'cmake ..')
     run_image_command(['cmake', '..'], 'cmake ..')
+
+def test_hyphen_command():
+    run_image_command(['make', '-j', '5'], 'make -j 5')
+    run_image_command(['cmake', '..', '-DBUILD_SHARED_LIBS=OFF'], 'cmake .. -DBUILD_SHARED_LIBS=OFF')
 
 def test_normpath_windows():
     if os.name != 'nt':
