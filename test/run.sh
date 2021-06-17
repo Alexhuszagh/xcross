@@ -30,7 +30,7 @@ for image in "${METAL_IMAGES[@]}"; do
         break
     elif [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
-        FLAGS="-nostartfiles" "$scriptdir/docker-run.sh" add "$image"
+        FLAGS="-nostartfiles" "$scriptdir/docker-run.sh" atoi "$image"
     fi
 
     if [ "$STOP" = "$image" ]; then
