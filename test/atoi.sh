@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Run the cpp-atof test, for bare-metal toolchains.
+# Run the cpp-atoi test, for bare-metal toolchains.
 # Slightly more complicated, since we test a simple
-# C/C++ standard library linking against `atof`, which
-# requires a C-runtime and an allocator.
+# C/C++ standard library linking against `atoi`
+# which requires a C-runtime but no allocator.
 
 set -e
 
