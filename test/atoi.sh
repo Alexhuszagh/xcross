@@ -7,8 +7,8 @@
 
 set -e
 
-git clone https://github.com/Alexhuszagh/cpp-atof.git
-cd cpp-atof
+git clone https://github.com/Alexhuszagh/cpp-atoi.git
+cd cpp-atoi
 
 # Test CMake.
 mkdir build && cd build
@@ -23,4 +23,4 @@ source /env/static
 CXXFLAGS="$CXXFLAGS $FLAGS" make
 
 # Test symbolic links
-c++ atof.cc -static $FLAGS
+c++ atoi.cc -static $FLAGS
