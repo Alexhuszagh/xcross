@@ -5,8 +5,8 @@ source "$scriptdir/base"
 source "$scriptdir/replace"
 
 # Compiler toolchain with static linking.
-CFLAGS="$(replace CFLAGS -fPIC)"
-CXXFLAGS="$(replace CXXFLAGS -fPIC)"
-LDFLAGS="$(replace LDFLAGS -static) -static"
+export CFLAGS="$(replace CFLAGS -fPIC)"
+export CXXFLAGS="$(replace CXXFLAGS -fPIC)"
+export LDFLAGS="$(replace LDFLAGS -static) -static"
 
 unset replace
