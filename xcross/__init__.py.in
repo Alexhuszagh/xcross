@@ -383,7 +383,7 @@ def main(argv=None):
     try:
         command = image_command(args, relpath)
         fd = os.open(args.script_name, open_flags)
-        with os.fdopen(fd, 'w') as file:
+        with os.fdopen(fd, 'w', newline='\n') as file:
             file.write(command)
     except OSError as err:
         if err.errno == errno.EEXIST:
