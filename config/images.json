@@ -217,23 +217,29 @@
     //    "type": "crosstool",
     //    "target": "microblazeel-xilinx-elf"
     //},
+    // NOTE:
+    //      For some reason, libc isn't automatically linked in.
+    //      It works just fine when it's manually provided.
     {
         "type": "crosstool",
         "target": "mips-unknown-o32",
-        "triple": "mips-unknown-elf"
+        "triple": "mips-unknown-elf",
+        "flags": "-lc"
     },
-    {
-        "type": "crosstool",
-        "target": "mips64-unknown-n64",
-        "triple": "mips64-unknown-elf",
-        "flags": "-mabi=32"
-    },
-    {
-        "type": "crosstool",
-        "target": "mips64el-unknown-n64",
-        "triple": "mips64el-unknown-elf",
-        "flags": "-mabi=32"
-    },
+    // FAILS DURING LINKING DUE TO:
+    //      ABI is incompatible with that of the selected emulation
+    //      This is because binutils is built for 32-bit MIPS, while
+    //      the C-runtime itself is 64-bit.
+    //{
+    //    "type": "crosstool",
+    //    "target": "mips64-unknown-n64",
+    //    "triple": "mips64-unknown-elf"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "mips64el-unknown-n64",
+    //    "triple": "mips64el-unknown-elf"
+    //},
     {
         "type": "crosstool",
         "target": "mipsel-unknown-o32",
