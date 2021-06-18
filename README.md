@@ -401,7 +401,8 @@ To build all Docker images, run `docker/build.sh`. To build and run a single doc
 
 ```bash
 image=ppcle-unknown-linux-gnu
-docker build -t "ahuszagh/cross:$image" . --file "docker/Dockerfile.$image"
+python3 setup.py configure
+docker build -t "ahuszagh/cross:$image" . --file "docker/images/Dockerfile.$image"
 docker run -it "ahuszagh/cross:$image" /bin/bash
 ```
 
@@ -421,7 +422,7 @@ There are two types of images:
 - Images with an OS layer, such as `ppcle-unknown-linux-gnu`.
 - Bare metal images, such as `ppcle-unknown-elf`.
 
-The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and do not link to a memory allocator. Please note that not all bare-metal images provide complete startup routines (crt0), and therefore might need to be linked against standlone flags (`-nostartfiles`, `-nostdlib`, `-nodefaultlibs`, or `-ffreestanding`) with a custom `_start` or equivalent routine or a custom `crt0` must be provided.
+The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and do not link to a memory allocator. Please note that not all bare-metal images provide complete startup routines (crt0), and therefore might need to be linked against standalone flags (`-nostartfiles`, `-nostdlib`, `-nodefaultlibs`, or `-ffreestanding`) with a custom `_start` or equivalent routine or a custom `crt0` must be provided.
 
 The other images use a C-runtime that depends on a POSIX-like OS (such as Linux, FreeBSD, or MinGW for Windows), and can be used with:
 
@@ -444,6 +445,7 @@ All images are named as `ahuszagh/cross:$triple`, where `$triple` is the target 
 For example, the following image names decompose to the following triples:
 
 - `avr`, or `(avr, unknown, -, -)`
+- `i386-w64-mingw32`, or `(i386, unknown, w64, mingw32)`
 - `mips-unknown-o32`, `(mips, unknown, -, o32)`
 - `mips-unknown-linux-gnu`, `(mips, unknown, linux, gnu)`
 
@@ -504,13 +506,13 @@ To add your own toolchain, the general workflow is as follows:
 2. Configure your toolchain.
 3. Move the config file to `ct-ng`.
 4. Patch the config file.
-5. Add the image to `setup.py`.
+5. Add the image to `config/images.json`.
 
 After the toolchain is created, all the CMake toolchain files, symlinks, and Dockerfiles may be created with:
 
 **config/images.json**
 
-```json
+```jsonc
 [
     // ...
     {
@@ -549,7 +551,7 @@ After the toolchain is created, all the CMake toolchain files, symlinks, and Doc
 ]
 ```
 
-For a bare-metal example, see `docker/Dockerfile.ppcle-unknown-elf`. For a Linux example, see `docker/Dockerfile.ppcle-unknown-linux-gnu`. Be sure to add your new toolchain to `config/images.json`, and run the test suite with the new toolchain image.
+For a bare-metal example, see `ct-ng/ppcle-unknown-elf.config`. For a Linux example, see `ct-ng/ppcle-unknown-linux-gnu.config`. Be sure to add your new toolchain to `config/images.json`, and run the test suite with the new toolchain image.
 
 # Platform Support
 
