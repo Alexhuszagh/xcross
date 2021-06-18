@@ -233,17 +233,20 @@
     //{
     //    "type": "crosstool",
     //    "target": "mips64-unknown-n64",
-    //    "triple": "mips64-unknown-elf"
+    //    "triple": "mips64-unknown-elf",
+    //    "flags": "-lc"
     //},
     //{
     //    "type": "crosstool",
     //    "target": "mips64el-unknown-n64",
-    //    "triple": "mips64el-unknown-elf"
+    //    "triple": "mips64el-unknown-elf",
+    //    "flags": "-lc"
     //},
     {
         "type": "crosstool",
         "target": "mipsel-unknown-o32",
-        "triple": "mipsel-unknown-elf"
+        "triple": "mipsel-unknown-elf",
+        "flags": "-lc"
     },
     // FAILS DURING CONFIGURING GCC PASS 2 DUE TO:
     //      error: cannot compute suffix of object files: cannot compile
