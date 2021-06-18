@@ -117,15 +117,21 @@
         "target": "arm-unknown-elf",
         "triple": "arm-unknown-eabi"
     },
+    // NOTE:
+    //      We don't want to semihost, so we need to make sure there's
+    //      no reference to `_exit`.
+    //      https://stackoverflow.com/a/23922211/4131059
     {
         "type": "crosstool",
         "target": "arm64-unknown-elf",
-        "triple": "aarch64-unknown-elf"
+        "triple": "aarch64-unknown-elf",
+        "flags": "--specs=nosys.specs"
     },
     {
         "type": "crosstool",
         "target": "arm64eb-unknown-elf",
-        "triple": "aarch64_be-unknown-elf"
+        "triple": "aarch64_be-unknown-elf",
+        "flags": "--specs=nosys.specs"
     },
     {
         "type": "crosstool",
@@ -531,9 +537,13 @@
     //    "flags": "-m*be*",
     //    "processor": "sh*be*"
     //},
+    // NOTE:
+    //      For some reason, libc isn't automatically linked in.
+    //      It works just fine when it's manually provided.
     {
         "type": "crosstool",
-        "target": "sparc-unknown-elf"
+        "target": "sparc-unknown-elf",
+        "flags": "-lc"
     },
     // FAILS DURING BUILDING NEWLIB DUE TO:
     //      error: argument 'dirp' doesn't match prototype

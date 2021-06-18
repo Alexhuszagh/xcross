@@ -25,12 +25,44 @@ for image in "${OS_IMAGES[@]}"; do
     fi
 done
 
+startfiles() {
+    case "$1" in
+        # i[3-6]86 does not provide start files, a known bug with newlib.
+        # moxie cannot find `__bss_start__` and `__bss_end__`.
+        # sparc cannot find `__stack`.
+        # there is no crt0 for x86_64
+        i[3-7]86-unknown-elf | moxie*-none-elf | sparc-unknown-elf | x86_64-unknown-elf)
+            echo "-nostartfiles"
+            ;;
+        *)
+            ;;
+    esac
+}
+
+skip() {
+    # Check if we should skip a test.
+    # PPCLE is linked to the proper library, which contains the
+    # proper symbols, but still fails with an error:
+    #   undefined reference to `_savegpr_29`.
+    case "$1" in
+        ppcle-unknown-elf)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 for image in "${METAL_IMAGES[@]}"; do
     if [ "$has_stopped" = yes ]; then
         break
     elif [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
-        FLAGS="-nostartfiles" "$scriptdir/docker-run.sh" atoi "$image"
+        if ! skip "$image"; then
+            flags=$(startfiles "$image")
+            FLAGS="$flags" "$scriptdir/docker-run.sh" atoi "$image"
+        fi
     fi
 
     if [ "$STOP" = "$image" ]; then
