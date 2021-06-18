@@ -237,6 +237,12 @@ class OperatingSystem(enum.Enum):
     def is_baremetal(self):
         return self == OperatingSystem.BareMetal
 
+    def is_script(self):
+        return self == OperatingSystem.Script
+
+    def is_os(self):
+        return not (self.is_baremetal() or self.is_script())
+
     def to_triple(self):
         '''Get the identifier as a triple string.'''
         return triple_string[self]
@@ -959,11 +965,13 @@ class ConfigureCommand(VersionCommand):
             self.configure_other(image)
 
         # Need to write the total image list.
-        os_images = sorted([i.target for i in images if not i.os.is_baremetal()])
         metal_images = sorted([i.target for i in images if i.os.is_baremetal()])
+        script_images = sorted([i.target for i in images if i.os.is_script()])
+        os_images = sorted([i.target for i in images if i.os.is_os()])
         self.configure(f'{images_sh}.in', images_sh, True, [
             ('OS_IMAGES', create_array(os_images)),
             ('METAL_IMAGES', create_array(metal_images)),
+            ('SCRIPT_IMAGES', create_array(script_images)),
         ])
 
 

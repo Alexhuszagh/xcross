@@ -8,7 +8,11 @@ export OS_IMAGES=^OS_IMAGES^
 # These don't use newlibs nanomalloc, so these do not support system allocators.
 export METAL_IMAGES=^METAL_IMAGES^
 
+# Images that don't compile to machine code.
+export SCRIPT_IMAGES=^SCRIPT_IMAGES^
+
 export IMAGES=(
     "${OS_IMAGES[@]}"
     "${METAL_IMAGES[@]}"
+    "${SCRIPT_IMAGES[@]}"
 )
