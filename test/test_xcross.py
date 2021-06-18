@@ -36,6 +36,12 @@ def test_simple_image_command():
     run_image_command(['make'], 'make')
     run_image_command(['cmake ..'], 'cmake ..')
     run_image_command(['cmake', '..'], 'cmake ..')
+    run_image_command(['c++', 'main o.cc'], 'c++ "main o.cc"')
+
+def test_single_image_command():
+    run_image_command(['c++ "main o.cc"'], 'c++ "main o.cc"')
+    run_image_command(['c++ main\\ o.cc'], 'c++ main\\ o.cc')
+    run_image_command(['c++ main\\ "o.cc'], 'c++ main\\ "o.cc')
 
 def test_hyphen_command():
     run_image_command(['make', '-j', '5'], 'make -j 5')
@@ -60,6 +66,12 @@ def test_control_characters():
         run_image_command(['echo', '${var[@]}'], '')
     with pytest.raises(SystemExit):
         run_image_command(['echo', '`whoami`'], '')
+    with pytest.raises(SystemExit):
+        run_image_command(['c++', '"main o.cc"'], '')
+    with pytest.raises(SystemExit):
+        run_image_command(['c++', 'main" o.cc'], '')
+    with pytest.raises(SystemExit):
+        run_image_command(['c++', "main' o.cc"], '')
 
 def test_validate_arguments():
     assert not run_validate_arguments(['--target', 'x\\a'])

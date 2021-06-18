@@ -172,14 +172,27 @@ def image_command(args):
     # tell the difference between `( 'hello)'` and `( hello)` with
     # `["(", hello)"]`. So, just error if we have any potentially grammatical
     # character.
-    if any(re.search('[;\n\\$!(){}`]', i) for i in args.command):
+    if any(re.search('[;\'\"\n\\$!(){}`]', i) for i in args.command):
         error('Invalid control characters present: use a quoted string instead', show_help=False)
 
     # Normalize the paths inside, in case we have Windows-style paths.
     normpath(args)
 
     # No need to escape any characters: we've ensured all values are simple.
-    return ' '.join(args.command)
+    if len(args.command) == 1:
+        return args.command[0]
+
+    # Have more than 1 value. We might have spaces inside.
+    # We need to escape these spaces, if present.
+    # We know there's no special characters, or quotes,
+    # so this is very simple to do:
+    quoted = []
+    for parameter in args.command:
+        if ' ' in parameter:
+            quoted.append(f'"{parameter}"')
+        else:
+            quoted.append(parameter)
+    return ' '.join(quoted)
 
 def validate_arguments(args):
     '''Validate the parsed arguments.'''

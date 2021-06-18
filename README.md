@@ -224,25 +224,33 @@ Most of the magic happens via xcross, which allows you to transparently execute 
 
 **Fallthrough**
 
-All arguments that are not recognized, as follows, are passed to the Docker container, with a few caveats.
+All arguments that are not xcross-specific are passed into the container. 
 
-- Escape all control characters for the local shell.
-
-If they are not properly escaped, they will be evaluated on the host, often giving unexpected results.
+- Any trivial arguments can be passed through without issue.
 
 ```bash
-# This works in POSIX shells, since we have no environment variables that 
-# might be evaluated, and we've escaped the `|`.
-xcross echo "int main() { return 0; }" '|' c++ -x c++ -
+# Just works
+xcross make -j 5
+```
 
-# In Windows CMD, we need to escape the `|` as follows:
-xcross echo "int main() { return 0; }" ^| c++ -x c++ -
+- To avoid shell expansion, pass entire complex commands as a single, quoted string.
 
-# Escape environment variables in POSIX shells to evaluate them in the container.
-xcross -E CXX=cpp '$CXX' main.c -o main
+Please note that due to shell expansion, some things may evaluate on the host, and therefore may not work as expected. For example:
 
+```bash
 # This does not work in POSIX shells, since it evaluates `$CXX` in the local shell.
 xcross -E CXX=cpp $CXX main.c -o main
+```
+
+In order to mitigate this, we only allow characters that could be expanded by the local shell to be passed as a single string to the container:
+
+```bash
+# Although this is escaped, we can't tell if we want a literal `$CXX`
+# or want to expand it. xcross rejects this.
+xcross -E CXX=cpp '$CXX' main.c -o main
+
+# Instead, pass it as a single string. Works now.
+xcross -E CXX=cpp '$CXX main.c -o main'
 ```
 
 - Any environment variables and paths should be passed in POSIX style.
