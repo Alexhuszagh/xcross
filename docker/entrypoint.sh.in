@@ -2,4 +2,8 @@
 
 export PATH=^BIN^:"$PATH"
 source env/base
-exec "$@"
+if [ $# -eq 0 ]; then
+    exec bash
+else
+    exec "$@"
+fi

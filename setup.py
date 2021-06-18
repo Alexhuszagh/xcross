@@ -209,6 +209,7 @@ class VersionCommand(Command):
 
         xcross = f'{HOME}/xcross/__init__.py'
         self.configure(f'{xcross}.in', xcross, True, [
+            ('BIN', f'"{bin_directory}"'),
             ('VERSION_MAJOR', f"'{major}'"),
             ('VERSION_MINOR', f"'{minor}'"),
             ('VERSION_PATCH', f"'{patch}'"),

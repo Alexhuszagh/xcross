@@ -111,22 +111,19 @@ xcross -E CXX=g++ '$CXX' helloworld.cc -o hello
 
 ## Docker
 
-For more fine-tuned control, you can also build a project within a container:
+For more fine-tuned control, you can also run an interactive session within a container:
 
 ```bash
 # Pull the Docker image, and run it interactively, entering the container.
-image=alpha-unknown-linux-gnu
-docker pull "ahuszagh/cross:$image"
-docker run -it "ahuszagh/cross:$image" /bin/bash
+xcross bash --target alpha-unknown-linux-gnu
 
 # Clone the repository, build and run the code in the container using CMake.
-# These toolchains in general aren't necessary, but ensure
-# CMake knows we're cross-compiling and how to link.
 git clone https://github.com/Alexhuszagh/cpp-helloworld.git
 cd cpp-helloworld
 mkdir build && cd build
-# Build a statically-linked executable.
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake
+
+# Build a default executable: no toolchain file required.
+cmake ..
 make
 # Just works, as long as `add_custom_target` uses
 # `${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:..>`
@@ -134,6 +131,13 @@ make
 # only works on some architectures.
 make run
 # Can also run executables manually.
+run hello
+
+# Build a statically-linked executable.
+rm -rf ./*
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake
+make
+make run
 run hello
 
 # Clean, and build a dynamically-linked executable.
@@ -329,6 +333,16 @@ xcross run-cpu-list
 
 These are convenience functions around `gcc -mcpu=unknown` and `qemu-ppc -cpu help`, listing only the sorted CPU types. Note that the CPU types might not be identical for both, so it's up to the caller to properly match the CPU types.
 
+ `--server`, `CROSS_SERVER`: The server to fetch container images from.
+
+This defaults to `docker.io` if not provided, however, it may be explicit set to an empty string. If the server is not empty, the server is prepended to the image name.
+
+```bash
+# These are all identical.
+xcross --server=docker.io ...
+CROSS_SERVER=docker.io xcross ...
+```
+
 - `--username`, `CROSS_USERNAME`: The Docker Hub username for the Docker image.
 
 This defaults to `ahuszagh` if not provided, however, it may be explicit set to an empty string. If the username is not empty, the image has the format `$username/$repository:$target`, otherwise, it has the format `$repository:$target`.
@@ -341,7 +355,7 @@ CROSS_USERNAME=ahuszagh xcross ...
 
 - `--repository`, `CROSS_REPOSITORY`: The name of the repository for the image.
 
-This default to `cross` if not provided or is empty.
+This defaults to `cross` if not provided or is empty.
 
 ```bash
 # These are all identical.
@@ -349,14 +363,34 @@ xcross --repository=cross ...
 CROSS_REPOSITORY=cross xcross ...
 ```
 
-- `--docker`, `CROSS_DOCKER`: The command for the Docker executable.
+- `--engine`, `CROSS_ENGINE`: The command for the container engine executable.
 
-This default to `docker` if not provided or is empty.
+If not provided or empty, this searches for `docker` then `podman`.
 
 ```bash
 # These are all identical.
-xcross --docker=docker ...
-CROSS_DOCKER=docker xcross ...
+xcross --engine=docker ...
+CROSS_ENGINE=docker xcross ...
+```
+
+- `--non-interactive`, `CROSS_NONINTERACTIVE`: Disable interactive shells.
+
+This defaults to using interactive shells if not `--non-interactive` is not provided and if `CROSS_NONINTERACTIVE` does not exist, or is set to an empty string.
+
+```bash
+# These are all identical.
+xcross --non-interactive ...
+CROSS_NONINTERACTIVE=1 xcross ...
+```
+
+- `--update`, `CROSS_UPDATE`: Update the container image before running.
+
+This defaults to using the existing container version if not `--update` is not provided and if `CROSS_UPDATE` does not exist, or is set to an empty string.
+
+```bash
+# These are all identical.
+xcross --update ...
+CROSS_UPDATE=1 xcross ...
 ```
 
 # Sharing Binaries To Host
@@ -369,11 +403,9 @@ In order to build projects and share data back to the host machine, you can use 
 #   `setenforce 0`
 
 # Run docker image, and share current directory.
-image=alpha-unknown-linux-gnu
 git clone https://github.com/Alexhuszagh/cpp-helloworld.git
-docker run -it --volume "$(pwd)/cpp-helloworld:/hello" \
-    "ahuszagh/cross:$image" \
-    /bin/bash
+cd cpp-helloworld
+xcross --target alpha-unknown-linux-gnu
 
 # Enter the repository, and make a platform-specific build.
 cd hello
@@ -384,15 +416,15 @@ make
 
 # Exit, and check we have our proper image.
 exit
-file cpp-helloworld/build-alpha/hello
-# cpp-helloworld/build-alpha/hello: ELF 64-bit LSB executable, 
+file build-alpha/hello
+# build-alpha/hello: ELF 64-bit LSB executable, 
 # Alpha (unofficial), version 1 (GNU/Linux), statically linked, 
 # BuildID[sha1]=252707718fb090ed987a9eb9ab3a8c3f6ae93482, for 
 # GNU/Linux 3.2.0, not stripped
 
 # Please note the generated images will be owned by `root`.
-ls -lh cpp-helloworld/build-alpha/hello
-# -rwxr-xr-x. 1 root root 2.4M May 30 20:50 cpp-helloworld/build-alpha/hello
+ls -lh build-alpha/hello
+# -rwxr-xr-x. 1 root root 2.4M May 30 20:50 build-alpha/hello
 ```
 
 # Building/Running Dockerfiles
@@ -403,7 +435,10 @@ To build all Docker images, run `docker/build.sh`. To build and run a single doc
 image=ppcle-unknown-linux-gnu
 python3 setup.py configure
 docker build -t "ahuszagh/cross:$image" . --file "docker/images/Dockerfile.$image"
+# Runs the image without the xcross abstraction.
 docker run -it "ahuszagh/cross:$image" /bin/bash
+# Runs the image using xcross, for a simpler interface.
+xcross bash --target "$image"
 ```
 
 # Images

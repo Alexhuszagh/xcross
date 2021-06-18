@@ -10,6 +10,7 @@ import collections
 import os
 import pathlib
 import re
+import stat
 import subprocess
 import sys
 import uuid
@@ -67,29 +68,48 @@ you may run `run -cpu help`.
 Ex: `--cpu=e500mc`''',
 )
 parser.add_argument(
+    '--server',
+    help='''Server to fetch container images from.
+This may also be supplied via the environment variable `CROSS_SERVER`.
+Ex: `--server=docker.io`''',
+)
+parser.add_argument(
     '--username',
-    help='''The username for the Docker Hub image.
+    help='''The username for the container image.
 This may also be supplied via the environment variable `CROSS_USERNAME`.
 Ex: `--username=ahuszagh`''',
 )
 parser.add_argument(
     '--repository',
-    help='''The repository for the Docker Hub image.
+    help='''The repository for the container image.
 This may also be supplied via the environment variable `CROSS_REPOSITORY`.
 Ex: `--repository=cross`''',
 )
 parser.add_argument(
-    '--docker',
-    help='''The path or name of the Docker binary.
-This may also be supplied via the environment variable `CROSS_DOCKER`.
-Ex: `--docker=docker`''',
+    '--engine',
+    help='''The path or name of the container engine executable.
+This may also be supplied via the environment variable `CROSS_ENGINE`.
+If not provided or empty, this searches for `docker` then `podman`.
+Ex: `--engine=docker`''',
+)
+parser.add_argument(
+    '--non-interactive',
+    help='''Disable interactive shells.
+This may also be supplied via the environment variable `CROSS_NONINTERACTIVE`.''',
+    action='store_true'
+)
+parser.add_argument(
+    '--update',
+    help='''Update the container on run.
+This may also be supplied via the environment variable `CROSS_UPDATE`.''',
+    action='store_true'
 )
 parser.add_argument(
     '-V', '--version',
     action='version',
-    version=f'%(prog)s {__version__}'
+    version=f'%(prog)s {__version__}',
 )
-base_script_name = '__ahuszagh_xcross_uuid_'
+base_script_name = '.__ahuszagh_xcross_uuid_'
 
 def error(message, code=126, show_help=True):
     '''Print message, help, and exit on error.'''
@@ -114,6 +134,16 @@ def validate_repository(repository):
 
 def validate_target(target):
     return re.match('^[A-Za-z0-9._-]+$', target)
+
+def get_image(args):
+    '''Format the image parameters to a string.'''
+
+    image = f'{args.repository}:{args.target}'
+    if args.username:
+        image = f'{args.username}/{image}'
+    if args.server:
+        image = f'{args.server}/{image}'
+    return image
 
 def escape_single_quote(string):
     '''Escape a single quote in a string to be quoted.'''
@@ -157,8 +187,8 @@ def normpath(args):
                 # on Windows, believe it or not.
                 args.command[index] = escape_single_quote(posix)
 
-def image_command(args):
-    '''Create the image command from the argument list.'''
+def format_command(args):
+    '''Format a list of commands normalized to be executed in the shell.'''
 
     if args.command is None:
         return ''
@@ -178,10 +208,6 @@ def image_command(args):
     # Normalize the paths inside, in case we have Windows-style paths.
     normpath(args)
 
-    # No need to escape any characters: we've ensured all values are simple.
-    if len(args.command) == 1:
-        return args.command[0]
-
     # Have more than 1 value. We might have spaces inside.
     # We need to escape these spaces, if present.
     # We know there's no special characters, or quotes,
@@ -194,6 +220,47 @@ def image_command(args):
             quoted.append(parameter)
     return ' '.join(quoted)
 
+def image_command(args, relpath):
+    '''Create the image command from the argument list.'''
+
+    # Need to change to the proper directory, then export
+    # any useful environment variables, etc. We first
+    # inject the binary dir to the path, then add
+    # any CPU model, if we're using it, and then
+    # go to the CWD and work from there.
+    command = ['export PATH=^BIN^:"$PATH"']
+    if args.cpu:
+        command.append(f'export CPU={escape_single_quote(args.cpu)}')
+    command.append(f'cd /src/{escape_single_quote(relpath)}')
+    command.append(format_command(args))
+    return '\n'.join(command)
+
+def find_container_engine():
+    '''Find the container engine binary (docker or podman) if one isn't provided.'''
+
+    devnull = subprocess.DEVNULL
+    for engine in ['docker', 'podman']:
+        try:
+            code = subprocess.call([engine, '-v'], stdin=devnull, stdout=devnull)
+            if code == 0:
+                return engine
+        except OSError as error:
+            if error.errno != os.errno.ENOENT:
+                raise
+
+    error('Could not find docker or podman')
+
+def engine_type(engine):
+    '''Determine the container engine type.'''
+
+    proc = subprocess.Popen([engine, '-v'], stdout=subprocess.PIPE)
+    stdout, _ = proc.communicate()
+    if b'docker' in stdout.lower():
+        return 'docker'
+    elif b'podman' in stdout.lower():
+        return 'podman'
+    error(f'Unrecognized engine type, got {stdout}')
+
 def validate_arguments(args):
     '''Validate the parsed arguments.'''
 
@@ -202,14 +269,21 @@ def validate_arguments(args):
     args.dir = args.dir or get_current_dir().root
     args.cpu = args.cpu or os.environ.get('CROSS_DIR')
     args.cpu = args.cpu or os.environ.get('CROSS_CPU')
+    if args.server is None:
+        args.server = os.environ.get('CROSS_SERVER')
+    if args.server is None:
+        args.server = 'docker.io'
     if args.username is None:
         args.username = os.environ.get('CROSS_USERNAME')
     if args.username is None:
         args.username = 'ahuszagh'
     args.repository = args.repository or os.environ.get('CROSS_REPOSITORY')
     args.repository = args.repository or 'cross'
-    args.docker = args.docker or os.environ.get('CROSS_DOCKER')
-    args.docker = args.docker or 'docker'
+    args.engine = args.engine or os.environ.get('CROSS_ENGINE')
+    args.engine = args.engine or find_container_engine()
+    args.engine_type = engine_type(args.engine)
+    args.non_interactive = args.non_interactive or bool(os.environ.get('CROSS_NONINTERACTIVE', False))
+    args.update = args.update or bool(os.environ.get('CROSS_UPDATE', False))
 
     # Validate our arguments.
     if args.target is None or not validate_target(args.target):
@@ -219,17 +293,8 @@ def validate_arguments(args):
     if args.repository is None or not validate_repository(args.repository):
         error('Must provide a valid Docker Hub repository')
 
-def docker_command(args):
+def docker_command(args, parent_dir, relpath):
     '''Create the docker command to invoke.'''
-
-    # Normalize our paths here.
-    parent_dir = get_parent_dir(args)
-    current_dir = get_current_dir()
-    if not os.path.isdir(parent_dir):
-        error('`dir` is not a directory')
-    if not current_dir.is_relative_to(parent_dir):
-        error('`dir` must be a parent of the current working directory')
-    relpath = current_dir.relative_to(parent_dir).as_posix()
 
     # Process our environment variables.
     # We don't need to escape these, since we aren't
@@ -246,25 +311,24 @@ def docker_command(args):
     # for the command, to ensure we avoid any malicious
     # escapes. This allows us to have internal `'` characters
     # in our commands, without actually providing a dangerous escape.
-    image = f'{args.repository}:{args.target}'
-    if args.username:
-        image = f'{args.username}/{image}'
-    command = ['docker', 'run', '-t']
+    command = [args.engine, 'run', '--tty']
+    if not args.non_interactive:
+        command.append('--interactive')
     for var in env:
         command += ['--env', var]
+    # Docker by default uses root as the main user.
+    # We therefore want to map to the current user.
+    if args.engine_type == 'docker' and os.name == 'posix':
+        euid = os.geteuid()
+        command += ['--user', f'{euid}:{euid}']
     command += ['--volume', f'{parent_dir}:/src']
-    command.append(image)
-    chdir = f'cd /src/{escape_single_quote(relpath)}'
+    command.append(get_image(args))
 
-    script = f"/bin/bash {escape_single_quote(args.script_name)}"
-    if args.cpu:
-        script = f"export CPU={escape_single_quote(args.cpu)}; {script}"
-    nonroot = f'su crosstoolng -c "{script}"'
-    cmd = f'{chdir} && {nonroot}'
-    command += ['/bin/bash', '-c', cmd]
+    # Now need to add the remaining arguments, the passed command over.
+    script = f'/src/{relpath}/{args.script_name}'
+    command += ['bash', script]
 
     return command
-
 
 def process_args(argv=None):
     '''Parse arguments to the script.'''
@@ -274,12 +338,33 @@ def process_args(argv=None):
     args.script_name = f'{base_script_name}{uuid.uuid4().hex}'
     return args
 
+def update_image(engine, image):
+    '''Pull the latest version of the image'''
+
+    devnull = subprocess.DEVNULL
+    code = subprocess.call([engine, 'pull', image], stdin=devnull, stdout=devnull)
+    if code != 0:
+        error('Unable to pull image', code)
+
 def main(argv=None):
     '''Entry point'''
 
     # Parse and validate command-line options.
     args = process_args(argv)
     validate_arguments(args)
+
+    # Update the image, if required.
+    if args.update:
+        update_image(args.engine, get_image(args))
+
+    # Normalize our paths here.
+    parent_dir = get_parent_dir(args)
+    current_dir = get_current_dir()
+    if not os.path.isdir(parent_dir):
+        error('`dir` is not a directory')
+    if not current_dir.is_relative_to(parent_dir):
+        error('`dir` must be a parent of the current working directory')
+    relpath = current_dir.relative_to(parent_dir).as_posix()
 
     # Try to write the command to a script,
     # Do not use `exists` or `isfile`, then open, since
@@ -289,7 +374,7 @@ def main(argv=None):
     # exist, in practice it's identical to mkstemp.
     open_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     try:
-        command = image_command(args)
+        command = image_command(args, relpath)
         fd = os.open(args.script_name, open_flags)
         with os.fdopen(fd, 'w') as file:
             file.write(command)
@@ -303,7 +388,7 @@ def main(argv=None):
     # Create our docker command and call the script.
     try:
         code = subprocess.call(
-            docker_command(args),
+            docker_command(args, parent_dir, relpath),
             shell=False,
             stdout=sys.stdout,
             stderr=sys.stderr
