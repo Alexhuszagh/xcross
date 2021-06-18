@@ -113,7 +113,7 @@ mkdir build-"$ARCH" && cd build-"$ARCH"
         --prefix=^SYSROOT^ \
         --static \
         --target-list="$TARGETS" \
-        --interp-prefix=/opt/"$ARCH"/sysroot \
+        --interp-prefix=^SYSROOT^/"$ARCH"/sysroot \
         --python=python3
 make -j ^JOBS^
 make install

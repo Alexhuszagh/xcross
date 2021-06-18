@@ -484,6 +484,7 @@ In order to simplify using the cross-compiler with CMake, we provide 3 CMake too
 
 Likewise, to simplify using the cross-compiler with Makefiles, we provide 2 Bash config files:
 
+- `/env/base`, base environment variables for cross-compiling.
 - `/env/shared`, for building dynamically-linked binaries.
 - `/env/static`, for building statically-linked binaries.
 
@@ -499,37 +500,48 @@ To add your own toolchain, the general workflow is as follows:
 
 After the toolchain is created, all the CMake toolchain files, symlinks, and Dockerfiles may be created with:
 
-**setup.py**
+**config/images.json**
 
-```python
-crosstool_images = [
-    crosstool_image(
-        # The target.
-        os=OperatingSystem.Linux, 
-        # The triplet for the target.
-        target='alphaev4-unknown-linux-gnu', 
-        # The architecture name for Qemu.
-        arch='alpha', 
-        # Use qemu for an emulated runner.
-        with_qemu=True, 
-        # The name of the crosstool-NG configuration file to use.
-        #   Defaults to `target` if not provided.
-        config=None, 
-        # The prefix of the created binaries.
-        #   Defaults to `config`, then `target`, if not provided.
-        prefix=None, 
-        # The name of the processor for the CMake toolchain file.
-        #   Defaults to `prefix.split('-')[0]` if not provided.
-        processor=None, 
-        # Additional flags to use when compiling.
-        #   Defaults to an empty set of flags.
-        flags=None
-    ),
-    ...
+```json
+[
+    // ...
+    {
+        // Image type (mandatory). Valid values are:
+        //  1. android
+        //  2. crosstool
+        //  3. debian
+        //  4. riscv
+        //  5. other
+        //
+        // The following values are for crosstool images,
+        // which are by far the most prevalent.
+        "type": "crosstool",
+        // The name of the target, resembling an LLVM triple (mandatory).
+        "target": "alphaev4-unknown-linux-gnu",
+        // Actual LLVM triple name, which will be the compiler prefix.
+        // For example, gcc will be `alphaev4-unknown-linux-gnu-gcc`.
+        // Optional, and defaults to `target`.
+        "triple": "alphaev4-unknown-linux-gnu",
+        // The crosstool-NG target to use. This is useful
+        // when the same configuration for a multilib compiler
+        // can be reused. Optional, defaults to `target`.
+        "config": "alphaev4-unknown-linux-gnu",
+        // Enable qemu userspace emulation (optional). Default false.
+        "qemu": true,
+        // Optional flags to provide to the C compiler.
+        // This is useful when targeting a specific ABI,
+        // or for example, to skip the default start code
+        // to provide your own crt0.
+        "flags": "-nostartfiles",
+        // Name of the processor for Qemu user-space emulation
+        // and for setting the toolchain alias.
+        "processor": "alpha"
+    },
+    // ...
 ]
 ```
 
-For a bare-metal example, see `docker/Dockerfile.ppcle-unknown-elf`. For a Linux example, see `docker/Dockerfile.ppcle-unknown-linux-gnu`. Be sure to add your new toolchain to `images.sh`, and run the test suite with the new toolchain image.
+For a bare-metal example, see `docker/Dockerfile.ppcle-unknown-elf`. For a Linux example, see `docker/Dockerfile.ppcle-unknown-linux-gnu`. Be sure to add your new toolchain to `config/images.json`, and run the test suite with the new toolchain image.
 
 # Platform Support
 

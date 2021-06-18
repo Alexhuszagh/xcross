@@ -1,7 +1,7 @@
 # Add toolchains
 COPY ["cmake/toolchain/^TARGET^.cmake", "/toolchains/toolchain.cmake"]
 # This step is mostly for backward compatibility.
-COPY ["cmake/toolchain/^TARGET^.cmake", "/toolchains/^TRIPLE_ARCH^.cmake"]
+COPY ["cmake/toolchain/^TARGET^.cmake", "/toolchains/^ARCH^.cmake"]
 COPY ["cmake/shared.cmake", "/toolchains/"]
 COPY ["cmake/static.cmake", "/toolchains/"]
 COPY ["env/base", "/env/"]

@@ -49,28 +49,24 @@ cp -r android-ndk-"$version"/build/cmake "^NDK_DIRECTORY^/build"
 cp -r android-ndk-"$version"/toolchains/llvm "^NDK_DIRECTORY^/toolchains"
 
 # Need to remove other installed targets.
-prefix="^NDK_DIRECTORY^/toolchains/llvm/prebuilt/linux-x86_64"
-all_targets=(
-    "aarch64-linux-android"
-    "armv7a-linux-androideabi"
-    "i686-linux-android"
-    "x86_64-linux-android"
-)
-rm -rf "$prefix"/test
-for target in "${all_targets[@]}"; do
-    if [ "$target" != "$ARCH" ]; then
-        base=$(echo "$target" | cut -d '-' -f 1)
-        if [ "$base" = "armv7a" ]; then
-            base="arm"
-        fi
-        rm -rf "$prefix"/"$target"
-        rm -f "$prefix"/bin/"$target"*
-        rm -f "$prefix"/share/man/man1/"$target"*
-        rm -rf "$prefix"/lib/gcc/"$target"
-        rm -rf "$prefix"/sysroot/usr/include/"$target"
-        rm -rf "$prefix"/sysroot/usr/lib/"$target"
-        rm -rf "$prefix"/lib64/clang/^CLANG_VERSION^/lib/linux/"$base"
+dir="^NDK_DIRECTORY^/toolchains/llvm/prebuilt/linux-x86_64"
+toolchains=^TOOLCHAINS^
+prefixes=^PREFIXES^
+rm -rf "$dir"/test
+index=0
+while [ $index -lt ${#toolchains[*]} ]; do
+    toolchain="${toolchains[$index]}"
+    prefix="${prefixes[$index]}"
+    if [ "$toolchain" != "$ARCH" ]; then
+        rm -rf "$dir"/"$toolchain"
+        rm -f "$dir"/bin/"$toolchain"*
+        rm -f "$dir"/share/man/man1/"$toolchain"*
+        rm -rf "$dir"/lib/gcc/"$toolchain"
+        rm -rf "$dir"/sysroot/usr/include/"$toolchain"
+        rm -rf "$dir"/sysroot/usr/lib/"$toolchain"
+        rm -rf "$dir"/lib64/clang/^CLANG_VERSION^/lib/linux/"$prefix"
     fi
+    index=$(($index + 1));
 done
 
 # Cleanup

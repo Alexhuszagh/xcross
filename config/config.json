@@ -1,0 +1,148 @@
+// NOTE: This is a custom JSON file, where lines leading
+// with `//` are removed. No other comments are valid.
+{
+    // Currently uses the following toolchain versions:
+    //   Ubuntu          20.04
+    //   GCC             10.2.0
+    //   MinGW           8.0.0
+    //   glibc           2.31 or 2.32
+    //   musl            1.2.2
+    //   avr-libc        2.0.0
+    //   uclibc-ng       1.0.31
+    //   crosstool-ng    1.24.0
+    //   qemu (Debian)   4.2.1
+    //   qemu (Source)   6.0.0
+    //   android NDK     r22b
+    //
+    // Incrementing a major version of any of these dependencies
+    // will lead to a version increment.
+
+    // Version for xcross.
+    "xcross": {
+        "version": {
+            "major": "0",
+            "minor": "1",
+            "patch": "3",
+            "build": ""
+        }
+    },
+    // Ubuntu version for Docker images.
+    "ubuntu": {
+        "version": {
+            "major": "20",
+            "minor": "04",
+            "name": "focal"
+        }
+    },
+    // GCC Version for **most** images.
+    // We still track config files in ct-ng since some images
+    // have to be specially maintained.
+    "gcc": {
+        "version": {
+            "major": "10",
+            "minor": "2",
+            "patch": "0"
+        }
+    },
+    // MinGW version for crosstool-NG builds.
+    "mingw": {
+        "version": {
+            "major": "8",
+            "minor": "0",
+            "patch": "0"
+        }
+    },
+    // Glibc version for crosstool-NG builds.
+    "glibc": {
+        "version": {
+            "major": "2",
+            "minor": "31",
+            "patch": "0"
+        }
+    },
+    // Musl libc version for crosstool-NG builds.
+    "musl": {
+        "version": {
+            "major": "1",
+            "minor": "2",
+            "patch": "2"
+        }
+    },
+    // AVR libc version for crosstool-NG builds.
+    "avr": {
+        "version": {
+            "major": "2",
+            "minor": "0",
+            "patch": "0"
+        }
+    },
+    // uClibc-NG version for crosstool-NG builds.
+    "uclibc": {
+        "version": {
+            "major": "1",
+            "minor": "0",
+            "patch": "31"
+        }
+    },
+    // Expat version for crosstool-NG builds.
+    "expat": {
+        "version": {
+            "major": "2",
+            "minor": "4",
+            "patch": "1"
+        }
+    },
+    // Get the crosstool-NG version we download.
+    "crosstool-ng": {
+        "version": {
+            "major": "1",
+            "minor": "24",
+            "patch": "0"
+        }
+    },
+    // Qemu-from-source version.
+    "qemu": {
+        "version": {
+            "major": "6",
+            "minor": "0",
+            "patch": "0"
+        }
+    },
+    // Android versions.
+    "android": {
+        "clang_version": "11.0.5",
+        "ndk_directory": "/usr/local/ndk",
+        "ndk_version": "r22b",
+        "sdk_version": "30"
+    },
+    // RISCV GNU toolchain version.
+    "riscv-gnu-toolchain": {
+        "riscv-version": "2021.04.23",
+        "binutils-version": "2.36.1",
+        "gdb-version": "10.1",
+        "glibc-version": "2.33",
+        "newlib-version": "4.1.0",
+        "extensions": {
+            "linux": {
+                "type": "linux",
+                "required": "ima",
+                "all": "imafdc"
+            },
+            "bare-metal": {
+                "type": null,
+                "required": "imac",
+                "all": "imac"
+            }
+        },
+        "bits": ["32", "64"],
+        "abi": {
+            "32": "ilp32",
+            "64": "lp64"
+        }
+    },
+    // Other configuration options.
+    "options": {
+        "build_jobs": "5",
+        "sysroot": "/opt"
+    }
+}

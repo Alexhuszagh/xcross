@@ -3,11 +3,11 @@
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/shortcut.sh"
 
-export PREFIX=^ARCH^-linux-gnu
+export PREFIX=^PREFIX^-^OS^-^SYSTEM^
 export VER=^GCC_MAJOR^
-export ARCH=^ARCH^
+export ARCH=^PROCESSOR^
 export LIBPATH="/usr/$PREFIX"
 
-shortcut_gcc
+^FLAGS^shortcut_gcc
 shortcut_util
 shortcut_run

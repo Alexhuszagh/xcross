@@ -3,11 +3,11 @@
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/shortcut.sh"
 
-export PREFIX=riscv64-unknown-linux-gnu
+export PREFIX=^TRIPLE^
 export DIR="/opt/riscv"
 export ARCH=^ARCH^
 export LIBPATH=("$DIR", "$DIR"/sysroot)
 
-CFLAGS="-march=^MARCH^ -mabi=^MABI^" shortcut_gcc
+^FLAGS^shortcut_gcc
 shortcut_util
 shortcut_run

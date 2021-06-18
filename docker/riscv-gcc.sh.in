@@ -100,7 +100,7 @@ if [[ "$ARCH" = *-linux-gnu ]]; then
     make linux -j ^JOBS^
 elif [[ "$ARCH" = *-elf ]]; then
     ./configure --prefix=/opt/riscv --disable-linux --enable-multilib
-    make
+    make -j ^JOBS^
 fi
 
 # Need to strip binaries, since the installer doesn't do that

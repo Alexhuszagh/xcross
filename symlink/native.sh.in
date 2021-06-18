@@ -5,7 +5,7 @@ source "$scriptdir/shortcut.sh"
 
 export PREFIX=
 export VER=^GCC_MAJOR^
-export ARCH=^ARCH^
+export ARCH=^PROCESSOR^
 
 shortcut_gcc
 shortcut_run

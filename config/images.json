@@ -1,0 +1,826 @@
+// NOTE: This is a custom JSON file, where lines leading
+// with `//` are removed. No other comments are valid.
+[
+    // ANDROID
+    {
+        "type": "android",
+        "target": "aarch64-unknown-linux-android",
+        "abi": "arm64-v8a"
+    },
+    {
+        "type": "android",
+        "target": "armv7a-unknown-linux-androideabi",
+        "abi": "armeabi-v7a",
+        "prefix": "arm"
+    },
+    {
+        "type": "android",
+        "target": "i686-unknown-linux-android",
+        "abi": "x86"
+    },
+    {
+        "type": "android",
+        "target": "x86_64-unknown-linux-android"
+    },
+
+    // CROSSTOOL-NG
+    {
+        "type": "crosstool",
+        "target": "alphaev4-unknown-linux-gnu",
+        "qemu": true,
+        "processor": "alpha"
+    },
+    {
+        "type": "crosstool",
+        "target": "alphaev5-unknown-linux-gnu",
+        "qemu": true,
+        "processor": "alpha"
+    },
+    {
+        "type": "crosstool",
+        "target": "alphaev6-unknown-linux-gnu",
+        "qemu": true,
+        "processor": "alpha"
+    },
+    {
+        "type": "crosstool",
+        "target": "alphaev7-unknown-linux-gnu",
+        "qemu": true,
+        "processor": "alpha"
+    },
+    // REMOVED:
+    //      alpha EV8 was never finished, and was canceled prior to release
+    //{
+    //    "type": "crosstool",
+    //    "target": "alphaev8-unknown-linux-gnu",
+    //    "qemu": true,
+    //    "processor": "alpha"
+    //},
+    // ALPHA IMAGES FAIL WITH:
+    //      checking iconv.h usability... make[2]: *** [Makefile:7091: configure-ld] Error 1
+    //{
+    //    "type": "crosstool",
+    //    "target": "alphaev4-unknown-elf",
+    //    "processor": "alpha"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "alphaev5-unknown-elf",
+    //    "processor": "alpha"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "alphaev6-unknown-elf",
+    //    "processor": "alpha"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "alphaev7-unknown-elf",
+    //    "processor": "alpha"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "alphaev8-unknown-elf",
+    //    "processor": "alpha"
+    //},
+    {
+        "type": "crosstool",
+        "target": "arc-unknown-elf"
+    },
+    // FAILS IN LIBC BUILD PASS 1:
+    //      glibc: configure: error: The arc is not supported
+    //{
+    //    "type": "crosstool",
+    //    "target": "arc-unknown-linux-gnu"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "arcbe-unknown-linux-gnu"
+    //},
+    {
+        "type": "crosstool",
+        "target": "arc-unknown-linux-uclibc"
+    },
+    // Prefix is arceb
+    {
+        "type": "crosstool",
+        "target": "arcbe-unknown-elf",
+        "triple": "arceb-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "arcbe-unknown-linux-uclibc",
+        "triple": "arceb-unknown-linux-uclibc"
+    },
+    {
+        "type": "crosstool",
+        "target": "arm-unknown-elf",
+        "triple": "arm-unknown-eabi"
+    },
+    {
+        "type": "crosstool",
+        "target": "arm64-unknown-elf",
+        "triple": "aarch64-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "arm64eb-unknown-elf",
+        "triple": "aarch64_be-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "arm64eb-unknown-linux-gnu",
+        "triple": "aarch64_be-unknown-linux-gnu",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armeb-unknown-elf",
+        "triple": "armeb-unknown-eabi"
+    },
+    {
+        "type": "crosstool",
+        "target": "armeb-unknown-linux-gnueabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "avr"
+    },
+    {
+        "type": "crosstool",
+        "target": "i386-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "i386-w64-mingw32",
+        "triple": "x86_64-w64-mingw32",
+        "config": "x86_64-w64-mingw32",
+        "flags": "-m32",
+        "processor": "i386"
+    },
+    {
+        "type": "crosstool",
+        "target": "i486-unknown-elf",
+        "processor": "i386"
+    },
+    {
+        "type": "crosstool",
+        "target": "i586-unknown-elf",
+        "processor": "i386"
+    },
+    {
+        "type": "crosstool",
+        "target": "i686-multilib-linux-musl",
+        "triple": "x86_64-multilib-linux-musl",
+        "config": "x86_64-multilib-linux-musl",
+        "flags": "-m32",
+        "processor": "i386",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "i686-unknown-elf",
+        "processor": "i386"
+    },
+    // FAILS WITH:
+    //      fatal error: pthread.h: No such file or directory
+    //{
+    //    "type": "crosstool",
+    //    "target": "i686-unknown-linux-uclibc",
+    //    "processor": "i386",
+    //    "qemu": true
+    //},
+    {
+        "type": "crosstool",
+        "target": "m68k-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "microblaze-xilinx-linux-gnu",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "microblazeel-xilinx-linux-gnu",
+        "qemu": true
+    },
+    // FAILS DURING COMPILING DUE TO:
+    //      bin/ld: cannot find -lxil
+    //      This is the xilinx standard library, but we compiled against
+    //      newlib.
+    //{
+    //    "type": "crosstool",
+    //    "target": "microblaze-xilinx-elf"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "microblazeel-xilinx-elf"
+    //},
+    {
+        "type": "crosstool",
+        "target": "mips-unknown-o32",
+        "triple": "mips-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "mips64-unknown-n64",
+        "triple": "mips64-unknown-elf",
+        "flags": "-mabi=32"
+    },
+    {
+        "type": "crosstool",
+        "target": "mips64el-unknown-n64",
+        "triple": "mips64el-unknown-elf",
+        "flags": "-mabi=32"
+    },
+    {
+        "type": "crosstool",
+        "target": "mipsel-unknown-o32",
+        "triple": "mipsel-unknown-elf"
+    },
+    // FAILS DURING CONFIGURING GCC PASS 2 DUE TO:
+    //      error: cannot compute suffix of object files: cannot compile
+    //{
+    //    "type": "crosstool",
+    //    "target": "mips64-unknown-n32",
+    //    "triple": "mips64-unknown-elf"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "mips64el-unknown-n32",
+    //    "triple": "mips64el-unknown-elf"
+    //},
+    {
+        "type": "crosstool",
+        "target": "moxie-none-elf",
+        "triple": "moxie-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "moxie-none-moxiebox"
+    },
+    // FAILS DURING BUILDING BINUTILS:
+    //      BFD does not support target moxie-unknown-linux-gnu.
+    //{
+    //    "type": "crosstool",
+    //    "target": "moxie-unknown-linux-gnu"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "moxieeb-unknown-linux-gnu",
+    //    "triple": "moxie-unknown-linux-gnu"
+    //},
+    {
+        "type": "crosstool",
+        "target": "moxieeb-none-elf",
+        "triple": "moxie-unknown-elf"
+    },
+    // FAILS DURING BUILDING LIBC PASS 2:
+    //      moxie-none-moxiebox-cc: error: this target is little-endian
+    //      Expected since moxiebox only supports LE.
+    //{
+    //    "type": "crosstool",
+    //    "target": "moxieeb-none-moxiebox",
+    //    "target": "moxie-none-moxiebox"
+    //},
+    {
+        "type": "crosstool",
+        "target": "nios2-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "nios2-unknown-linux-gnu",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "ppc-unknown-elf",
+        "triple": "powerpc-unknown-elf",
+        "processor": "ppc"
+    },
+    {
+        "type": "crosstool",
+        "target": "ppcle-unknown-elf",
+        "triple": "powerpcle-unknown-elf",
+        "processor": "ppcle"
+    },
+    // GCC DOES NOT SUPPORT PPC64 AND PPC64LE WITH ELF:
+    //      Configuration powerpc64-unknown-elf not supported
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64-unknown-elf"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64le-unknown-elf"
+    //},
+    // FAILS DURING COMPILING DUE TO:
+    //      undefined reference to `__init'
+    //      Adding -msim or -mads does not fix it.
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc-unknown-eabi",
+    //    "triple": "powerpc-unknown-elf",
+    //    "processor": "ppc"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppcle-unknown-eabi",
+    //    "triple": "powerpcle-unknown-elf",
+    //    "processor": "ppcle"
+    //},
+    // BINUTILS DOES NOT SUPPORT PPC64 AND PPC64LE WITH EABI:
+    //      BFD does not support target powerpc64-unknown-eabi.
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64-unknown-eabi",
+    //    "triple": "ppc64-unknown-elf"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64le-unknown-eabi",
+    //    "triple": "ppc64le-unknown-elf"
+    //},
+    // GCC DOES NOT SUPPORT SPEELF:
+    //      Configuration powerpc-unknown-elfspe not supported
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc-unknown-spe",
+    //    "triple": "powerpc-unknown-elf",
+    //    "processor": "ppc"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppcle-unknown-spe",
+    //    "triple": "powerpcle-unknown-elf",
+    //    "processor": "ppcle"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64-unknown-spe",
+    //    "triple": "ppc64-unknown-elf"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64le-unknown-spe",
+    //    "triple": "ppc64le-unknown-elf"
+    //},
+    {
+        "type": "crosstool",
+        "target": "ppcle-unknown-linux-gnu",
+        "triple": "powerpcle-unknown-linux-gnu",
+        "processor": "ppcle"
+    },
+    // FAILS WITH CUSTOM BUILD OF STOCK GCC:
+    //      rv32i-based targets are not supported on stock GCC.
+    //{
+    //    "type": "crosstool",
+    //    "target": "riscv32-unknown-linux-gnu",
+    //    "qemu": true
+    //},
+    {
+        "type": "crosstool",
+        "target": "s390-unknown-linux-gnu",
+        "triple": "s390-ibm-linux-gnu"
+    },
+    // FAILS DURING BUILDING BINUTILS:
+    //      checking for suffix of executables...
+    //      make[2]: *** [Makefile:7088: configure-ld] Error 1
+    //{
+    //    "type": "crosstool",
+    //    "target": "s390-unknown-elf"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "s390x-unknown-elf"
+    //},
+    {
+        "type": "crosstool",
+        "target": "sh1-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m1",
+        "processor": "sh1"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh2-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m2",
+        "processor": "sh2"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh2e-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m2e",
+        "processor": "sh2e"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh3-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m3",
+        "processor": "sh3"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh3-unknown-linux-gnu"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh3be-unknown-linux-gnu",
+        "triple": "sh3eb-unknown-linux-gnu"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh3e-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m3e",
+        "processor": "sh3e"
+    },
+    // # FAILS DUE TO:
+    //      undefined reference to `__fpscr_values`.
+    //{
+    //    "type": "crosstool",
+    //    "target": "sh3e-unknown-linux-gnu"
+    //},
+    {
+        "type": "crosstool",
+        "target": "sh4-100-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m4-100",
+        "processor": "sh4-100"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh4-200-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m4-200",
+        "processor": "sh4-200"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh4-300-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m4-300",
+        "processor": "sh4-300"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh4-340-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m4-340",
+        "processor": "sh4-340"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh4-500-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m4-500",
+        "processor": "sh4-500"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh4-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m4",
+        "processor": "sh4"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh4a-unknown-elf",
+        "triple": "sh-unknown-elf",
+        "config": "sh-unknown-elf",
+        "flags": "-m4a",
+        "processor": "sh4a"
+    },
+    {
+        "type": "crosstool",
+        "target": "sh4be-unknown-linux-gnu",
+        "triple": "sh4eb-unknown-linux-gnu",
+        "qemu": true
+    },
+    // FAILS DURING BUILDING LIBC PASS 2:
+    //      "multiple definition of `_errno'".
+    //{
+    //    "type": "crosstool",
+    //    "target": "sh*be*-unknown-elf",
+    //    "triple": "shbe-unknown-elf",
+    //    "config": "shbe-unknown-elf",
+    //    "flags": "-m*be*",
+    //    "processor": "sh*be*"
+    //},
+    {
+        "type": "crosstool",
+        "target": "sparc-unknown-elf"
+    },
+    // FAILS DURING BUILDING NEWLIB DUE TO:
+    //      error: argument 'dirp' doesn't match prototype
+    //{
+    //    "type": "crosstool",
+    //    "target": "sparc64-unknown-elf"
+    //},
+    // FAILS IN LIBC BUILD PASS 1:
+    //      glibc 2.23+ do not support only support SPARCv9, and
+    //      there's bugs with older glibc versions.
+    //{
+    //    "type": "crosstool",
+    //    "target": "sparc-unknown-linux-gnu",
+    //    "qemu": true
+    //},
+    // NOTE:
+    //      Note: requires GCC-8, due to invalid register clobbing with source and dest.
+    {
+        "type": "crosstool",
+        "target": "sparc-unknown-linux-uclibc",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "thumb-unknown-elf",
+        "triple": "arm-unknown-eabi",
+        "config": "arm-unknown-elf",
+        "flags": "-mthumb"
+    },
+    {
+        "type": "crosstool",
+        "target": "thumbeb-unknown-elf",
+        "triple": "armeb-unknown-eabi",
+        "config": "armeb-unknown-elf",
+        "flags": "-mthumb"
+    },
+    {
+        "type": "crosstool",
+        "target": "thumbeb-unknown-linux-gnueabi",
+        "triple": "armeb-unknown-linux-gnueabi",
+        "config": "armeb-unknown-linux-gnueabi",
+        "flags": "-mthumb",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "x86_64-multilib-linux-musl",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "x86_64-unknown-elf"
+    },
+    {
+        "type": "crosstool",
+        "target": "x86_64-unknown-linux-uclibc",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "x86_64-w64-mingw32"
+    },
+    // FAILS DURING BUILDING LIBC PASS 1:
+    //      Newlib does not support Xtensa.
+    //{
+    //    "type": "crosstool",
+    //    "target": "xtensa-unknown-elf"
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "xtensabe-unknown-elf",
+    //    "triple": "xtensa-unknown-elf",
+    //    "processor": "xtensaeb"
+    //},
+    // FAILS IN LIBC BUILD PASS 2:
+    //      little endian output does not match Xtensa configuration
+    //{
+    //    "type": "crosstool",
+    //    "target": "xtensa-unknown-linux-uclibc",
+    //    "qemu": true
+    //},
+    // NOTE:
+    //      Qemu currently fails, but seems to be a Qemu error, since
+    //      the instructions seem to all be valid.
+    {
+        "type": "crosstool",
+        "target": "xtensabe-unknown-linux-uclibc",
+        "triple": "xtensa-unknown-linux-uclibc",
+        "processor": "xtensaeb",
+        "qemu": true
+    },
+
+    // DEBIAN
+    {
+        "type": "debian",
+        "target": "alpha-unknown-linux-gnu",
+        "libc": "libc6.1-alpha-cross"
+    },
+    {
+        "type": "debian",
+        "target": "arm64-unknown-linux-gnu",
+        "processor": "aarch64"
+    },
+    {
+        "type": "debian",
+        "target": "armel-unknown-linux-gnueabi",
+        "processor": "arm"
+    },
+    {
+        "type": "debian",
+        "target": "armelhf-unknown-linux-gnueabi",
+        "libc": "libc6-armel-armhf-cross",
+        "processor": "arm",
+        "system": "gnueabihf"
+    },
+    {
+        "type": "debian",
+        "target": "hppa-unknown-linux-gnu"
+    },
+    {
+        "type": "debian",
+        "target": "i686-unknown-linux-gnu",
+        "cxx": "g++-{version}-i686-linux-gnu",
+        "libc": "libc6-i386-cross",
+        "prefix": "i686",
+        "processor": "i386"
+    },
+    {
+        "type": "debian",
+        "target": "m68k-unknown-linux-gnu"
+    },
+    {
+        "type": "debian",
+        "target": "mips-unknown-linux-gnu"
+    },
+    {
+        "type": "debian",
+        "target": "mips64-unknown-linux-gnu",
+        "system": "gnuabi64"
+    },
+    {
+        "type": "debian",
+        "target": "mips64el-unknown-linux-gnu",
+        "system": "gnuabi64"
+    },
+    {
+        "type": "debian",
+        "target": "mips64r6-unknown-linux-gnu",
+        "cxx": "g++-{version}-mipsisa64r6-linux-gnuabi64",
+        "prefix": "mipsisa64r6",
+        "processor": "mips64",
+        "system": "gnuabi64"
+    },
+    {
+        "type": "debian",
+        "target": "mips64r6el-unknown-linux-gnu",
+        "cxx": "g++-{version}-mipsisa64r6el-linux-gnuabi64",
+        "prefix": "mipsisa64r6el",
+        "processor": "mips64el",
+        "system": "gnuabi64"
+    },
+    {
+        "type": "debian",
+        "target": "mipsel-unknown-linux-gnu"
+    },
+    {
+        "type": "debian",
+        "target": "mipsr6-unknown-linux-gnu",
+        "cxx": "g++-{version}-mipsisa32r6-linux-gnu",
+        "prefix": "mipsisa32r6",
+        "processor": "mips"
+    },
+    {
+        "type": "debian",
+        "target": "mipsr6el-unknown-linux-gnu",
+        "cxx": "g++-{version}-mipsisa32r6el-linux-gnu",
+        "prefix": "mipsisa32r6el",
+        "processor": "mipsel"
+    },
+    {
+        "type": "debian",
+        "target": "ppc-unknown-linux-gnu",
+        "cxx": "g++-{version}-powerpc-linux-gnu",
+        "libc": "libc6-powerpc-cross",
+        "prefix": "powerpc",
+        "processor": "ppc"
+    },
+    {
+        "type": "debian",
+        "target": "ppc64-unknown-linux-gnu",
+        "cxx": "g++-{version}-powerpc64-linux-gnu",
+        "prefix": "powerpc64"
+    },
+    {
+        "type": "debian",
+        "target": "ppc64le-unknown-linux-gnu",
+        "cxx": "g++-{version}-powerpc64le-linux-gnu",
+        "libc": "libc6-ppc64el-cross",
+        "prefix": "powerpc64le"
+    },
+    {
+        "type": "debian",
+        "target": "riscv64-unknown-linux-gnu"
+    },
+    {
+        "type": "debian",
+        "target": "s390x-unknown-linux-gnu",
+        "libc": "libc6-s390-s390x-cross"
+    },
+    {
+        "type": "debian",
+        "target": "sh4-unknown-linux-gnu"
+    },
+    {
+        "type": "debian",
+        "target": "sparc64-unknown-linux-gnu"
+    },
+    {
+        "type": "debian",
+        "target": "thumbel-unknown-linux-gnueabi",
+        "triple": "armel-unknown-linux-gnueabi",
+        "flags": "-mthumb",
+        "processor": "arm"
+    },
+    {
+        "type": "debian",
+        "target": "thumbelhf-unknown-linux-gnueabi",
+        "triple": "armelhf-unknown-linux-gnueabi",
+        "libc": "libc6-armel-armhf-cross",
+        "flags": "-mthumb",
+        "processor": "arm",
+        "system": "gnueabihf"
+    },
+    {
+        "type": "debian",
+        "target": "x86_64-unknown-linux-gnu",
+        "cxx": "g++-{version}",
+        "libc": "libc6"
+    },
+
+    // RISC-V
+    // We also have some extensive flags for specific configurations of RISC-V.
+    // The naming follows as this:
+    //   riscv{BITS}-{ARCH}-{ABI}-{vendor}-{os}-{system}
+    //   * `BITS` - 32 or 64
+    //   * `ARCH` - A string of the format imafdc, in order.
+    //       The `I` extension is the base integer instructions.
+    //       The `M` extension is the base multiplication and division instructions.
+    //       The `A` extension is the base atomic instructions.
+    //       The `F` extension is for 32-bit float instructions.
+    //       The `D` extension is for 64-bit float instructions.
+    //       The `C` extension is for compressed instructions.
+    //       The `ima` component is mandatory.
+    //   * `ABI` - ilp32[d] or lp64[d]
+    //       The `D` extension specifies that 64-bit floats should be passed in registers.
+    //       The `F` extension (32-bit floats) is not supported,
+    //           nor is `Q` (128-bit floats)
+    //       The `E` extension (embedded) is only supported on bare-metal machines.
+    {
+        "type": "riscv",
+        "target": "riscv32-multilib-linux-gnu",
+        "triple": "riscv64-unknown-linux-gnu",
+        "qemu": true,
+        "extensions": "imac",
+        "abi": "ilp32"
+    },
+    {
+        "type": "riscv",
+        "target": "riscv32-unknown-elf",
+        "triple": "riscv64-unknown-elf",
+        "qemu": false,
+        "extensions": "imac",
+        "abi": "ilp32"
+    },
+    {
+        "type": "riscv",
+        "target": "riscv64-multilib-linux-gnu",
+        "triple": "riscv64-unknown-linux-gnu",
+        "qemu": true,
+        "extensions": "imac",
+        "abi": "lp64"
+    },
+    {
+        "type": "riscv",
+        "target": "riscv64-unknown-elf",
+        "triple": "riscv64-unknown-elf",
+        "qemu": false,
+        "extensions": "imac",
+        "abi": "lp64"
+    },
+
+    // OTHER
+    {
+        "type": "other",
+        "os": "script",
+        "system": "javascript",
+        "target": "wasm"
+    }
+]

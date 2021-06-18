@@ -6,5 +6,5 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=^PREFIX^
 export DIR="^NDK_DIRECTORY^/toolchains/llvm/prebuilt/linux-x86_64"
 
-PREFIX=^ARCH^^SDK_VERSION^ shortcut_clang
+^FLAGS^PREFIX=^TOOLCHAIN^^SDK_VERSION^ shortcut_clang
 shortcut_util

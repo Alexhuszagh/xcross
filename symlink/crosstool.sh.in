@@ -3,7 +3,7 @@
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/shortcut.sh"
 
-export PREFIX=^PREFIX^
+export PREFIX=^TRIPLE^
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 
 ^FLAGS^shortcut_gcc
