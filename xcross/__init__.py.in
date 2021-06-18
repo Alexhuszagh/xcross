@@ -253,13 +253,20 @@ def find_container_engine():
 def engine_type(engine):
     '''Determine the container engine type.'''
 
-    proc = subprocess.Popen([engine, '-v'], stdout=subprocess.PIPE)
-    stdout, _ = proc.communicate()
-    if b'docker' in stdout.lower():
-        return 'docker'
-    elif b'podman' in stdout.lower():
-        return 'podman'
-    error(f'Unrecognized engine type, got {stdout}')
+    try:
+        proc = subprocess.Popen([engine, '-v'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate()
+        if b'docker' in stdout.lower():
+            return 'docker'
+        elif b'podman' in stdout.lower():
+            return 'podman'
+        if stderr:
+            error(f'Got error when probing engine type of "{stderr.decode("utf-8")}"', show_help=False)
+        error(f'Unrecognized engine type, got "{stderr.decode("utf-8")}"', show_help=False)
+    except OSError as err:
+        if err.errno == errno.ENOENT:
+            error(f'Unable to find command {engine}', code=err.errno, show_help=False)
+        raise
 
 def validate_arguments(args):
     '''Validate the parsed arguments.'''
@@ -376,7 +383,7 @@ def main(argv=None):
     try:
         command = image_command(args, relpath)
         fd = os.open(args.script_name, open_flags)
-        with os.fdopen(fd, 'w', newline='\n') as file:
+        with os.fdopen(fd, 'w') as file:
             file.write(command)
     except OSError as err:
         if err.errno == errno.EEXIST:
