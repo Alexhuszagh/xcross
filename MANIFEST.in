@@ -1,2 +1,2 @@
-include version
+include config/*
 include xcross/*.in
