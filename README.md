@@ -501,6 +501,8 @@ Image names may optionally contain a trailing version, which will always use the
 - **No Version**: Alias for the latest version listed.
 - **0.1**: GCC 10.2.0, glibc 2.31, and Ubuntu 20.04.
 
+Pre-1.0, minor versions signify backwards-incompatible changes to toolchains. Patch increments signify bug fixes, and build increments signify the addition of new toolchains.
+
 # Dependencies
 
 In order to use `xcross`, you must have:
