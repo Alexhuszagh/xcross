@@ -644,6 +644,8 @@ Platform-specific details:
 
 This is free and unencumbered software released into the public domain. This project, however, does derive off of projects that are not necessarily public domain software, such as [crosstool-NG](https://github.com/crosstool-ng/crosstool-ng), the [Android NDK](https://android.googlesource.com/platform/prebuilts/ndk/+/master/NOTICE), as well as build off of GCC, the Linux kernel headers, and the relevant C-runtime (glibc, musl, uClibc-ng). Therefore, distributing any images will be subject to the GPLv3 or later (for GCC), and GPLv2 for the Linux headers.
 
+The diff files, used to fix bugs in toolchain components, are licensed under the terms of the original component. See [diff/README.md](https://github.com/Alexhuszagh/xcross/blob/main/diff/README.md) for more details.
+
 These licenses are only relevant if you distribute a toolchain: for merely compiling and linking code as part of a standard toolchain, the usual linking exceptions apply.
 
 # Contributing
