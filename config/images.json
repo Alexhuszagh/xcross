@@ -202,16 +202,22 @@
             "armv6-setjmp",
             "armv6-setjmp-make"
         ],
+	"processor": "armeb",
+	"flags": "-march=armv6",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "armebv6-unknown-linux-musleabi",
+	"processor": "armeb",
+	"flags": "-march=armv6",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "armebv6-unknown-linux-uclibceabi",
+	"processor": "armeb",
+	"flags": "-march=armv6",
         "qemu": true
     },
     {
@@ -223,16 +229,22 @@
             "armv6-setjmp",
             "armv6-setjmp-make"
         ],
+	"processor": "arm",
+	"flags": "-march=armv6",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "armv6-unknown-linux-musleabi",
+	"processor": "arm",
+	"flags": "-march=armv6",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "armv6-unknown-linux-uclibceabi",
+	"processor": "arm",
+	"flags": "-march=armv6",
         "qemu": true
     },
     {
