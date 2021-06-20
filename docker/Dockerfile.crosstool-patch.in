@@ -1,0 +1,7 @@
+# Build GCC
+COPY ["ct-ng/^CONFIG^.config", "/ct-ng/"]
+COPY ["docker/gcc-patch.sh", "/ct-ng/"]
+RUN mkdir -p /src/diff
+^PATCH^
+RUN ARCH=^CONFIG^ /ct-ng/gcc-patch.sh
+RUN rm -rf /ct-ng/

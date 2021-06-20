@@ -415,6 +415,14 @@ class CrosstoolImage(Image):
         self._processor = value
 
     @property
+    def patches(self):
+        return getattr(self, '_patches', [])
+
+    @patches.setter
+    def patches(self, value):
+        self._patches = value
+
+    @property
     def qemu(self):
         return getattr(self, '_qemu', False)
 
@@ -595,6 +603,7 @@ class ConfigureCommand(VersionCommand):
         cmake = f'{HOME}/docker/cmake.sh'
         entrypoint = f'{HOME}/docker/entrypoint.sh'
         gcc = f'{HOME}/docker/gcc.sh'
+        gcc_patch = f'{HOME}/docker/gcc-patch.sh'
         qemu = f'{HOME}/docker/qemu.sh'
         qemu_apt = f'{HOME}/docker/qemu-apt.sh'
         riscv_gcc = f'{HOME}/docker/riscv-gcc.sh'
@@ -613,6 +622,10 @@ class ConfigureCommand(VersionCommand):
             ('BIN', f'"{bin_directory}"'),
         ])
         self.configure(f'{gcc}.in', gcc, True, [
+            ('CROSSTOOL_VERSION', f'"{ct_version}"'),
+            ('JOBS', config["options"]["build_jobs"]),
+        ])
+        self.configure(f'{gcc_patch}.in', gcc_patch, True, [
             ('CROSSTOOL_VERSION', f'"{ct_version}"'),
             ('JOBS', config["options"]["build_jobs"]),
         ])
@@ -711,7 +724,15 @@ class ConfigureCommand(VersionCommand):
 
         self.configure(f'{patch}.in', patch, True, replacements)
 
-    def configure_dockerfile(self, target, template, with_qemu, replacements, use_base=True, use_toolchain=True):
+    def configure_dockerfile(
+        self,
+        target,
+        template,
+        with_qemu,
+        replacements,
+        use_base=True,
+        use_toolchain=True
+    ):
         '''Configure a Dockerfile from template.'''
 
         # These files are read in the order they're likely to change,
@@ -783,12 +804,22 @@ class ConfigureCommand(VersionCommand):
         '''Configure a crosstool-NG image.'''
 
         # Configure the dockerfile.
-        template = f'{HOME}/docker/Dockerfile.crosstool.in'
+        if image.patches:
+            template = f'{HOME}/docker/Dockerfile.crosstool-patch.in'
+            files = []
+            for patch in image.patches:
+                files += glob.glob(f'diff/{patch}.*')
+            patches = [f'COPY ["{i}", "/src/diff/"]' for i in files]
+            patches = '\n'.join(patches)
+        else:
+            template = f'{HOME}/docker/Dockerfile.crosstool.in'
+            patches = ''
         self.configure_dockerfile(image.target, template, image.qemu, [
             ('ARCH', image.processor),
             ('BIN', f'"{bin_directory}"'),
             ('CONFIG', image.config),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('PATCH', patches),
             ('TARGET', image.target),
         ])
 

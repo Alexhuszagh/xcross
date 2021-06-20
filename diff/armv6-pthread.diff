@@ -1,0 +1,6 @@
+29a30
+> #include <bits/types/struct___jmp_buf_tag.h>
+719c720
+< extern int __sigsetjmp (struct __jmp_buf_tag *__env, int __savemask) __THROWNL;
+---
+> extern int __sigsetjmp (struct __jmp_buf_tag __env[1], int __savemask) __THROWNL;

@@ -196,6 +196,12 @@
     {
         "type": "crosstool",
         "target": "armebv6-unknown-linux-gnueabi",
+        "patches": [
+            "armv6-jump-buf-tag",
+            "armv6-pthread",
+            "armv6-setjmp",
+            "armv6-setjmp-make"
+        ],
         "qemu": true
     },
     {
@@ -211,6 +217,12 @@
     {
         "type": "crosstool",
         "target": "armv6-unknown-linux-gnueabi",
+        "patches": [
+            "armv6-jump-buf-tag",
+            "armv6-pthread",
+            "armv6-setjmp",
+            "armv6-setjmp-make"
+        ],
         "qemu": true
     },
     {
