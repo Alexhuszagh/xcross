@@ -1,0 +1,12 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
+SET(CMAKE_SYSTEM_NAME Generic)
+OPTION(JS_ONLY "Compiles to native JS (No WASM)" OFF)
+
+IF(JS_ONLY)
+    ADD_LINK_OPTIONS(-s WASM=0)
+ELSE()
+    ADD_LINK_OPTIONS(-s WASM=1)
+ENDIF()
+
+SET(CROSSCOMPILING_EMULATOR "run")
+INCLUDE(/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake)

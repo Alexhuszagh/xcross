@@ -30,9 +30,9 @@ cmake=^CMAKE^
 case "$1" in
     --build | --install | --open | -E | --find-package | --help)
         if [ "$VERBOSE" != "" ]; then
-            echo "$cmake" "$@"
+            echo ^WRAPPER^"$cmake" "$@"
         fi
-        "$cmake" "$@"
+        ^WRAPPER^"$cmake" "$@"
         ;;
     *)
         # Only add our toolchain file if it isn't provided
@@ -50,8 +50,8 @@ case "$1" in
         fi
 
         if [ "$VERBOSE" != "" ]; then
-            echo "$cmake" "$toolchain" "$@"
+            echo ^WRAPPER^"$cmake" "$toolchain" "$@"
         fi
-        "$cmake" "$toolchain" "$@"
+        ^WRAPPER^"$cmake" "$toolchain" "$@"
         ;;
 esac

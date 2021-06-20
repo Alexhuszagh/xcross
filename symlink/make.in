@@ -1,0 +1,8 @@
+#!/bin/bash
+# Wrapper script for Make to simplify adding custom wrappers.
+
+make=^MAKE^
+if [ "$VERBOSE" != "" ]; then
+    echo ^WRAPPER^"$make" "$@"
+fi
+^WRAPPER^"$make" "$@"

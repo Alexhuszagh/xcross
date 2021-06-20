@@ -14,6 +14,7 @@ fi
 
 docker run -v "$scriptdir:/test" \
     --env IMAGE="$image" \
+    --env CMAKE_FLAGS="$CMAKE_FLAGS" \
     --env FLAGS="$FLAGS" \
     ahuszagh/cross:"$image" \
     /bin/bash -c "$command"

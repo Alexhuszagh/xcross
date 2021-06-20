@@ -71,6 +71,10 @@ for image in "${METAL_IMAGES[@]}"; do
     fi
 done
 
+# Test other images
+"$scriptdir/docker-run.sh" helloworld wasm
+CMAKE_FLAGS="-DJS_ONLY=1" "$scriptdir/docker-run.sh" helloworld wasm
+
 # Extensive custom OS tests.
 if [ "$METAL_TESTS" != "" ]; then
     "$scriptdir/docker-run.sh" ppc_metal "ppc-unknown-elf"

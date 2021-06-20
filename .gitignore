@@ -10,6 +10,7 @@ __pycache__/
 
 # Configured files
 cmake/cmake
+cmake/emcmake
 cmake/toolchain/
 ct-ng/patch.sh
 docker/android.sh
@@ -22,6 +23,7 @@ docker/qemu.sh
 docker/qemu-apt.sh
 docker/riscv-gcc.sh
 docker/version.sh
+symlink/emmake
 symlink/shortcut.sh
 symlink/toolchain/
 xcross/__init__.py

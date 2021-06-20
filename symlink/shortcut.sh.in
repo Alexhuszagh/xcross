@@ -152,11 +152,27 @@ shortcut_clang() {
     PREFIX="$PREFIX" HARDCODED="$HARDCODED" shortcut_clang_cpu_list
 }
 
+# Shortcut for a miscellaneous compiler tyoe.
+shortcut_compiler_other() {
+    cc_alias=("$BIN/cc")
+    cxx_alias=("$BIN/c++" "$BIN/cpp")
+
+    local cc="$1"
+    local cxx="$2"
+    ARGS="$CFLAGS" shortcut "$cc" "${cc_alias[@]}"
+    ARGS="$CFLAGS" shortcut "$cxx" "${cxx_alias[@]}"
+}
+
 # Shortcut for all the utilities.
 shortcut_util() {
     if [ "$PREFIX" = "" ]; then
         echo "Error: must set a prefix for the utilities."
         exit 1
+    fi
+
+    local hyphen=
+    if  [ "$DISABLE_HYPEN" = "" ]; then
+        hyphen="-"
     fi
 
     local prefix
@@ -198,11 +214,11 @@ shortcut_util() {
     # Some of these might not exist, but it's fine.
     # Shortcut does nothing if the file doesn't exist.
     for util in "${utils[@]}"; do
-        shortcut "$prefix"-"$util" "$BIN/$util"
+        shortcut "$prefix$hyphen$util" "$BIN/$util"
     done
     if [ "$VER" != "" ]; then
         for util in "${ver_utils[@]}"; do
-            shortcut "$prefix"-"$util"-"$VER" "$BIN/$util"
+            shortcut "$prefix$hyphen$util"-"$VER" "$BIN/$util"
         done
     fi
 }
@@ -275,4 +291,13 @@ shortcut_run() {
     fi
     FLAGS="-cpu /CPU" ARGS="$args" shortcut "$BIN/qemu-$ARCH-static" "$BIN/run"
     ARCH="$ARCH" HARDCODED="$HARDCODED" shortcut_run_cpu_list
+}
+
+# Create a runner for a non-Qemu binary.
+shortcut_run_other() {
+    if [ "$RUN" = "" ]; then
+        echo "Must specify a runner"
+        exit 1
+    fi
+    ARGS="$@" shortcut "$RUN" "$BIN/run"
 }

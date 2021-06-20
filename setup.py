@@ -711,7 +711,7 @@ class ConfigureCommand(VersionCommand):
 
         self.configure(f'{patch}.in', patch, True, replacements)
 
-    def configure_dockerfile(self, target, template, with_qemu, replacements):
+    def configure_dockerfile(self, target, template, with_qemu, replacements, use_base=True):
         '''Configure a Dockerfile from template.'''
 
         # These files are read in the order they're likely to change,
@@ -725,9 +725,12 @@ class ConfigureCommand(VersionCommand):
         symlink = f'{HOME}/docker/Dockerfile.symlink.in'
         toolchain = f'{HOME}/docker/Dockerfile.toolchain.in'
         entrypoint = f'{HOME}/docker/Dockerfile.entrypoint.in'
-        contents = ['FROM ahuszagh/cross:base\n']
-        with open(template, 'r') as file:
-            contents.append(file.read())
+        contents = []
+        if use_base:
+            contents.append('FROM ahuszagh/cross:base\n')
+        if template is not None:
+            with open(template, 'r') as file:
+                contents.append(file.read())
         if with_qemu:
             with open(qemu, 'r') as file:
                 contents.append(file.read())
@@ -904,11 +907,25 @@ class ConfigureCommand(VersionCommand):
     def configure_other(self, image):
         '''Configure a miscellaneous image.'''
 
+        # Configure the dockerfile.
         template = f'{HOME}/docker/Dockerfile.{image.target}.in'
-        dockerfile = f'{HOME}/docker/images/Dockerfile.{image.target}'
-        with open(template) as file:
-            contents = file.read()
-        self.write_file(dockerfile, contents, False)
+        self.configure_dockerfile(image.target, template, False, [
+            ('ARCH', image.target),
+            ('BIN', f'"{bin_directory}"'),
+            ('BINDIR', bin_directory),
+            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('TARGET', image.target),
+        ], use_base=False)
+
+        # Configure the CMake toolchain.
+        cmake_template = f'{HOME}/cmake/{image.target}.cmake.in'
+        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
+        self.configure(cmake_template, cmake, False, [])
+
+        # Configure the symlinks.
+        symlink_template = f'{HOME}/symlink/{image.target}.sh.in'
+        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
+        self.configure(symlink_template, symlink, True, [])
 
     def run(self):
         '''Modify configuration files.'''
@@ -923,6 +940,9 @@ class ConfigureCommand(VersionCommand):
         # Configure base version info.
         shell = f'{HOME}/docker/version.sh'
         cmake = f'{HOME}/cmake/cmake'
+        emcmake = f'{HOME}/cmake/emcmake'
+        emmake = f'{HOME}/symlink/emmake'
+        make = f'{HOME}/symlink/make.in'
         images_sh = f'{HOME}/docker/images.sh'
         self.configure(f'{shell}.in', shell, True, [
             ('VERSION_MAJOR', f"'{major}'"),
@@ -934,6 +954,15 @@ class ConfigureCommand(VersionCommand):
         ])
         self.configure(f'{cmake}.in', cmake, True, [
             ('CMAKE', f"'/usr/bin/cmake'"),
+            ('WRAPPER', ''),
+        ])
+        self.configure(f'{cmake}.in', emcmake, True, [
+            ('CMAKE', f"'/usr/bin/cmake'"),
+            ('WRAPPER', 'emcmake '),
+        ])
+        self.configure(make, emmake, True, [
+            ('MAKE', f"'/usr/bin/make'"),
+            ('WRAPPER', 'emmake '),
         ])
 
         # Configure our build scripts.

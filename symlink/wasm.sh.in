@@ -1,0 +1,11 @@
+#!/bin/bash
+
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+source "$scriptdir/shortcut.sh"
+
+export PREFIX=em
+export RUN=node
+
+shortcut_compiler_other emcc em++
+DISABLE_HYPEN=1 shortcut_util
+shortcut_run_other

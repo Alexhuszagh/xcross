@@ -12,6 +12,7 @@ cd cpp-add
 # Test CMake.
 mkdir build && cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake \
+    $CMAKE_FLAGS \
     -DCMAKE_C_FLAGS="$CFLAGS $FLAGS" \
     -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
 make
