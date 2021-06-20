@@ -634,6 +634,7 @@ We therefore support:
 - Sparc64 (Linux)
 - x86_64 (Linux, MinGW, Android, Bare-Metal)
 - xtensa (Linux)
+- wasm
 
 Platform-specific details:
 

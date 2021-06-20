@@ -72,12 +72,15 @@ for image in "${METAL_IMAGES[@]}"; do
 done
 
 # Test other images.
-"$scriptdir/docker-run.sh" helloworld wasm
-CMAKE_FLAGS="-DJS_ONLY=1" "$scriptdir/docker-run.sh" helloworld wasm
+wasm() {
+    TOOLCHAIN1=jsonly TOOLCHAIN2=wasm TOOLCHAIN1_FLAGS="-s WASM=0" TOOLCHAIN2_FLAGS="-s WASM=1" "$@"
+}
+wasm "$scriptdir/docker-run.sh" helloworld wasm
+wasm CMAKE_FLAGS="-DJS_ONLY=1" "$scriptdir/docker-run.sh" helloworld wasm
 
 # Test Ninja generators.
 CMAKE_FLAGS="-GNinja" "$scriptdir/docker-run.sh" helloworld "${OS_IMAGES[0]}"
-CMAKE_FLAGS="-GNinja" "$scriptdir/docker-run.sh" helloworld wasm
+wasm CMAKE_FLAGS="-GNinja" "$scriptdir/docker-run.sh" helloworld wasm
 
 # Extensive custom OS tests.
 if [ "$METAL_TESTS" != "" ]; then

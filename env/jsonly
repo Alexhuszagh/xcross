@@ -1,0 +1,11 @@
+# Sources the aliases and removes any duplicate shared/static flags.
+
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+source "$scriptdir/base"
+source "$scriptdir/replace"
+
+# Compiler toolchain with JS-only linking.
+export LDFLAGS="$(replace2 LDFLAGS -s WASM=1) -s WASM=0"
+
+unset replace
+unset replace2

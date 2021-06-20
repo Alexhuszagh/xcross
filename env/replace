@@ -7,10 +7,29 @@ replace() {
     local array=(${!variable})
     for target in "${delete[@]}"; do
         for i in "${!array[@]}"; do
-            if [[ ${array[i]} = $target ]]; then
+            if [ "${array[i]}" = "$target" ]; then
                 unset 'array[i]'
             fi
         done
+    done
+
+    echo "${array[*]}"
+}
+
+replace2() {
+    # Replace every instance of 2 variables in an array.
+    local variable="$1"
+    local first="$2"
+    local second="$3"
+    local array=(${!variable})
+
+    local length="${#array[@]}"
+    for i in "${!array[@]}"; do
+        j=$((i + 1))
+        if [ "$i" -lt "$length" ] && [ "${array[i]}" = "$first" ] && [ "${array[j]}" = "$second" ]; then
+            unset 'array[i]'
+            unset 'array[j]'
+        fi
     done
 
     echo "${array[*]}"

@@ -10,3 +10,4 @@ export CXXFLAGS="$(replace CXXFLAGS -fPIC) -fPIC"
 export LDFLAGS="$(replace LDFLAGS -static)"
 
 unset replace
+unset replace2

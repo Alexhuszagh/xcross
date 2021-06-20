@@ -711,7 +711,7 @@ class ConfigureCommand(VersionCommand):
 
         self.configure(f'{patch}.in', patch, True, replacements)
 
-    def configure_dockerfile(self, target, template, with_qemu, replacements, use_base=True):
+    def configure_dockerfile(self, target, template, with_qemu, replacements, use_base=True, use_toolchain=True):
         '''Configure a Dockerfile from template.'''
 
         # These files are read in the order they're likely to change,
@@ -736,8 +736,9 @@ class ConfigureCommand(VersionCommand):
                 contents.append(file.read())
         with open(symlink, 'r') as file:
             contents.append(file.read())
-        with open(toolchain, 'r') as file:
-            contents.append(file.read())
+        if use_toolchain:
+            with open(toolchain, 'r') as file:
+                contents.append(file.read())
         with open(entrypoint, 'r') as file:
             contents.append(file.read())
         contents = '\n'.join(contents)
@@ -915,7 +916,7 @@ class ConfigureCommand(VersionCommand):
             ('BINDIR', bin_directory),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('TARGET', image.target),
-        ], use_base=False)
+        ], use_base=False, use_toolchain=False)
 
         # Configure the CMake toolchain.
         cmake_template = f'{HOME}/cmake/{image.target}.cmake.in'
