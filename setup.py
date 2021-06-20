@@ -79,10 +79,8 @@ def get_version(key):
 # Read the xcross version information.
 major, minor, patch, build = get_version('xcross')
 version = f'{major}.{minor}'
-if patch != '0' or build != '':
+if patch != '0':
     version = f'{version}.{patch}'
-if build != '':
-    version = f'{version}-{build}'
 py2exe_version = f'{major}.{minor}.{patch}'
 
 # Read the dependency version information.
