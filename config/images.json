@@ -129,6 +129,18 @@
     },
     {
         "type": "crosstool",
+        "target": "arm64-unknown-linux-musl",
+        "triple": "aarch64-unknown-linux-musl",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "arm64-unknown-linux-uclibc",
+        "triple": "aarch64-unknown-linux-uclibc",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
         "target": "arm64eb-unknown-elf",
         "triple": "aarch64_be-unknown-elf",
         "flags": "--specs=nosys.specs"
@@ -141,12 +153,74 @@
     },
     {
         "type": "crosstool",
+        "target": "arm64eb-unknown-linux-musl",
+        "triple": "aarch64_be-unknown-linux-musl",
+        "qemu": true
+    },
+    {
+	"type": "crosstool",
+	"target": "arm64eb-unknown-linux-uclibc",
+	"triple": "aarch64_be-unknown-linux-uclibc",
+	"qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "arm-unknown-linux-musleabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "arm-unknown-linux-uclibceabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
         "target": "armeb-unknown-elf",
         "triple": "armeb-unknown-eabi"
     },
     {
         "type": "crosstool",
         "target": "armeb-unknown-linux-gnueabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armeb-unknown-linux-musleabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armeb-unknown-linux-uclibceabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armebv6-unknown-linux-gnueabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armebv6-unknown-linux-musleabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armebv6-unknown-linux-uclibceabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armv6-unknown-linux-gnueabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armv6-unknown-linux-musleabi",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "armv6-unknown-linux-uclibceabi",
         "qemu": true
     },
     {
