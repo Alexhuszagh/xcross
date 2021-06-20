@@ -14,6 +14,6 @@ RUN mkdir -p ^BIN^
 RUN mkdir -p /toolchains
 
 # Copy over build tool wrappers.
-COPY ["cmake/emcmake", "^BINDIR^/cmake"]
+COPY ["cmake/cmake", "^BINDIR^/cmake"]
 COPY ["symlink/emmake", "^BINDIR^/make"]
 WORKDIR /

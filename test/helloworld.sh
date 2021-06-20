@@ -56,9 +56,9 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/shared.cmake \
     $CMAKE_FLAGS \
     -DCMAKE_C_FLAGS="$CFLAGS $FLAGS" \
     -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
-make
+cmake --build .
 if [ "$run_shared" = yes ]; then
-    make run
+    cmake --build . -- run
     run hello
 fi
 
@@ -67,9 +67,9 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake \
     $CMAKE_FLAGS \
     -DCMAKE_C_FLAGS="$CFLAGS $FLAGS" \
     -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
-make
+cmake --build .
 if [ "$run_static" = yes ]; then
-    make run
+    cmake --build . -- run
     run hello
 fi
 

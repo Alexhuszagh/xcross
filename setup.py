@@ -940,7 +940,6 @@ class ConfigureCommand(VersionCommand):
         # Configure base version info.
         shell = f'{HOME}/docker/version.sh'
         cmake = f'{HOME}/cmake/cmake'
-        emcmake = f'{HOME}/cmake/emcmake'
         emmake = f'{HOME}/symlink/emmake'
         make = f'{HOME}/symlink/make.in'
         images_sh = f'{HOME}/docker/images.sh'
@@ -955,10 +954,6 @@ class ConfigureCommand(VersionCommand):
         self.configure(f'{cmake}.in', cmake, True, [
             ('CMAKE', f"'/usr/bin/cmake'"),
             ('WRAPPER', ''),
-        ])
-        self.configure(f'{cmake}.in', emcmake, True, [
-            ('CMAKE', f"'/usr/bin/cmake'"),
-            ('WRAPPER', 'emcmake '),
         ])
         self.configure(make, emmake, True, [
             ('MAKE', f"'/usr/bin/make'"),
