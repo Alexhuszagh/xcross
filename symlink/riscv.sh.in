@@ -5,6 +5,6 @@ source "$scriptdir/shortcut.sh"
 
 export PREFIX=^TRIPLE^
 export DIR="/opt/riscv"
-^HARDCODED^
+^HARDCODED^^LD_PRELOAD^^LD_LIBRARY_PATH^
 ^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util

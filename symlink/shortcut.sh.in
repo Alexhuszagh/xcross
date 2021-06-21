@@ -301,8 +301,17 @@ shortcut_run() {
     if [ "$LIBPATH" != "" ]; then
         # Add support for executables linked to a shared libc/libc++.
         for libpath in "${LIBPATH[@]}"; do
-            args="$args -L $libpath"
+            args="$args -L \"$libpath\""
         done
+    fi
+    # Need to specify the search path for custom libraries,
+    # since the local variables can be overwritten if the host
+    # is the same as the target, but using a custom libc.
+    if [ "$LD_PRELOAD" != "" ]; then
+        args="$args -E LD_PRELOAD=\"$LD_PRELOAD\""
+    fi
+    if [ "$LD_LIBRARY_PATH" != "" ]; then
+        args="$args -E LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
     fi
     FLAGS="-cpu /CPU" ARGS="$args" shortcut "$BIN/qemu-$ARCH-static" "$BIN/run"
     ARCH="$ARCH" HARDCODED="$HARDCODED" shortcut_run_cpu_list

@@ -28,10 +28,6 @@ is_android=no
 if [[ "$IMAGE" = *-android ]] || [[ "$IMAGE" = *-androideabi ]]; then
     is_android=yes
 fi
-is_musl=no
-if [[ "$IMAGE" = *-musl ]]; then
-    is_musl=yes
-fi
 is_armeb=no
 if [[ "$IMAGE" = armeb-* ]] || [[ "$IMAGE" = arm64eb-* ]] || [[ "$IMAGE" = thumbeb-* ]]; then
     is_armeb=yes
@@ -53,7 +49,7 @@ if [ "$has_run" = yes ] && [ "$is_ppc32" = no ] && [ "$is_microblaze" = no ]; th
     run_toolchain2=yes
 fi
 run_toolchain1=no
-if [ "$has_run" = yes ] && [ "$is_android" = no ] && [ "$is_musl" = no ] && [ "$is_armeb" = no ] && [ "$is_sh4be" = no ]; then
+if [ "$has_run" = yes ] && [ "$is_android" = no ] && [ "$is_armeb" = no ] && [ "$is_sh4be" = no ]; then
     run_toolchain1=yes
 fi
 if [[ "$IMAGE" = xtensa* ]]; then

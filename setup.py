@@ -343,6 +343,20 @@ class Image:
         return ''
 
     @property
+    def ld_library_path(self):
+        path = getattr(self, 'library_path', '')
+        if path:
+            return f'export LD_LIBRARY_PATH="{path}"\n'
+        return ''
+
+    @property
+    def ld_preload(self):
+        path = getattr(self, 'preload', '')
+        if path:
+            return f'export LD_PRELOAD="{path}"\n'
+        return ''
+
+    @property
     def flags(self):
         return getattr(self, '_flags', '')
 
@@ -817,6 +831,8 @@ class ConfigureCommand(VersionCommand):
         self.configure(symlink_template, symlink, True, [
             ('FLAGS', image.cflags),
             ('HARDCODED', image.hardcoded_cpulist),
+            ('LD_LIBRARY_PATH', image.ld_library_path),
+            ('LD_PRELOAD', image.ld_preload),
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
             ('OPTIONAL_FLAGS', image.optional_cflags),
             ('PREFIX', f'{image.prefix}-linux-{image.system}'),
@@ -873,6 +889,8 @@ class ConfigureCommand(VersionCommand):
             ('ARCH', image.processor),
             ('FLAGS', image.cflags),
             ('HARDCODED', image.hardcoded_cpulist),
+            ('LD_LIBRARY_PATH', image.ld_library_path),
+            ('LD_PRELOAD', image.ld_preload),
             ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])
@@ -916,6 +934,8 @@ class ConfigureCommand(VersionCommand):
             ('FLAGS', image.cflags),
             ('GCC_MAJOR', gcc_major),
             ('HARDCODED', image.hardcoded_cpulist),
+            ('LD_LIBRARY_PATH', image.ld_library_path),
+            ('LD_PRELOAD', image.ld_preload),
             ('PREFIX', image.prefix),
             ('PROCESSOR', image.processor),
             ('OPTIONAL_FLAGS', image.optional_cflags),
@@ -962,6 +982,8 @@ class ConfigureCommand(VersionCommand):
             ('ARCH', image.processor),
             ('FLAGS', image.cflags),
             ('HARDCODED', image.hardcoded_cpulist),
+            ('LD_LIBRARY_PATH', image.ld_library_path),
+            ('LD_PRELOAD', image.ld_preload),
             ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])

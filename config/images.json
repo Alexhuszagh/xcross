@@ -692,6 +692,7 @@
     {
         "type": "crosstool",
         "target": "x86_64-multilib-linux-musl",
+        "library_path": "$LIBPATH/lib64",
         "qemu": true
     },
     {
