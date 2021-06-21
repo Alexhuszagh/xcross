@@ -553,6 +553,8 @@ After the toolchain is created, all the CMake toolchain files, symlinks, and Doc
 [
     // ...
     {
+        // COMMON CONFIGURATIONS
+
         // Image type (mandatory). Valid values are:
         //  1. android
         //  2. crosstool
@@ -588,6 +590,44 @@ After the toolchain is created, all the CMake toolchain files, symlinks, and Doc
         // Name of the processor for Qemu user-space emulation
         // and for setting the toolchain alias.
         "processor": "alpha"
+
+        // OTHER CONFIGURATIONS
+
+        // Numerous other configurations are also supported, such as:
+        //  * `cpulist` - A hard-coded list of valid CPU values.
+        //    This will override any values from `run-cpu-list` and `cc-cpu-list`.
+        //    For example, on HPPA, `"cpulist": "1.0"`.
+        //
+        //  * `system` - Override the system component of a triple.
+        //    For example, `"system": "gnuabi64"`.
+        //
+        //  * `os` - Override the OS component of a triple.
+        //    For example, `"os": "linux"`.
+        //
+        //  * `vendor` - Override the vendor component of a triple.
+        //    For example, `"vendor": "unknown"`.
+        //
+        //  * `arch` - Override the arch component of a triple.
+        //    In almost all cases, it's preferable to use `processor`,
+        //    which exists for this purpose.
+        //
+        //  * `extensions` - Specify hardware extensions for the architecture.
+        //    Not available for all targets.
+        //    For example, `"extensions": "imadc"`.
+        //
+        //  * `abi` - Specify ABI details for the architecture.
+        //    Not available for all targets.
+        //    For example, `"abi": "lp64d"`.
+        //
+        //  * `library_path` - Specify the `LD_LIBRARY_PATH` variable for Qemu.
+        //    When the C-library differs but the host and target architecture
+        //    are the same, it can be necessary to set this value. You may
+        //    use the `$LIBPATH` variable, which specifies the sysroot for
+        //    Qemu's library search path.
+        //    For example, `"library_path": "$LIBPATH/lib64"`.
+        //
+        //  * `preload` - Specify the `LD_PRELOAD` variable for Qemu.
+        //    For example, `"preload": "$LIBPATH/lib64/libstdc++.so.6"`.
     },
     // ...
 ]
