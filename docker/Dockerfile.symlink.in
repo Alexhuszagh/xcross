@@ -1,4 +1,5 @@
 # Add symlinks
+COPY ["env/find", "/env/"]
 COPY ["symlink/shortcut.sh", "/"]
 COPY ["symlink/toolchain/^TARGET^.sh", "/"]
 RUN "/^TARGET^.sh"

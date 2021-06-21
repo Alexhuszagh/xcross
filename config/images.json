@@ -125,7 +125,7 @@
         "type": "crosstool",
         "target": "arm64-unknown-elf",
         "triple": "aarch64-unknown-elf",
-        "flags": "--specs=nosys.specs"
+        "optional_flags": "--specs=nosys.specs"
     },
     {
         "type": "crosstool",
@@ -143,7 +143,7 @@
         "type": "crosstool",
         "target": "arm64eb-unknown-elf",
         "triple": "aarch64_be-unknown-elf",
-        "flags": "--specs=nosys.specs"
+        "optional_flags": "--specs=nosys.specs"
     },
     {
         "type": "crosstool",
@@ -158,10 +158,10 @@
         "qemu": true
     },
     {
-	"type": "crosstool",
-	"target": "arm64eb-unknown-linux-uclibc",
-	"triple": "aarch64_be-unknown-linux-uclibc",
-	"qemu": true
+        "type": "crosstool",
+        "target": "arm64eb-unknown-linux-uclibc",
+        "triple": "aarch64_be-unknown-linux-uclibc",
+        "qemu": true
     },
     {
         "type": "crosstool",
@@ -193,33 +193,36 @@
         "target": "armeb-unknown-linux-uclibceabi",
         "qemu": true
     },
-    {
-        "type": "crosstool",
-        "target": "armebv6-unknown-linux-gnueabi",
-        "patches": [
-            "armv6-jump-buf-tag",
-            "armv6-pthread",
-            "armv6-setjmp",
-            "armv6-setjmp-make"
-        ],
-	"processor": "armeb",
-	"flags": "-march=armv6",
-        "qemu": true
-    },
-    {
-        "type": "crosstool",
-        "target": "armebv6-unknown-linux-musleabi",
-	"processor": "armeb",
-	"flags": "-march=armv6",
-        "qemu": true
-    },
-    {
-        "type": "crosstool",
-        "target": "armebv6-unknown-linux-uclibceabi",
-	"processor": "armeb",
-	"flags": "-march=armv6",
-        "qemu": true
-    },
+    // FAILS IN COMPILATION:
+    //      Improperly builds the C-library and compiler
+    //      in little-endian order.
+    //{
+    //    "type": "crosstool",
+    //    "target": "armebv6-unknown-linux-gnueabi",
+    //    "patches": [
+    //        "armv6-jump-buf-tag",
+    //        "armv6-pthread",
+    //        "armv6-setjmp",
+    //        "armv6-setjmp-make"
+    //    ],
+    //    "processor": "armeb",
+    //    "flags": "-march=armv6",
+    //    "qemu": true
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "armebv6-unknown-linux-musleabi",
+    //    "processor": "armeb",
+    //    "flags": "-march=armv6",
+    //    "qemu": true
+    //},
+    //{
+    //    "type": "crosstool",
+    //    "target": "armebv6-unknown-linux-uclibceabi",
+    //    "processor": "armeb",
+    //    "flags": "-march=armv6",
+    //    "qemu": true
+    //},
     {
         "type": "crosstool",
         "target": "armv6-unknown-linux-gnueabi",
@@ -229,22 +232,22 @@
             "armv6-setjmp",
             "armv6-setjmp-make"
         ],
-	"processor": "arm",
-	"flags": "-march=armv6",
+        "processor": "arm",
+        "optional_flags": "-march=armv6",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "armv6-unknown-linux-musleabi",
-	"processor": "arm",
-	"flags": "-march=armv6",
+        "processor": "arm",
+        "optional_flags": "-march=armv6",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "armv6-unknown-linux-uclibceabi",
-	"processor": "arm",
-	"flags": "-march=armv6",
+        "processor": "arm",
+        "optional_flags": "-march=armv6",
         "qemu": true
     },
     {

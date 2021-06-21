@@ -8,6 +8,6 @@ export VER=^GCC_MAJOR^
 export ARCH=^PROCESSOR^
 export LIBPATH="/usr/$PREFIX"
 
-^FLAGS^shortcut_gcc
+^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util
 shortcut_run

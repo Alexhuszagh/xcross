@@ -4,6 +4,10 @@
 # Custom binary directory, so it can technically be removed from the path.
 BIN=^BIN^
 
+add_cflags() {
+    ARGS="$CFLAGS" OPTIONAL_ARGS="$OPTIONAL_CFLAGS" "$@"
+}
+
 # Can't guarantee all files are compiled binaries, might be
 # scripts that use positional arguments. Make it a script
 # that called the argument. Only export shortcut if the
@@ -13,12 +17,23 @@ shortcut() {
     if command -v "$1" &> /dev/null; then
         echo '#!/bin/bash' >> "$2"
         echo "args=\"$ARGS\"" >> "$2"
+        echo "" >> "$2"
+        echo 'source "/env/find"' >> "$2"
         for value in "${FLAGS[@]}"; do
             local flag="${value%\/*}"
             local ident="${value#*\/}"
             echo "if [ \"\$$ident\" != \"\" ]; then" >> "$2"
-            echo "    args=\"\$args $flag\$$ident\"" >> "$2"
+            echo "    if ! find \"$flag\" \"\${@:2}\"; then" >> "$2"
+            echo "        args=\"\$args $flag\$$ident\"" >> "$2"
+            echo "    fi" >> "$2"
             echo "fi" >> "$2"
+        done
+        # This isn't bad, since we control `OPTIONAL_ARGS`.
+        eval "local options=($OPTIONAL_ARGS)"
+        for value in "${options[@]}"; do
+            echo "if ! find \"$value\" \"\${@:2}\"; then" >> "$2"
+            echo "    args=\"\$args '$value'\"" >> "$2"
+            echo 'fi' >> "$2"
         done
         echo "$1 \$args \"\$@\"" >> "$2"
         chmod +x "$2"
@@ -126,12 +141,12 @@ shortcut_compiler() {
 
     cc_alias=("$BIN/$cc_base" "$BIN/cc")
     cxx_alias=("$BIN/$cxx_base" "$BIN/c++" "$BIN/cpp")
-    ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cc" "${cc_alias[@]}"
-    ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cxx" "${cxx_alias[@]}"
+    FLAGS="-$cpu=/CPU" add_cflags shortcut "$cc" "${cc_alias[@]}"
+    FLAGS="-$cpu=/CPU" add_cflags shortcut "$cxx" "${cxx_alias[@]}"
 
     if [ "$VER" != "" ]; then
-        ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cc"-"$VER" "${cc_alias[@]}"
-        ARGS="$CFLAGS" FLAGS="-$cpu=/CPU" shortcut "$cxx"-"$VER" "${cxx_alias[@]}"
+        FLAGS="-$cpu=/CPU" add_cflags shortcut "$cc"-"$VER" "${cc_alias[@]}"
+        FLAGS="-$cpu=/CPU" add_cflags shortcut "$cxx"-"$VER" "${cxx_alias[@]}"
     fi
 
     # Need to add shortcut for Makefiles and CMake into "$BIN"
@@ -159,8 +174,8 @@ shortcut_compiler_other() {
 
     local cc="$1"
     local cxx="$2"
-    ARGS="$CFLAGS" shortcut "$cc" "${cc_alias[@]}"
-    ARGS="$CFLAGS" shortcut "$cxx" "${cxx_alias[@]}"
+    add_cflags shortcut "$cc" "${cc_alias[@]}"
+    add_cflags shortcut "$cxx" "${cxx_alias[@]}"
 }
 
 # Shortcut for all the utilities.

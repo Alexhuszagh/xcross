@@ -7,5 +7,5 @@ export PREFIX=
 export VER=^GCC_MAJOR^
 export ARCH=^PROCESSOR^
 
-shortcut_gcc
+^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_run

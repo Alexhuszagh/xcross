@@ -575,11 +575,16 @@ After the toolchain is created, all the CMake toolchain files, symlinks, and Doc
         "config": "alphaev4-unknown-linux-gnu",
         // Enable qemu userspace emulation (optional). Default false.
         "qemu": true,
-        // Optional flags to provide to the C compiler.
+        // Flags to provide to the C compiler (optional).
         // This is useful when targeting a specific ABI,
         // or for example, to skip the default start code
         // to provide your own crt0.
         "flags": "-nostartfiles",
+        // Optional flags to provide to the C compiler (optional).
+        // These are flags that will not clobber existing settings,
+        // for example, if `march=armv6` is provided as an optional
+        // flag, then passing `-march=armv6z` will override that setting.
+        "optional_flags": "",
         // Name of the processor for Qemu user-space emulation
         // and for setting the toolchain alias.
         "processor": "alpha"

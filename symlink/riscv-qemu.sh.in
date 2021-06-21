@@ -8,6 +8,6 @@ export DIR="/opt/riscv"
 export ARCH=^ARCH^
 export LIBPATH=("$DIR", "$DIR"/sysroot)
 
-^FLAGS^shortcut_gcc
+^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util
 shortcut_run

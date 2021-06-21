@@ -1,0 +1,20 @@
+# Script to find a flag in an array of arguments.
+
+split() {
+    # Split needle by a value (`=`) if present.
+    echo "$1" | cut -d '=' -f 1
+}
+
+find() {
+    # Find if an element if present in an array.
+    local needle=$(split "$1")
+    local haystack=("${@:2}")
+    for item in "${haystack[@]}"; do
+        item=$(split "$item")
+        if [ "$needle" = "$item" ]; then
+            return 0
+        fi
+    done
+
+    return 1
+}

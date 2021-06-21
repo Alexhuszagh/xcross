@@ -344,10 +344,25 @@ class Image:
         self._flags = value
 
     @property
+    def optional_flags(self):
+        return getattr(self, '_optional_flags', '')
+
+    @optional_flags.setter
+    def optional_flags(self, value):
+        self._optional_flags = value
+
+    @property
     def cflags(self):
         flags = self.flags
         if flags:
-            return f'CFLAGS="{flags}" '
+            return f'CFLAGS="{flags}"" '
+        return ''
+
+    @property
+    def optional_cflags(self):
+        flags = self.optional_flags
+        if flags:
+            return f'OPTIONAL_CFLAGS="{flags}" '
         return ''
 
     @property
@@ -491,12 +506,12 @@ class RiscvImage(Image):
         return int(re.match(r'^riscv(\d+)$', self.processor).group(1))
 
     @property
-    def cflags(self):
+    def optional_cflags(self):
         march = f'rv{self.bits}{self.extensions}'
         flags = f'-march={march} -mabi={self.abi}'
-        if self.flags:
-            flags= f'{self.flags} {flags}'
-        return f'CFLAGS="{flags}" '
+        if self.optional_flags:
+            flags= f'{self.optional_flags} {flags}'
+        return f'OPTIONAL_CFLAGS="{flags}" '
 
 class OtherImage(Image):
     '''Specialized properties for miscellaneous images.'''
@@ -795,6 +810,7 @@ class ConfigureCommand(VersionCommand):
         self.configure(symlink_template, symlink, True, [
             ('FLAGS', image.cflags),
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
+            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('PREFIX', f'{image.prefix}-linux-{image.system}'),
             ('SDK_VERSION', config['android']['sdk_version']),
             ('TOOLCHAIN', image.toolchain),
@@ -848,6 +864,7 @@ class ConfigureCommand(VersionCommand):
         self.configure(symlink_template, symlink, True, [
             ('ARCH', image.processor),
             ('FLAGS', image.cflags),
+            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])
 
@@ -891,6 +908,7 @@ class ConfigureCommand(VersionCommand):
             ('GCC_MAJOR', gcc_major),
             ('PREFIX', image.prefix),
             ('PROCESSOR', image.processor),
+            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('OS', image.os.to_triple()),
             ('SYSTEM', image.system),
         ])
@@ -933,6 +951,7 @@ class ConfigureCommand(VersionCommand):
         self.configure(symlink_template, symlink, True, [
             ('ARCH', image.processor),
             ('FLAGS', image.cflags),
+            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])
 
