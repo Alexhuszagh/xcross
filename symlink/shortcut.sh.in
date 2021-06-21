@@ -15,8 +15,23 @@ add_cflags() {
 # or an absolute path.
 shortcut() {
     if command -v "$1" &> /dev/null; then
+        # So, we need to use arrays to do this.
+        # The general approach is as follows:
+        #   1. Use eval to read the string into an array, which
+        #       is the only way to keep quoted values without
+        #       splitting them on whitespace. Since we control
+        #       the input, it's no big deal.
+        #   2. We format this array as an array in string, and
+        #       then add arguments to it.
+        #   3. Printf formatting only works if there's at least
+        #       1 element, so we short-circuit otherwise.
         echo '#!/bin/bash' >> "$2"
-        echo "args=\"$ARGS\"" >> "$2"
+        eval "local args=($ARGS)"
+        local formatted
+        if [ "${#args[@]}" -ne "0" ]; then
+            formatted=$(printf '"%s" ' "${args[@]}")
+        fi
+        echo "args=($formatted)" >> "$2"
         echo "" >> "$2"
         echo 'source "/env/find"' >> "$2"
         for value in "${FLAGS[@]}"; do
@@ -24,18 +39,18 @@ shortcut() {
             local ident="${value#*\/}"
             echo "if [ \"\$$ident\" != \"\" ]; then" >> "$2"
             echo "    if ! find \"$flag\" \"\${@:2}\"; then" >> "$2"
-            echo "        args=\"\$args $flag\$$ident\"" >> "$2"
+            echo "        args+=(\"$flag\$$ident\")" >> "$2"
             echo "    fi" >> "$2"
             echo "fi" >> "$2"
         done
-        # This isn't bad, since we control `OPTIONAL_ARGS`.
+
         eval "local options=($OPTIONAL_ARGS)"
         for value in "${options[@]}"; do
             echo "if ! find \"$value\" \"\${@:2}\"; then" >> "$2"
-            echo "    args=\"\$args '$value'\"" >> "$2"
+            echo "    args+=('$value')" >> "$2"
             echo 'fi' >> "$2"
         done
-        echo "$1 \$args \"\$@\"" >> "$2"
+        echo "$1 \"\${args[@]}\" \"\$@\"" >> "$2"
         chmod +x "$2"
         for file in "${@:3}"; do
             ln -s "$2" "$file"
