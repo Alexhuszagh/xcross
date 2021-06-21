@@ -526,6 +526,22 @@ class DebianImage(Image):
 class MuslCrossImage(Image):
     '''Specialized properties for musl-cross images.'''
 
+    @property
+    def processor(self):
+        return getattr(self, '_processor', self.arch)
+
+    @processor.setter
+    def processor(self, value):
+        self._processor = value
+
+    @property
+    def qemu(self):
+        return getattr(self, '_qemu', False)
+
+    @qemu.setter
+    def qemu(self, value):
+        self._qemu = value
+
 class RiscvImage(Image):
     '''Specialized properties for RISC-V images.'''
 

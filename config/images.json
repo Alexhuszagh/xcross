@@ -969,6 +969,67 @@
     // MUSL CROSS
     {
         "type": "musl-cross",
+        "target": "i386-unknown-linux-musl",
+        "config": "i386-linux-musl",
+        "processor": "i386",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "i486-unknown-linux-musl",
+        "config": "i486-linux-musl",
+        "processor": "i386",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "i586-unknown-linux-musl",
+        "config": "i586-linux-musl",
+        "processor": "i386",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "microblaze-unknown-linux-musl",
+        "config": "microblaze-linux-musl",
+        "processor": "microblaze",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "microblazeel-unknown-linux-musl",
+        "config": "microblazeel-linux-musl",
+        "processor": "microblazeel",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mips-unknown-linux-musl",
+        "config": "mips-linux-musl",
+        "processor": "mips",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mipsel-unknown-linux-musl",
+        "config": "mipsel-linux-musl",
+        "processor": "mipsel",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mipsel-unknown-linux-muslsf",
+        "config": "mipsel-linux-muslsf",
+        "processor": "mipsel",
+        "qemu": true
+    },
+    // TODO(ahuszagh) Add more once these are confirmed to work
+    // - `mips64[el]-linux-musl[n32][sf]`
+    // - `powerpc-linux-musl[sf]`
+    // - `powerpc64[le]-linux-musl`
+    // - `sh*[eb]-linux-musl[fdpic][sf]`
+    {
+        "type": "musl-cross",
         "target": "ppc64-unknown-linux-musl",
         "config": "powerpc64-linux-musl",
         "processor": "ppc64",
@@ -979,6 +1040,69 @@
         "target": "ppc64le-unknown-linux-musl",
         "config": "powerpc64le-linux-musl",
         "processor": "ppc64le",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "riscv64-unknown-linux-musl",
+        "config": "riscv64-linux-musl",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "s390x-unknown-linux-musl",
+        "config": "s390x-linux-musl",
+        "processor": "s390x",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh1-unknown-linux-musl",
+        "config": "sh1-linux-musl"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh2-unknown-linux-musl",
+        "config": "sh2-linux-musl"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh3-unknown-linux-musl",
+        "config": "sh3-linux-musl"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh4-unknown-linux-musl",
+        "config": "sh4-linux-musl",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh1eb-unknown-linux-musl",
+        "config": "sh1eb-linux-musl"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh2eb-unknown-linux-musl",
+        "config": "sh2eb-linux-musl"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh3eb-unknown-linux-musl",
+        "config": "sh3eb-linux-musl"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh4eb-unknown-linux-musl",
+        "config": "sh4eb-linux-musl",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "x86_64-unknown-linux-muslx32",
+        "config": "x86_64-linux-muslx32",
+        "processor": "x86_64",
         "qemu": true
     },
 
