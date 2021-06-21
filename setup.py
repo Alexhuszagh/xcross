@@ -362,7 +362,7 @@ class Image:
     def cflags(self):
         flags = self.flags
         if flags:
-            return f'CFLAGS="{flags}"" '
+            return f'CFLAGS="{flags}" '
         return ''
 
     @property
