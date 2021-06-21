@@ -409,13 +409,15 @@
         "target": "nios2-unknown-linux-gnu",
         "qemu": true
     },
-    {
-        "type": "crosstool",
-        "target": "ppc-e500v2-linux-gnuspe",
-        "triple": "powerpc-e500v2-linux-gnuspe",
-        "processor": "ppc",
-        "qemu": true
-    },
+    // FAILS DURING GCC PASS 1:
+    //     Fails during configuration.
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc-e500v2-linux-gnuspe",
+    //    "triple": "powerpc-e500v2-linux-gnuspe",
+    //    "processor": "ppc",
+    //    "qemu": true
+    //},
     {
         "type": "crosstool",
         "target": "ppc-unknown-elf",
