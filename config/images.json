@@ -411,6 +411,13 @@
     },
     {
         "type": "crosstool",
+        "target": "ppc-e500v2-linux-gnuspe",
+        "triple": "powerpc-e500v2-linux-gnuspe",
+        "processor": "ppc",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
         "target": "ppc-unknown-elf",
         "triple": "powerpc-unknown-elf",
         "processor": "ppc"
