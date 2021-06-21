@@ -14,7 +14,7 @@ semver() {
         "$VERSION_MAJOR.$VERSION_MINOR"
         "$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH"
     )
-    if [ "$VERSION_MAJOR" != "" ]; then
+    if [ "$VERSION_MAJOR" != "0" ]; then
         versions+=("$VERSION_MAJOR")
     fi
     echo "${versions[@]}"
