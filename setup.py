@@ -336,6 +336,13 @@ class Image:
         return image_types[image_type].from_dict(data)
 
     @property
+    def hardcoded_cpulist(self):
+        cpus = getattr(self, 'cpulist', '')
+        if cpus:
+            return f'export HARDCODED="{cpus}"\n'
+        return ''
+
+    @property
     def flags(self):
         return getattr(self, '_flags', '')
 
@@ -809,6 +816,7 @@ class ConfigureCommand(VersionCommand):
         symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
         self.configure(symlink_template, symlink, True, [
             ('FLAGS', image.cflags),
+            ('HARDCODED', image.hardcoded_cpulist),
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
             ('OPTIONAL_FLAGS', image.optional_cflags),
             ('PREFIX', f'{image.prefix}-linux-{image.system}'),
@@ -864,6 +872,7 @@ class ConfigureCommand(VersionCommand):
         self.configure(symlink_template, symlink, True, [
             ('ARCH', image.processor),
             ('FLAGS', image.cflags),
+            ('HARDCODED', image.hardcoded_cpulist),
             ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])
@@ -906,6 +915,7 @@ class ConfigureCommand(VersionCommand):
         self.configure(symlink_template, symlink, True, [
             ('FLAGS', image.cflags),
             ('GCC_MAJOR', gcc_major),
+            ('HARDCODED', image.hardcoded_cpulist),
             ('PREFIX', image.prefix),
             ('PROCESSOR', image.processor),
             ('OPTIONAL_FLAGS', image.optional_cflags),
@@ -951,6 +961,7 @@ class ConfigureCommand(VersionCommand):
         self.configure(symlink_template, symlink, True, [
             ('ARCH', image.processor),
             ('FLAGS', image.cflags),
+            ('HARDCODED', image.hardcoded_cpulist),
             ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])

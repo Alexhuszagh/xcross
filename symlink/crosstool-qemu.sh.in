@@ -7,7 +7,7 @@ export PREFIX=^TRIPLE^
 export DIR=/home/crosstoolng/x-tools/"$PREFIX"/
 export ARCH=^ARCH^
 export LIBPATH="$DIR$PREFIX"/sysroot
-
+^HARDCODED^
 ^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util
 shortcut_run

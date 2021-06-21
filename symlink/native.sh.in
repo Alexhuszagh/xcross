@@ -6,6 +6,6 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=
 export VER=^GCC_MAJOR^
 export ARCH=^PROCESSOR^
-
+^HARDCODED^
 ^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_run

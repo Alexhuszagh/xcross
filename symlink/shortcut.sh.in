@@ -158,13 +158,13 @@ shortcut_compiler() {
 # Shortcut for a GCC-based compiler.
 shortcut_gcc() {
     shortcut_compiler "gcc" "g++"
-    PREFIX="$PREFIX" HARDCODED="$HARDCODED" shortcut_gcc_cpu_list
+    shortcut_gcc_cpu_list
 }
 
 # Shortcut for a Clang-based compiler.
 shortcut_clang() {
     shortcut_compiler "clang" "clang++"
-    PREFIX="$PREFIX" HARDCODED="$HARDCODED" shortcut_clang_cpu_list
+    shortcut_clang_cpu_list
 }
 
 # Shortcut for a miscellaneous compiler tyoe.

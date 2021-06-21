@@ -7,7 +7,7 @@ export PREFIX=^PREFIX^-^OS^-^SYSTEM^
 export VER=^GCC_MAJOR^
 export ARCH=^PROCESSOR^
 export LIBPATH="/usr/$PREFIX"
-
+^HARDCODED^
 ^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util
 shortcut_run

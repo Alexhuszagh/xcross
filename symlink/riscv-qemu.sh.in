@@ -7,7 +7,7 @@ export PREFIX=^TRIPLE^
 export DIR="/opt/riscv"
 export ARCH=^ARCH^
 export LIBPATH=("$DIR", "$DIR"/sysroot)
-
+^HARDCODED^
 ^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util
 shortcut_run

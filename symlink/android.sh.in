@@ -5,6 +5,6 @@ source "$scriptdir/shortcut.sh"
 
 export PREFIX=^PREFIX^
 export DIR="^NDK_DIRECTORY^/toolchains/llvm/prebuilt/linux-x86_64"
-
+^HARDCODED^
 ^FLAGS^^OPTIONAL_FLAGS^PREFIX=^TOOLCHAIN^^SDK_VERSION^ shortcut_clang
 shortcut_util

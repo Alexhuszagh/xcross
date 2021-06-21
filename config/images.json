@@ -762,7 +762,8 @@
     },
     {
         "type": "debian",
-        "target": "hppa-unknown-linux-gnu"
+        "target": "hppa-unknown-linux-gnu",
+        "cpulist": "1.0"
     },
     {
         "type": "debian",
