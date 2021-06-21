@@ -638,6 +638,8 @@ For a bare-metal example, see `ct-ng/ppcle-unknown-elf.config`. For a Linux exam
 
 # Platform Support
 
+For a complete list of targets, see [here](https://github.com/Alexhuszagh/xcross/blob/main/TARGETS.md). For a complete list of images, see the Docker Hub [repository](https://hub.docker.com/r/ahuszagh/cross).
+
 Currently, we only create images that are supported by:
 
 - crosstool-NG with official sources
