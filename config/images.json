@@ -417,6 +417,18 @@
     },
     {
         "type": "crosstool",
+        "target": "ppc-unknown-linux-musl",
+        "triple": "powerpc-unknown-linux-musl",
+        "processor": "ppc"
+    },
+    {
+        "type": "crosstool",
+        "target": "ppc-unknown-linux-uclibc",
+        "triple": "powerpc-unknown-linux-uclibc",
+        "processor": "ppc"
+    },
+    {
+        "type": "crosstool",
         "target": "ppcle-unknown-elf",
         "triple": "powerpcle-unknown-elf",
         "processor": "ppcle"
@@ -486,6 +498,18 @@
         "type": "crosstool",
         "target": "ppcle-unknown-linux-gnu",
         "triple": "powerpcle-unknown-linux-gnu",
+        "processor": "ppcle"
+    },
+    {
+        "type": "crosstool",
+        "target": "ppcle-unknown-linux-musl",
+        "triple": "powerpcle-unknown-linux-musl",
+        "processor": "ppcle"
+    },
+    {
+        "type": "crosstool",
+        "target": "ppcle-unknown-linux-uclibc",
+        "triple": "powerpcle-unknown-linux-uclibc",
         "processor": "ppcle"
     },
     // FAILS WITH CUSTOM BUILD OF STOCK GCC:
