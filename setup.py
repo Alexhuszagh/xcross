@@ -1121,6 +1121,7 @@ class ConfigureCommand(VersionCommand):
         # Make the required subdirectories.
         os.makedirs(f'{HOME}/cmake/toolchain', exist_ok=True)
         os.makedirs(f'{HOME}/docker/images', exist_ok=True)
+        os.makedirs(f'{HOME}/musl/config', exist_ok=True)
         os.makedirs(f'{HOME}/symlink/toolchain', exist_ok=True)
 
         # Configure base version info.
