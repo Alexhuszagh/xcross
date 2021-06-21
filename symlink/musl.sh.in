@@ -3,4 +3,8 @@
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/shortcut.sh"
 
-# TODO(ahuszagh) Not yet implemented...
+export PREFIX=^TRIPLE^
+export DIR=/home/crosstoolng/musl/
+^HARDCODED^^LD_PRELOAD^^LD_LIBRARY_PATH^
+^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
+shortcut_util

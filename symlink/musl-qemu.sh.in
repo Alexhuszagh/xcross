@@ -3,4 +3,17 @@
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/shortcut.sh"
 
-# TODO(ahuszagh) Not yet implemented...
+export PREFIX=^TRIPLE^
+export DIR=/home/crosstoolng/musl/
+export ARCH=^ARCH^
+^HARDCODED^^LD_PRELOAD^^LD_LIBRARY_PATH^
+^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
+shortcut_util
+shortcut_run
+
+# These don't work well with the aliased toolchains for shared
+# libraries, so we alias them into /lib.
+for lib in "$DIR$PREFIX"/lib/*.so*; do
+    name=$(basename "$lib")
+    ln -s "$lib" /lib/"$name"
+done

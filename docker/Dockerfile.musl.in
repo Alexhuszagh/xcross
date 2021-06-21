@@ -1,4 +1,4 @@
 # Build musl toolchain
 COPY ["musl/config/^TARGET^.mak", "/src/config.mak"]
-COPY ["docker/musl.sh", "/ct-ng/src"]
+COPY ["docker/musl.sh", "/src"]
 RUN /src/musl.sh

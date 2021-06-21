@@ -517,12 +517,14 @@
         "triple": "powerpcle-unknown-linux-musl",
         "processor": "ppcle"
     },
-    {
-        "type": "crosstool",
-        "target": "ppcle-unknown-linux-uclibc",
-        "triple": "powerpcle-unknown-linux-uclibc",
-        "processor": "ppcle"
-    },
+    // FAILS DURING LIBC BUILD PASS 2:
+    //      compiled for a little endian system and target is big endian
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppcle-unknown-linux-uclibc",
+    //    "triple": "powerpcle-unknown-linux-uclibc",
+    //    "processor": "ppcle"
+    //},
     // FAILS DURING LIBC BUILD PASS 1:
     //      error: unsupported powerpc64 ABI for MUSL
     //      using compiler runtime libraries:
