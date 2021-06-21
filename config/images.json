@@ -419,13 +419,15 @@
         "type": "crosstool",
         "target": "ppc-unknown-linux-musl",
         "triple": "powerpc-unknown-linux-musl",
-        "processor": "ppc"
+        "processor": "ppc",
+        "qemu": true
     },
     {
         "type": "crosstool",
         "target": "ppc-unknown-linux-uclibc",
         "triple": "powerpc-unknown-linux-uclibc",
-        "processor": "ppc"
+        "processor": "ppc",
+        "qemu": true
     },
     {
         "type": "crosstool",
@@ -511,6 +513,34 @@
         "target": "ppcle-unknown-linux-uclibc",
         "triple": "powerpcle-unknown-linux-uclibc",
         "processor": "ppcle"
+    },
+    {
+        "type": "crosstool",
+        "target": "ppc64-unknown-linux-musl",
+        "triple": "powerpc64-unknown-linux-musl",
+        "processor": "ppc64",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "ppc64-unknown-linux-uclibc",
+        "triple": "powerpc64-unknown-linux-uclibc",
+        "processor": "ppc64",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "ppc64le-unknown-linux-musl",
+        "triple": "powerpc64le-unknown-linux-musl",
+        "processor": "ppc64le",
+        "qemu": true
+    },
+    {
+        "type": "crosstool",
+        "target": "ppc64le-unknown-linux-uclibc",
+        "triple": "powerpc64le-unknown-linux-uclibc",
+        "processor": "ppc64le",
+        "qemu": true
     },
     // FAILS WITH CUSTOM BUILD OF STOCK GCC:
     //      rv32i-based targets are not supported on stock GCC.
