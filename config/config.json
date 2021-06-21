@@ -34,6 +34,33 @@
             "name": "focal"
         }
     },
+    // Linux version for musl images.
+    "linux": {
+        "version": {
+            "major": "4",
+            "minor": "19",
+            "patch": "90",
+            "xz_sha1": "2663224361a984c8a62b9cf9fc8c82c0a75f9f3f"
+        }
+    },
+    // Linux kernel header version for musl images.
+    "linux-headers": {
+        "version": {
+            "major": "4",
+            "minor": "19",
+            "patch": "88",
+            "xz_sha1": "de12b9c8ae2de9e85056a36be9f0fcc0a1e4abe9"
+        }
+    },
+    // Binutils version for **most** images.
+    "binutils": {
+        "version": {
+            "major": "2",
+            "minor": "32",
+            // The SHA1 sum to verify the download.
+            "xz_sha1": "cd45a512af1c8a508976c1beb4f5825b3bb89f4d"
+        }
+    },
     // GCC Version for **most** images.
     // We still track config files in ct-ng since some images
     // have to be specially maintained.
@@ -41,7 +68,9 @@
         "version": {
             "major": "10",
             "minor": "2",
-            "patch": "0"
+            "patch": "0",
+            // The SHA1 sum to verify the download.
+            "xz_sha1": "8de0aecd3a52bb92b43082df8a9256356d1f03be"
         }
     },
     // MinGW version for crosstool-NG builds.
@@ -65,7 +94,17 @@
         "version": {
             "major": "1",
             "minor": "2",
-            "patch": "2"
+            "patch": "2",
+            // The SHA1 sum to verify the download from musl.
+            "gz_sha1": "e7ba5f0a5f89c13843b955e916f1d9a9d4b6ab9a"
+        }
+    },
+    // Musl-cross-make versions for musl builds.
+    "musl-cross": {
+        "version": {
+            "major": "0",
+            "minor": "9",
+            "patch": "9"
         }
     },
     // AVR libc version for crosstool-NG builds.
@@ -82,6 +121,41 @@
             "major": "1",
             "minor": "0",
             "patch": "31"
+        }
+    },
+    // ISL version for musl-cross builds.
+    "isl": {
+        "version": {
+            "major": "0",
+            "minor": "20",
+            "bz2_sha1": "b1d96b7b44c72f86c98d4fbd4caaa7796b27681e"
+        }
+    },
+    // Get the GMP version for musl-cross builds.
+    "gmp": {
+        "version": {
+            "major": "6",
+            "minor": "1",
+            "patch": "2",
+            "bz2_sha1": "366ded6a44cd108ba6b3f5b9a252eab3f3a95cdf"
+        }
+    },
+    // Get the MPC version for musl-cross builds.
+    "mpc": {
+        "version": {
+            "major": "1",
+            "minor": "1",
+            "patch": "0",
+            "gz_sha1": "b019d9e1d27ec5fb99497159d43a3164995de2d0"
+        }
+    },
+    // Get the MPFR version for musl-cross builds.
+    "mpfr": {
+        "version": {
+            "major": "4",
+            "minor": "0",
+            "patch": "2",
+            "bz2_sha1": "d6a313a3b1ceb9ff3be71cd18e45468837b7fd53"
         }
     },
     // Expat version for crosstool-NG builds.

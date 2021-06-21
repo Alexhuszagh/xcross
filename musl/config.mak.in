@@ -1,0 +1,14 @@
+# Custom configurations to use the same defaults
+# as the global configurations.
+
+TARGET = ^TARGET^
+OUTPUT = /home/crosstoolng/musl
+BINUTILS_VER = ^BINUTILS_VERSION^
+GCC_VER = ^GCC_VERSION^
+MUSL_VER = ^MUSL_VERSION^
+GMP_VER = ^GMP_VERSION^
+MPC_VER = ^MPC_VERSION^
+MPFR_VER = ^MPFR_VERSION^
+ISL_VER = ^ISL_VERSION^
+LINUX_VER = headers-^LINUX_HEADERS_VERSION^
+GCC_CONFIG += --enable-languages=c,c++

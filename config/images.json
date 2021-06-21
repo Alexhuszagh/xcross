@@ -523,34 +523,48 @@
         "triple": "powerpcle-unknown-linux-uclibc",
         "processor": "ppcle"
     },
-    {
-        "type": "crosstool",
-        "target": "ppc64-unknown-linux-musl",
-        "triple": "powerpc64-unknown-linux-musl",
-        "processor": "ppc64",
-        "qemu": true
-    },
-    {
-        "type": "crosstool",
-        "target": "ppc64-unknown-linux-uclibc",
-        "triple": "powerpc64-unknown-linux-uclibc",
-        "processor": "ppc64",
-        "qemu": true
-    },
-    {
-        "type": "crosstool",
-        "target": "ppc64le-unknown-linux-musl",
-        "triple": "powerpc64le-unknown-linux-musl",
-        "processor": "ppc64le",
-        "qemu": true
-    },
-    {
-        "type": "crosstool",
-        "target": "ppc64le-unknown-linux-uclibc",
-        "triple": "powerpc64le-unknown-linux-uclibc",
-        "processor": "ppc64le",
-        "qemu": true
-    },
+    // FAILS DURING LIBC BUILD PASS 1:
+    //      error: unsupported powerpc64 ABI for MUSL
+    //      using compiler runtime libraries:
+    //      checking preprocessor condition _CALL_ELF == 2... false
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64-unknown-linux-musl",
+    //    "triple": "powerpc64-unknown-linux-musl",
+    //    "processor": "ppc64",
+    //    "qemu": true
+    //},
+    // FAILS DURING LIBC BUILD PASS 2:
+    //      ./include/sys/procfs.h:55:34: error: conflicting types for 'elf_vrreg_t'
+    //      ./include/sys/procfs.h:56:21: error: conflicting types for 'elf_vrregset_t'
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64-unknown-linux-uclibc",
+    //    "triple": "powerpc64-unknown-linux-uclibc",
+    //    "processor": "ppc64",
+    //    "qemu": true
+    //},
+    // FAILS DURING LIBC BUILD PASS 1:
+    //      error: unsupported powerpc64le ABI for MUSL
+    //      using compiler runtime libraries:
+    //      checking preprocessor condition _CALL_ELF == 2... false
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64le-unknown-linux-musl",
+    //    "triple": "powerpc64le-unknown-linux-musl",
+    //    "processor": "ppc64le",
+    //    "qemu": true
+    //},
+    // FAILS DURING LIBC BUILD PASS 2:
+    //      ./include/sys/procfs.h:55:34: error: conflicting types for 'elf_vrreg_t'
+    //      ./include/sys/procfs.h:56:21: error: conflicting types for 'elf_vrregset_t'
+    //{
+    //    "type": "crosstool",
+    //    "target": "ppc64le-unknown-linux-uclibc",
+    //    "triple": "powerpc64le-unknown-linux-uclibc",
+    //    "processor": "ppc64le",
+    //    "qemu": true
+    //},
     // FAILS WITH CUSTOM BUILD OF STOCK GCC:
     //      rv32i-based targets are not supported on stock GCC.
     //{
@@ -948,6 +962,22 @@
         "target": "x86_64-unknown-linux-gnu",
         "cxx": "g++-{version}",
         "libc": "libc6"
+    },
+
+    // MUSL CROSS
+    {
+        "type": "musl-cross",
+        "target": "ppc64-unknown-linux-musl",
+        "config": "powerpc64-linux-musl",
+        "processor": "ppc64",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "ppc64le-unknown-linux-musl",
+        "config": "powerpc64le-linux-musl",
+        "processor": "ppc64le",
+        "qemu": true
     },
 
     // RISC-V

@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Build a cross-installation of GCC with musl libc.
+
+set -ex
+
+export DEBIAN_FRONTEND="noninteractive"
+
+# Install dependencies. We store the installed
+# dependencies so we don't accidentally delete
+# necessary files, and we get rid of everything
+# that was only required for the build.
+# This is probably more than we need, but
+# since we remove them later, it's no big deal.
+apt-get update
+before_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
+apt-get install --assume-yes --no-install-recommends \
+    autoconf \
+    bison \
+    flex \
+    g++ \
+    gawk \
+    help2man \
+    libncurses-dev \
+    libtool-bin \
+    patch \
+    python3 \
+    python3-dev \
+    python3-pip \
+    texinfo \
+    unzip \
+    wget \
+    xz-utils
+after_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
+
+# Calculate the packages we need to remove later.
+diff=()
+for i in "${after_installed[@]}"; do
+    skip=
+    for j in "${before_installed[@]}"; do
+        [[ $i == $j ]] && { skip=1; break; }
+    done
+    [[ -n $skip ]] || diff+=("$i")
+done
+declare -p diff
+
+# Create a source directory for easy cleanup.
+mkdir -p src && cd src
+
+# Clone and configure musl cross.
+wget https://github.com/richfelker/musl-cross-make/archive/refs/tags/v^MUSL_CROSS_VERSION^.zip
+unzip v^MUSL_CROSS_VERSION^.zip
+rm v^MUSL_CROSS_VERSION^.zip
+cd musl-cross-make-^MUSL_CROSS_VERSION^
+echo "^BINUTILS_XZ_SHA1^  binutils-^BINUTILS_VERSION^.tar.xz" > "hashes/binutils-^BINUTILS_VERSION^.tar.xz.sha1"
+echo "^GCC_XZ_SHA1^  gcc-^GCC_VERSION^.tar.xz" > "hashes/gcc-^GCC_VERSION^.tar.xz.sha1"
+echo "^MUSL_GZ_SHA1^  musl-^MUSL_VERSION^.tar.gz" > "hashes/musl-^MUSL_VERSION^.tar.gz.sha1"
+echo "^GMP_BZ2_SHA1^  gmp-^GMP_VERSION^.tar.bz2" > "hashes/gmp-^GMP_VERSION^.tar.bz2.sha1"
+echo "^MPC_GZ_SHA1^  mpc-^MPC_VERSION^.tar.gz" > "hashes/mpc-^MPC_VERSION^.tar.gz.sha1"
+echo "^MPFR_BZ2_SHA1^  mpfr-^MPFR_VERSION^.tar.bz2" > "hashes/mpfr-^MPFR_VERSION^.tar.bz2.sha1"
+echo "^ISL_BZ2_SHA1^  isl-^ISL_VERSION^.tar.bz2" > "hashes/isl-^ISL_VERSION^.tar.bz2.sha1"
+echo "^LINUX_XZ_SHA1^  linux-^LINUX_VERSION^.tar.xz" > "hashes/linux-^LINUX_VERSION^.tar.xz.sha1"
+echo "^LINUX_HEADERS_XZ_SHA1^  linux-headers-^LINUX_HEADERS_VERSION^.tar.xz" > "hashes/linux-headers-^LINUX_HEADERS_VERSION^.tar.xz.sha1"
+
+# Set our configurations.
+su crosstoolng -c "mkdir -p /home/crosstoolng/musl"
+cp /src/config.mak ./
+make -j ^JOBS^
+make install
+
+# Cleanup
+# Even though we didn't install GCC, it doesn't get autoremoved,
+# which takes up a lot of space.
+cd /
+rm -rf /src
+apt-get remove --purge --assume-yes "${diff[@]}"
+apt-get autoremove --assume-yes

@@ -559,8 +559,9 @@ After the toolchain is created, all the CMake toolchain files, symlinks, and Doc
         //  1. android
         //  2. crosstool
         //  3. debian
-        //  4. riscv
-        //  5. other
+        //  4. musl-cross
+        //  5. riscv
+        //  6. other
         //
         // The following values are for crosstool images,
         // which are by far the most prevalent.
@@ -642,6 +643,7 @@ Currently, we only create images that are supported by:
 - crosstool-NG with official sources
 - Debian packages
 - Android NDK's
+- musl-cross-make.
 - RISCV GNU utils.
 
 We therefore support:

@@ -87,18 +87,34 @@ py2exe_version = f'{major}.{minor}.{patch}'
 # This is the GCC and other utilities version from crosstool-NG.
 gcc_major, gcc_minor, gcc_patch, _ = get_version('gcc')
 gcc_version = f'{gcc_major}.{gcc_minor}.{gcc_patch}'
+binutils_major, binutils_minor, _, _ = get_version('binutils')
+binutils_version = f'{binutils_major}.{binutils_minor}'
 mingw_major, mingw_minor, mingw_patch, _ = get_version('mingw')
 mingw_version = f'{mingw_major}.{mingw_minor}.{mingw_patch}'
 glibc_major, glibc_minor, _, _ = get_version('glibc')
 glibc_version = f'{glibc_major}.{glibc_minor}'
 musl_major, musl_minor, musl_patch, _ = get_version('musl')
 musl_version = f'{musl_major}.{musl_minor}.{musl_patch}'
+musl_cross_major, musl_cross_minor, musl_cross_patch, _ = get_version('musl-cross')
+musl_cross_version = f'{musl_cross_major}.{musl_cross_minor}.{musl_cross_patch}'
 avr_major, avr_minor, avr_patch, _ = get_version('avr')
 avr_version = f'{avr_major}.{avr_minor}.{avr_patch}'
 uclibc_major, uclibc_minor, uclibc_patch, _ = get_version('uclibc')
 uclibc_version = f'{uclibc_major}.{uclibc_minor}.{uclibc_patch}'
 expat_major, expat_minor, expat_patch, _ = get_version('expat')
 expat_version = f'{expat_major}.{expat_minor}.{expat_patch}'
+isl_major, isl_minor, _, _ = get_version('isl')
+isl_version = f'{isl_major}.{isl_minor}'
+linux_major, linux_minor, linux_patch, _ = get_version('linux')
+linux_version = f'{linux_major}.{linux_minor}.{linux_patch}'
+linux_headers_major, linux_headers_minor, linux_headers_patch, _ = get_version('linux-headers')
+linux_headers_version = f'{linux_headers_major}.{linux_headers_minor}.{linux_headers_patch}'
+gmp_major, gmp_minor, gmp_patch, _ = get_version('gmp')
+gmp_version = f'{gmp_major}.{gmp_minor}.{gmp_patch}'
+mpc_major, mpc_minor, mpc_patch, _ = get_version('mpc')
+mpc_version = f'{mpc_major}.{mpc_minor}.{mpc_patch}'
+mpfr_major, mpfr_minor, mpfr_patch, _ = get_version('mpfr')
+mpfr_version = f'{mpfr_major}.{mpfr_minor}.{mpfr_patch}'
 ct_major, ct_minor, ct_patch, _ = get_version('crosstool-ng')
 ct_version = f'{ct_major}.{ct_minor}.{ct_patch}'
 qemu_major, qemu_minor, qemu_patch, _ = get_version('qemu')
@@ -507,6 +523,11 @@ class DebianImage(Image):
     def qemu(self):
         return True
 
+class MuslCrossImage(Image):
+    '''Specialized properties for musl-cross images.'''
+
+    # TODO(ahuszagh) Actually implement...
+
 class RiscvImage(Image):
     '''Specialized properties for RISC-V images.'''
 
@@ -541,6 +562,7 @@ image_types = {
     'android': AndroidImage,
     'crosstool': CrosstoolImage,
     'debian': DebianImage,
+    'musl-cross': MuslCrossImage,
     'riscv': RiscvImage,
     'other': OtherImage,
 }
@@ -557,6 +579,9 @@ def add_crosstool_extensions():
 
 def add_debian_extensions():
     '''Add Debian toolchain extensions (null-op).'''
+
+def add_musl_cross_extensions():
+    '''Add musl-cross toolchain extensions (null-op).'''
 
 # Add our RISC-V images with extensions.
 def create_riscv_image(os, bits, arch, abi):
@@ -608,6 +633,7 @@ def add_extensions():
     add_android_extensions()
     add_crosstool_extensions()
     add_debian_extensions()
+    add_musl_cross_extensions()
     add_riscv_extensions()
 
 add_extensions()
@@ -616,6 +642,7 @@ add_extensions()
 android_images = [i for i in images if isinstance(i, AndroidImage)]
 crosstool_images = [i for i in images if isinstance(i, CrosstoolImage)]
 debian_images = [i for i in images if isinstance(i, DebianImage)]
+musl_cross_images = [i for i in images if isinstance(i, MuslCrossImage)]
 riscv_images = [i for i in images if isinstance(i, RiscvImage)]
 other_images = [i for i in images if isinstance(i, OtherImage)]
 
@@ -640,6 +667,7 @@ class ConfigureCommand(VersionCommand):
         entrypoint = f'{HOME}/docker/entrypoint.sh'
         gcc = f'{HOME}/docker/gcc.sh'
         gcc_patch = f'{HOME}/docker/gcc-patch.sh'
+        musl = f'{HOME}/docker/musl.sh'
         qemu = f'{HOME}/docker/qemu.sh'
         qemu_apt = f'{HOME}/docker/qemu-apt.sh'
         riscv_gcc = f'{HOME}/docker/riscv-gcc.sh'
@@ -663,6 +691,28 @@ class ConfigureCommand(VersionCommand):
         ])
         self.configure(f'{gcc_patch}.in', gcc_patch, True, [
             ('CROSSTOOL_VERSION', f'"{ct_version}"'),
+            ('JOBS', config["options"]["build_jobs"]),
+        ])
+        self.configure(f'{musl}.in', musl, True, [
+            ('BINUTILS_VERSION', binutils_version),
+            ('BINUTILS_XZ_SHA1', config['binutils']['version']['xz_sha1']),
+            ('GCC_VERSION', gcc_version),
+            ('GCC_XZ_SHA1', config['gcc']['version']['xz_sha1']),
+            ('GMP_VERSION', gmp_version),
+            ('GMP_BZ2_SHA1', config['gmp']['version']['bz2_sha1']),
+            ('ISL_VERSION', isl_version),
+            ('ISL_BZ2_SHA1', config['isl']['version']['bz2_sha1']),
+            ('MPC_VERSION', mpc_version),
+            ('MPC_GZ_SHA1', config['mpc']['version']['gz_sha1']),
+            ('MPFR_VERSION', mpfr_version),
+            ('MPFR_BZ2_SHA1', config['mpfr']['version']['bz2_sha1']),
+            ('LINUX_HEADERS_VERSION', linux_headers_version),
+            ('LINUX_HEADERS_XZ_SHA1', config['linux-headers']['version']['xz_sha1']),
+            ('LINUX_VERSION', linux_version),
+            ('LINUX_XZ_SHA1', config['linux']['version']['xz_sha1']),
+            ('MUSL_CROSS_VERSION', musl_cross_version),
+            ('MUSL_VERSION', musl_version),
+            ('MUSL_GZ_SHA1', config['musl']['version']['gz_sha1']),
             ('JOBS', config["options"]["build_jobs"]),
         ])
         self.configure(f'{qemu}.in', qemu, True, [
@@ -759,6 +809,25 @@ class ConfigureCommand(VersionCommand):
         replacements.append(('EXPAT_NEW', expat_version))
 
         self.configure(f'{patch}.in', patch, True, replacements)
+
+    def configure_musl_config(self):
+        '''Configure the MUSL libc config files.'''
+
+        template = f'{HOME}/musl/config.mak.in'
+        for image in musl_cross_images:
+            outfile = f'{HOME}/musl/config/{image.target}.mak'
+            self.configure(template, outfile, False, [
+                ('BINUTILS_VERSION', binutils_version),
+                ('GCC_VERSION', gcc_version),
+                ('GMP_VERSION', gmp_version),
+                ('ISL_VERSION', isl_version),
+                ('LINUX_HEADERS_VERSION', linux_headers_version),
+                ('LINUX_VERSION', linux_version),
+                ('MPC_VERSION', mpc_version),
+                ('MPFR_VERSION', mpfr_version),
+                ('MUSL_VERSION', musl_version),
+                ('TARGET', image.config),
+            ])
 
     def configure_dockerfile(
         self,
@@ -943,6 +1012,39 @@ class ConfigureCommand(VersionCommand):
             ('SYSTEM', image.system),
         ])
 
+    def configure_musl(self, image):
+        '''Configure a musl-cross-based image.'''
+
+        # Get the proper dependent parameters for our image.
+        os = image.os.to_cmake()
+        if image.qemu:
+            cmake_template = f'{HOME}/cmake/musl-qemu.cmake.in'
+            symlink_template = f'{HOME}/symlink/musl-qemu.sh.in'
+        else:
+            cmake_template = f'{HOME}/cmake/musl.cmake.in'
+            symlink_template = f'{HOME}/symlink/musl.sh.in'
+
+        # Configure the dockerfile.
+        template = f'{HOME}/docker/Dockerfile.musl.in'
+        self.configure_dockerfile(image.target, template, image.qemu, [
+            ('ARCH', image.processor),
+            ('BIN', f'"{bin_directory}"'),
+            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('TARGET', image.target),
+        ])
+
+        # Configure the CMake toolchain.
+        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
+        self.configure(cmake_template, cmake, False, [
+            ('PROCESSOR', image.processor),
+            ('OS', os),
+        ])
+
+        # Configure the symlinks.
+        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
+        self.configure(symlink_template, symlink, True, [
+        ])
+
     def configure_riscv(self, image):
         '''Configure a RISC-V-based image.'''
 
@@ -1044,11 +1146,10 @@ class ConfigureCommand(VersionCommand):
             ('WRAPPER', 'emmake '),
         ])
 
-        # Configure our build scripts.
+        # Configure our build scripts, and other configurations.
         self.configure_scripts()
-
-        # Configure our patch script for ct-ng files.
         self.configure_ctng_config()
+        self.configure_musl_config()
 
         # Configure the base dockerfile.
         base_template = f'{HOME}/docker/Dockerfile.base.in'
@@ -1066,6 +1167,8 @@ class ConfigureCommand(VersionCommand):
             self.configure_crosstool(image)
         for image in debian_images:
             self.configure_debian(image)
+        for image in musl_cross_images:
+            self.configure_musl(image)
         for image in riscv_images:
             self.configure_riscv(image)
         for image in other_images:
