@@ -1045,6 +1045,7 @@ class ConfigureCommand(VersionCommand):
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('TARGET', image.target),
+            ('TRIPLE', image.config),
         ])
 
         # Configure the CMake toolchain.

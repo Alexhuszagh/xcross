@@ -4,6 +4,12 @@
 
 set -ex
 
+# Check required environment variables.
+if [ "$ARCH" = "" ]; then
+    echo "Invalid arch, must provide a valid architecture prefix."
+    exit 1
+fi
+
 export DEBIAN_FRONTEND="noninteractive"
 
 # Install dependencies. We store the installed
@@ -67,6 +73,34 @@ su crosstoolng -c "mkdir -p /home/crosstoolng/musl"
 cp /src/config.mak ./
 make -j ^JOBS^
 make install
+
+# Need to strip binaries, since the installer doesn't do that
+strip_shared() {
+    strip=strip
+    if [ "$2" != "" ]; then
+        strip="$2"
+    fi
+    mime=$(file "$1" --mime-type | cut -d ' ' -f 2)
+    # Don't strip archives: we need those symbols.
+    if [ "$mime" = "application/x-sharedlib" ] || [ "$mime" = "application/x-executable" ]; then
+        "$strip" "$1"
+    fi
+}
+
+strip_dir() {
+    files=($(ls "$1"))
+    for f in "${files[@]}"; do
+        strip_shared "$1/$f" "$2"
+    done
+}
+
+home=/home/crosstoolng/musl
+strip_native="$home/bin/"$ARCH"-strip"
+strip_dir "$home/bin"
+strip_dir "$home/lib"
+strip_dir "$home/"$ARCH"/bin"
+strip_dir "$home/libexec/gcc/"$ARCH"/^GCC_VERSION^"
+strip_dir "$home/"$ARCH"/lib" "$strip_native"
 
 # Cleanup
 # Even though we didn't install GCC, it doesn't get autoremoved,
