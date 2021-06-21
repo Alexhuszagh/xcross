@@ -17,15 +17,21 @@ if [ "$START" != "" ]; then
     has_started=no
 fi
 
+push_semver() {
+    local versions=($(semver))
+    docker push "$1"
+    for version in "${versions[@]}"; do
+        docker push "$image_name"-"$version"
+    done
+}
+
 for image in "${images[@]}"; do
     if [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
-        docker push "ahuszagh/cross:$image"
-        docker push "ahuszagh/cross:$image"-"$VERSION"
+        push_semver "ahuszagh/cross:$image"
         if [[ "$image" == *-unknown-linux-gnu ]]; then
             base="${image%-unknown-linux-gnu}"
-            docker push "ahuszagh/cross:$base"
-            docker push "ahuszagh/cross:$base"-"$VERSION"
+            push_semver "ahuszagh/cross:$base"
         fi
     fi
 

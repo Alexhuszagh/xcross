@@ -7,3 +7,15 @@ export VERSION_PATCH=^VERSION_PATCH^
 export VERSION_BUILD=^VERSION_BUILD^
 export VERSION_INFO=^VERSION_INFO^
 export VERSION=^VERSION^
+
+# Get the semantic versioning for an image.
+semver() {
+    local versions=(
+        "$VERSION_MAJOR.$VERSION_MINOR"
+        "$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH"
+    )
+    if [ "$VERSION_MAJOR" != "" ]; then
+        versions+=("$VERSION_MAJOR")
+    fi
+    echo "${versions[@]}"
+}

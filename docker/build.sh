@@ -17,6 +17,13 @@ if [ "$START" != "" ]; then
     has_started=no
 fi
 
+tag_semver() {
+    local versions=($(semver))
+    for version in "${versions[@]}"; do
+        docker tag "$1" "$1"-"$version"
+    done
+}
+
 for image in "${images[@]}"; do
     if [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
@@ -26,11 +33,12 @@ for image in "${images[@]}"; do
         project_dir="$scriptdir"/..
         dockerfile="$scriptdir/images/Dockerfile.$image"
         docker build -t "$image_name" "$project_dir" --file "$dockerfile"
-        docker tag "$image_name" "$image_name"-"$VERSION"
+        tag_semver "$image_name"
         if [[ "$image" == *-unknown-linux-gnu ]]; then
             base="${image%-unknown-linux-gnu}"
-            docker tag "$image_name" "$username/$repository:$base"
-            docker tag "$image_name" "$username/$repository:$base"-"$VERSION"
+            base_image="$username/$repository:$base"
+            docker tag "$image_name" "$base_image"
+            tag_semver "$base_image"
         fi
     fi
 
