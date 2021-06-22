@@ -166,6 +166,14 @@
             "patch": "1"
         }
     },
+    // Get the buildroot version we download.
+    "buildroot": {
+        "version": {
+            "major": "2021",
+            "minor": "02",
+            "patch": "3"
+        }
+    },
     // Get the crosstool-NG version we download.
     "crosstool-ng": {
         "version": {

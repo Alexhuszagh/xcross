@@ -1,0 +1,6 @@
+#!/bin/bash
+
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+source "$scriptdir/shortcut.sh"
+
+# TODO(ahuszagh) Implement...

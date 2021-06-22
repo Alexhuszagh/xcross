@@ -115,6 +115,8 @@ mpc_major, mpc_minor, mpc_patch, _ = get_version('mpc')
 mpc_version = f'{mpc_major}.{mpc_minor}.{mpc_patch}'
 mpfr_major, mpfr_minor, mpfr_patch, _ = get_version('mpfr')
 mpfr_version = f'{mpfr_major}.{mpfr_minor}.{mpfr_patch}'
+buildroot_major, buildroot_minor, buildroot_patch, _ = get_version('buildroot')
+buildroot_version = f'{buildroot_major}.{buildroot_minor}.{buildroot_patch}'
 ct_major, ct_minor, ct_patch, _ = get_version('crosstool-ng')
 ct_version = f'{ct_major}.{ct_minor}.{ct_patch}'
 qemu_major, qemu_minor, qemu_patch, _ = get_version('qemu')
@@ -165,6 +167,7 @@ class CleanCommand(Command):
         # Need to remove the configured directories.
         shutil.rmtree(f'{HOME}/cmake/toolchain', ignore_errors=True)
         shutil.rmtree(f'{HOME}/docker/images', ignore_errors=True)
+        shutil.rmtree(f'{HOME}/musl/config', ignore_errors=True)
         shutil.rmtree(f'{HOME}/symlink/toolchain', ignore_errors=True)
 
 
@@ -447,6 +450,33 @@ class AndroidImage(Image):
     def qemu(self):
         return False
 
+class BuildRootImage(Image):
+    '''Specialized properties for buildroot images.'''
+
+    @property
+    def config(self):
+        return getattr(self, '_config', self.target)
+
+    @config.setter
+    def config(self, value):
+        self._config = value
+
+    @property
+    def processor(self):
+        return getattr(self, '_processor', self.arch)
+
+    @processor.setter
+    def processor(self, value):
+        self._processor = value
+
+    @property
+    def qemu(self):
+        return getattr(self, '_qemu', False)
+
+    @qemu.setter
+    def qemu(self, value):
+        self._qemu = value
+
 class CrosstoolImage(Image):
     '''Specialized properties for crosstool-NG images.'''
 
@@ -527,6 +557,14 @@ class MuslCrossImage(Image):
     '''Specialized properties for musl-cross images.'''
 
     @property
+    def gcc_config(self):
+        return getattr(self, '_gcc_config', '')
+
+    @gcc_config.setter
+    def gcc_config(self, value):
+        self._gcc_config = value
+
+    @property
     def processor(self):
         return getattr(self, '_processor', self.arch)
 
@@ -574,6 +612,7 @@ class OtherImage(Image):
 
 image_types = {
     'android': AndroidImage,
+    'buildroot': BuildRootImage,
     'crosstool': CrosstoolImage,
     'debian': DebianImage,
     'musl-cross': MuslCrossImage,
@@ -587,6 +626,9 @@ images = [Image.from_json(i) for i in load_json(f'{HOME}/config/images.json')]
 # Add extensions
 def add_android_extensions():
     '''Add Android extensions (null-op).'''
+
+def add_buildroot_extensions():
+    '''Add buildroot extensions (null-op).'''
 
 def add_crosstool_extensions():
     '''Add crosstool-NG toolchain extensions (null-op).'''
@@ -645,6 +687,7 @@ def add_extensions():
     '''Add extensions for supported operating systems.'''
 
     add_android_extensions()
+    add_buildroot_extensions()
     add_crosstool_extensions()
     add_debian_extensions()
     add_musl_cross_extensions()
@@ -654,6 +697,7 @@ add_extensions()
 
 # Filter images by types.
 android_images = [i for i in images if isinstance(i, AndroidImage)]
+buildroot_images = [i for i in images if isinstance(i, BuildRootImage)]
 crosstool_images = [i for i in images if isinstance(i, CrosstoolImage)]
 debian_images = [i for i in images if isinstance(i, DebianImage)]
 musl_cross_images = [i for i in images if isinstance(i, MuslCrossImage)]
@@ -677,6 +721,7 @@ class ConfigureCommand(VersionCommand):
         '''Configure the build scripts.'''
 
         android = f'{HOME}/docker/android.sh'
+        buildroot = f'{HOME}/docker/buildroot.sh'
         cmake = f'{HOME}/docker/cmake.sh'
         entrypoint = f'{HOME}/docker/entrypoint.sh'
         gcc = f'{HOME}/docker/gcc.sh'
@@ -695,6 +740,10 @@ class ConfigureCommand(VersionCommand):
         ])
         self.configure(f'{cmake}.in', cmake, True, [
             ('UBUNTU_NAME', config['ubuntu']['version']['name']),
+        ])
+        self.configure(f'{buildroot}.in', buildroot, True, [
+            ('BUILDROOT_VERSION', buildroot_version),
+            ('JOBS', config["options"]["build_jobs"]),
         ])
         self.configure(f'{entrypoint}.in', entrypoint, True, [
             ('BIN', f'"{bin_directory}"'),
@@ -832,6 +881,7 @@ class ConfigureCommand(VersionCommand):
             outfile = f'{HOME}/musl/config/{image.target}.mak'
             self.configure(template, outfile, False, [
                 ('BINUTILS_VERSION', binutils_version),
+                ('GCC_CONFIG', image.gcc_config),
                 ('GCC_VERSION', gcc_version),
                 ('GMP_VERSION', gmp_version),
                 ('ISL_VERSION', isl_version),
@@ -921,6 +971,39 @@ class ConfigureCommand(VersionCommand):
             ('PREFIX', f'{image.prefix}-linux-{image.system}'),
             ('SDK_VERSION', config['android']['sdk_version']),
             ('TOOLCHAIN', image.toolchain),
+        ])
+
+    def configure_buildroot(self, image):
+        '''Configure a buildroot image.'''
+
+        # Get the proper dependent parameters for our image.
+        os = image.os.to_cmake()
+        if image.qemu:
+            cmake_template = f'{HOME}/cmake/buildroot-qemu.cmake.in'
+            symlink_template = f'{HOME}/symlink/buildroot-qemu.sh.in'
+        else:
+            cmake_template = f'{HOME}/cmake/buildroot.cmake.in'
+            symlink_template = f'{HOME}/symlink/buildroot.sh.in'
+
+        template = f'{HOME}/docker/Dockerfile.buildroot.in'
+        self.configure_dockerfile(image.target, template, image.qemu, [
+            ('ARCH', image.processor),
+            ('BIN', f'"{bin_directory}"'),
+            ('CONFIG', image.config),
+            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('TARGET', image.target),
+        ])
+
+        # Configure the CMake toolchain.
+        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
+        self.configure(cmake_template, cmake, False, [
+            ('PROCESSOR', image.processor),
+            ('OS', os),
+        ])
+
+        # Configure the symlinks.
+        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
+        self.configure(symlink_template, symlink, True, [
         ])
 
     def configure_crosstool(self, image):
@@ -1187,6 +1270,8 @@ class ConfigureCommand(VersionCommand):
         # Configure images.
         for image in android_images:
             self.configure_android(image)
+        for image in buildroot_images:
+            self.configure_buildroot(image)
         for image in crosstool_images:
             self.configure_crosstool(image)
         for image in debian_images:

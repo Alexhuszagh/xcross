@@ -1,0 +1,5 @@
+# Build GCC
+COPY ["buildroot/^CONFIG^.config", "/src/.config"]
+COPY ["docker/buildroot.sh", "/src/"]
+RUN /src/buildroot.sh
+RUN rm -rf /src/

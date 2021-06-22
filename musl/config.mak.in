@@ -11,4 +11,4 @@ MPC_VER = ^MPC_VERSION^
 MPFR_VER = ^MPFR_VERSION^
 ISL_VER = ^ISL_VERSION^
 LINUX_VER = headers-^LINUX_HEADERS_VERSION^
-GCC_CONFIG += --enable-languages=c,c++
+GCC_CONFIG += ^GCC_CONFIG^--enable-languages=c,c++
