@@ -558,7 +558,10 @@ class MuslCrossImage(Image):
 
     @property
     def gcc_config(self):
-        return getattr(self, '_gcc_config', '')
+        config = getattr(self, '_gcc_config', '')
+        if config:
+            return f'{config} '
+        return ''
 
     @gcc_config.setter
     def gcc_config(self, value):
