@@ -21,7 +21,7 @@ push_semver() {
     local versions=($(semver))
     docker push "$1"
     for version in "${versions[@]}"; do
-        docker push "$image_name"-"$version"
+        docker push "$1"-"$version"
     done
 }
 
