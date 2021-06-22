@@ -1116,11 +1116,13 @@
         "processor": "s390x",
         "qemu": true
     },
-    {
-        "type": "musl-cross",
-        "target": "sh1-unknown-linux-musl",
-        "config": "sh1-linux-musl"
-    },
+    // FAILS DURING CONFIGURE-GCC
+    //      Configuration sh1-unknown-linux-musl not supported
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh1-unknown-linux-musl",
+    //    "config": "sh1-linux-musl"
+    //},
     {
         "type": "musl-cross",
         "target": "sh2-unknown-linux-musl",
@@ -1137,11 +1139,13 @@
         "config": "sh4-linux-musl",
         "qemu": true
     },
-    {
-        "type": "musl-cross",
-        "target": "sh1-unknown-linux-muslfdpic",
-        "config": "sh1-linux-muslfdpic"
-    },
+    // FAILS DURING CONFIGURE-GCC
+    //      Configuration sh1-unknown-linux-musl not supported
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh1-unknown-linux-muslfdpic",
+    //    "config": "sh1-linux-muslfdpic"
+    //},
     {
         "type": "musl-cross",
         "target": "sh2-unknown-linux-muslfdpic",
@@ -1158,11 +1162,13 @@
         "config": "sh4-linux-muslfdpic",
         "qemu": true
     },
-    {
-        "type": "musl-cross",
-        "target": "sh1-unknown-linux-muslsf",
-        "config": "sh1-linux-muslsf"
-    },
+    // FAILS DURING CONFIGURE-GCC
+    //      Configuration sh1-unknown-linux-musl not supported
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh1-unknown-linux-muslsf",
+    //    "config": "sh1-linux-muslsf"
+    //},
     {
         "type": "musl-cross",
         "target": "sh2-unknown-linux-muslsf",
@@ -1179,11 +1185,13 @@
         "config": "sh4-linux-muslsf",
         "qemu": true
     },
-    {
-        "type": "musl-cross",
-        "target": "sh1-unknown-linux-muslfdpicsf",
-        "config": "sh1-linux-muslfdpicsf"
-    },
+    // FAILS DURING CONFIGURE-GCC
+    //      Configuration sh1-unknown-linux-musl not supported
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh1-unknown-linux-muslfdpicsf",
+    //    "config": "sh1-linux-muslfdpicsf"
+    //},
     {
         "type": "musl-cross",
         "target": "sh2-unknown-linux-muslfdpicsf",
@@ -1200,11 +1208,13 @@
         "config": "sh4-linux-muslfdpicsf",
         "qemu": true
     },
-    {
-        "type": "musl-cross",
-        "target": "sh1eb-unknown-linux-musl",
-        "config": "sh1eb-linux-musl"
-    },
+    // FAILS DURING CONFIGURE-GCC
+    //      Configuration sh1-unknown-linux-musl not supported
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh1eb-unknown-linux-musl",
+    //    "config": "sh1eb-linux-musl"
+    //},
     {
         "type": "musl-cross",
         "target": "sh2eb-unknown-linux-musl",
@@ -1221,11 +1231,13 @@
         "config": "sh4eb-linux-musl",
         "qemu": true
     },
-    {
-        "type": "musl-cross",
-        "target": "sh1eb-unknown-linux-muslfdpic",
-        "config": "sh1eb-linux-muslfdpic"
-    },
+    // FAILS DURING CONFIGURE-GCC
+    //      Configuration sh1-unknown-linux-musl not supported
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh1eb-unknown-linux-muslfdpic",
+    //    "config": "sh1eb-linux-muslfdpic"
+    //},
     {
         "type": "musl-cross",
         "target": "sh2eb-unknown-linux-muslfdpic",
@@ -1242,11 +1254,13 @@
         "config": "sh4eb-linux-muslfdpic",
         "qemu": true
     },
-    {
-        "type": "musl-cross",
-        "target": "sh1eb-unknown-linux-muslsf",
-        "config": "sh1eb-linux-muslsf"
-    },
+    // FAILS DURING CONFIGURE-GCC
+    //      Configuration sh1-unknown-linux-musl not supported
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh1eb-unknown-linux-muslsf",
+    //    "config": "sh1eb-linux-muslsf"
+    //},
     {
         "type": "musl-cross",
         "target": "sh2eb-unknown-linux-muslsf",
@@ -1263,11 +1277,13 @@
         "config": "sh4eb-linux-muslsf",
         "qemu": true
     },
-    {
-        "type": "musl-cross",
-        "target": "sh1eb-unknown-linux-muslfdpicsf",
-        "config": "sh1eb-linux-muslfdpicsf"
-    },
+    // FAILS DURING CONFIGURE-GCC
+    //      Configuration sh1-unknown-linux-musl not supported
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh1eb-unknown-linux-muslfdpicsf",
+    //    "config": "sh1eb-linux-muslfdpicsf"
+    //},
     {
         "type": "musl-cross",
         "target": "sh2eb-unknown-linux-muslfdpicsf",
