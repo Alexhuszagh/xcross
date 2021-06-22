@@ -1023,11 +1023,71 @@
         "processor": "mipsel",
         "qemu": true
     },
-    // TODO(ahuszagh) Add more once these are confirmed to work
-    // - `mips64[el]-linux-musl[n32][sf]`
-    // - `powerpc-linux-musl[sf]`
-    // - `powerpc64[le]-linux-musl`
-    // - `sh*[eb]-linux-musl[fdpic][sf]`
+    // TODO(ahuszagh) CHeck if the n32 builds
+    //  are actually n32...
+    {
+        "type": "musl-cross",
+        "target": "mips64-unknown-linux-musl",
+        "config": "mips64-linux-musl",
+        "processor": "mips64",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mips64-unknown-linux-musln32",
+        "config": "mips64-linux-musln32",
+        "processor": "mips64",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mips64-unknown-linux-muslsf",
+        "config": "mips64-linux-muslsf",
+        "processor": "mips64",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mips64-unknown-linux-musln32sf",
+        "config": "mips64-linux-musln32sf",
+        "processor": "mips64",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mips64el-unknown-linux-musl",
+        "config": "mips64el-linux-musl",
+        "processor": "mips64el",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mips64el-unknown-linux-musln32",
+        "config": "mips64el-linux-musln32",
+        "processor": "mips64el",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mips64el-unknown-linux-muslsf",
+        "config": "mips64el-linux-muslsf",
+        "processor": "mips64el",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "mips64el-unknown-linux-musln32sf",
+        "config": "mips64el-linux-musln32sf",
+        "processor": "mips64el",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "ppc-unknown-linux-muslsf",
+        "config": "powerpc-linux-muslsf",
+        "processor": "mips64el",
+        "qemu": true
+    },
     {
         "type": "musl-cross",
         "target": "ppc64-unknown-linux-musl",
@@ -1079,6 +1139,69 @@
     },
     {
         "type": "musl-cross",
+        "target": "sh1-unknown-linux-muslfdpic",
+        "config": "sh1-linux-muslfdpic"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh2-unknown-linux-muslfdpic",
+        "config": "sh2-linux-muslfdpic"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh3-unknown-linux-muslfdpic",
+        "config": "sh3-linux-muslfdpic"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh4-unknown-linux-muslfdpic",
+        "config": "sh4-linux-muslfdpic",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh1-unknown-linux-muslsf",
+        "config": "sh1-linux-muslsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh2-unknown-linux-muslsf",
+        "config": "sh2-linux-muslsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh3-unknown-linux-muslsf",
+        "config": "sh3-linux-muslsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh4-unknown-linux-muslsf",
+        "config": "sh4-linux-muslsf",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh1-unknown-linux-muslfdpicsf",
+        "config": "sh1-linux-muslfdpicsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh2-unknown-linux-muslfdpicsf",
+        "config": "sh2-linux-muslfdpicsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh3-unknown-linux-muslfdpicsf",
+        "config": "sh3-linux-muslfdpicsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh4-unknown-linux-muslfdpicsf",
+        "config": "sh4-linux-muslfdpicsf",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
         "target": "sh1eb-unknown-linux-musl",
         "config": "sh1eb-linux-musl"
     },
@@ -1096,6 +1219,69 @@
         "type": "musl-cross",
         "target": "sh4eb-unknown-linux-musl",
         "config": "sh4eb-linux-musl",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh1eb-unknown-linux-muslfdpic",
+        "config": "sh1eb-linux-muslfdpic"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh2eb-unknown-linux-muslfdpic",
+        "config": "sh2eb-linux-muslfdpic"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh3eb-unknown-linux-muslfdpic",
+        "config": "sh3eb-linux-muslfdpic"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh4eb-unknown-linux-muslfdpic",
+        "config": "sh4eb-linux-muslfdpic",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh1eb-unknown-linux-muslsf",
+        "config": "sh1eb-linux-muslsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh2eb-unknown-linux-muslsf",
+        "config": "sh2eb-linux-muslsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh3eb-unknown-linux-muslsf",
+        "config": "sh3eb-linux-muslsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh4eb-unknown-linux-muslsf",
+        "config": "sh4eb-linux-muslsf",
+        "qemu": true
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh1eb-unknown-linux-muslfdpicsf",
+        "config": "sh1eb-linux-muslfdpicsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh2eb-unknown-linux-muslfdpicsf",
+        "config": "sh2eb-linux-muslfdpicsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh3eb-unknown-linux-muslfdpicsf",
+        "config": "sh3eb-linux-muslfdpicsf"
+    },
+    {
+        "type": "musl-cross",
+        "target": "sh4eb-unknown-linux-muslfdpicsf",
+        "config": "sh4eb-linux-muslfdpicsf",
         "qemu": true
     },
     {
