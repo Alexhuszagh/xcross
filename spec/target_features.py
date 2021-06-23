@@ -154,7 +154,6 @@ def main():
         'target-c-int': target_c_int(defines),
         'pic': defines.get('__PIC__', '0'),
         'pie': defines.get('__PIE__', '0'),
-        'aggregate_align': alignof('char[0]'),
     }
     c_types = {
         'size_t': 'size_t',
