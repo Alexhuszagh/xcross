@@ -14,6 +14,22 @@ In addition, you need to disable `Kernel`, `Linux Kernel Extensions`, and `Linux
 
 ```text
 #
+# Kernel Header Options
+#
+# BR2_KERNEL_HEADERS_4_4 is not set
+# BR2_KERNEL_HEADERS_4_9 is not set
+# BR2_KERNEL_HEADERS_4_14 is not set
+# BR2_KERNEL_HEADERS_4_19 is not set
+# BR2_KERNEL_HEADERS_5_4 is not set
+BR2_KERNEL_HEADERS_5_10=y
+# BR2_KERNEL_HEADERS_VERSION is not set
+# BR2_KERNEL_HEADERS_CUSTOM_TARBALL is not set
+# BR2_KERNEL_HEADERS_CUSTOM_GIT is not set
+BR2_KERNEL_HEADERS_LATEST=y
+BR2_DEFAULT_KERNEL_HEADERS="5.10.43"
+BR2_PACKAGE_LINUX_HEADERS=y
+
+#
 # Kernel
 #
 # BR2_LINUX_KERNEL is not set
