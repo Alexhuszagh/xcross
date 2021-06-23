@@ -179,12 +179,12 @@ def main():
 
     with open('/opt/bin/target-specs.json', 'w') as file:
         json.dump(data, file)
-    with open('/opt/bin/target-specs.sh', 'w') as file:
+    with open('/opt/bin/target-specs', 'w') as file:
         file.write('#/bin/bash\n')
         file.write('cat /opt/bin/target-specs.json | jq\n')
     flags = stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-    st = os.stat('/opt/bin/target-specs.sh')
-    os.chmod('/opt/bin/target-specs.sh', st.st_mode | flags)
+    st = os.stat('/opt/bin/target-specs')
+    os.chmod('/opt/bin/target-specs', st.st_mode | flags)
 
 if __name__ == '__main__':
     main()
