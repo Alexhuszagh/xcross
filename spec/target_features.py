@@ -115,6 +115,8 @@ def target_endian(defines):
         return 'little'
     elif byte_order == '__ORDER_BIG_ENDIAN__':
         return 'big'
+    elif byte_order == '__ORDER_PDP_ENDIAN__':
+        return 'pdp'
     raise ValueError('Unknown byte order.')
 
 def target_pointer(defines):
