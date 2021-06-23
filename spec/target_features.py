@@ -142,6 +142,11 @@ def target_c_int(defines):
 def main():
     '''Entry point.'''
 
+    # Can't continue if we don't have a C-compiler.
+    # Just exit early so it doesn't fail the build.
+    if not os.path.exists('/opt/bin/cc'):
+        return
+
     linker = find_linker()
     defines = parse_defines()
     data = {

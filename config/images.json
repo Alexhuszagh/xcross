@@ -41,13 +41,13 @@
     {
         "type": "buildroot",
         "target": "archs38-unknown-linux-gnu",
-        "triple": "archs38-buildroot-linux-gnu",
+        "triple": "arc-buildroot-linux-gnu",
         "processor": "archs38"
     },
     {
         "type": "buildroot",
         "target": "arcebhs38-unknown-linux-gnu",
-        "triple": "arcebhs38-buildroot-linux-gnu",
+        "triple": "arceb-buildroot-linux-gnu",
         "processor": "arcebhs38"
     },
     // FAILS DURING BUILDING GDB:
@@ -57,7 +57,7 @@
     {
         "type": "buildroot",
         "target": "csky-unknown-linux-gnu",
-        "triple": "csky-buildroot-linux-gnu",
+        "triple": "csky-buildroot-linux-gnuabiv1",
         "processor": "csky"
     },
     {
@@ -66,6 +66,9 @@
         "triple": "m68k-buildroot-linux-uclibc",
         "processor": "m68k"
     },
+    // TODO(ahuszagh) These 2 seem to be failing...
+    // Also need to ensure we have the proper triples for everything
+    //  This is necessary so I can get the proper target features...
     {
         "type": "buildroot",
         "target": "microblaze-unknown-linux-uclibc",
@@ -112,6 +115,25 @@
         // Unknown the true triple
         "triple": "nds32",
         "processor": "nds32"
+    },
+    {
+        "type": "buildroot",
+        "target": "openrisc-unknown-linux-musl",
+        "triple": "openrisc-unknown-linux-musl",
+        "processor": "openrisc"
+    },
+    {
+        "type": "buildroot",
+        "target": "openrisc-unknown-linux-uclibc",
+        "triple": "openrisc-unknown-linux-uclibc",
+        "processor": "openrisc"
+    },
+    {
+        "type": "buildroot",
+        "target": "xtensa-unknown-linux-uclibc",
+        "triple": "xtensa-unknown-linux-uclibc",
+        "processor": "xtensa"
+        // TODO(ahuszagh) Needs qemu
     },
 
     // TODO(ahuszagh) Extend here...
