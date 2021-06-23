@@ -26,10 +26,76 @@
     // BUILDROOT
     {
         "type": "buildroot",
+        "target": "arc-unknown-linux-gnu",
+        "triple": "arc-buildroot-linux-gnu",
+        "processor": "arc"
+    },
+    {
+        "type": "buildroot",
+        "target": "arceb-unknown-linux-gnu",
+        "triple": "arceb-buildroot-linux-gnu",
+        "processor": "arceb"
+    },
+    {
+        "type": "buildroot",
+        "target": "csky-unknown-linux-gnu",
+        "triple": "csky-buildroot-linux-gnu",
+        "processor": "csky"
+    },
+    {
+        "type": "buildroot",
+        "target": "m68k-unknown-linux-uclibc",
+        "triple": "m68k-buildroot-linux-uclibc",
+        "processor": "m68k"
+    },
+    {
+        "type": "buildroot",
+        "target": "microblaze-unknown-linux-uclibc",
+        "config": "microblaze-linux-uclibc",
+        "processor": "microblaze",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "microblazeel-unknown-linux-uclibc",
+        "config": "microblazeel-linux-uclibc",
+        "processor": "microblazeel",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "mips64-unknown-linux-uclibcn32",
+        "triple": "mips64-buildroot-linux-uclibc",
+        "processor": "mips64"
+    },
+    {
+        "type": "buildroot",
+        "target": "mips64-unknown-linux-uclibcn64",
+        "triple": "mips64-buildroot-linux-uclibc",
+        "processor": "mips64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
         "target": "mips64el-unknown-linux-uclibcn32",
         "triple": "mips64el-buildroot-linux-uclibc",
         "processor": "mips64el"
     },
+    {
+        "type": "buildroot",
+        "target": "mips64el-unknown-linux-uclibcn64",
+        "triple": "mips64el-buildroot-linux-uclibc",
+        "processor": "mips64el",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "nds32",
+        // Unknown the true triple
+        "triple": "nds32",
+        "processor": "nds32"
+    },
+
     // TODO(ahuszagh) Extend here...
 
     // CROSSTOOL-NG
