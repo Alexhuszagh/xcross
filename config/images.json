@@ -24,14 +24,12 @@
     },
 
     // BUILDROOT
-    // TODO(ahuszagh) Currently failing with:
-    //      unsupported type Flat Device Tree
-    // I don't actually want to build Linux though...
-    //{
-    //    "type": "buildroot",
-    //    "target": "mips64-unknown-linux-uclibcn32",
-    //    "processor": "mips"
-    //},
+    {
+        "type": "buildroot",
+        "target": "mips64el-unknown-linux-uclibcn32",
+        "config": "mips64el-buildroot-linux-uclibc",
+        "processor": "mips64el"
+    },
     // TODO(ahuszagh) Extend here...
 
     // CROSSTOOL-NG
@@ -1252,13 +1250,13 @@
     //},
     // FAILS DURING BUILDING LIBSTDC++:
     //      unwind-pe.h:270:18: error: '_Unwind_gnu_Find_got' was not declared in this scope
-    // TODO(ahuszagh) This is tenative...
-    {
-        "type": "musl-cross",
-        "target": "sh2eb-unknown-linux-muslfdpic",
-        "config": "sh2eb-linux-muslfdpic",
-        "gcc_config": "--with-cpu=mj2"
-    },
+    //      If built with `with_cpu=mj2`, it says `with_cpu=mj2 not supported`.
+    //{
+    //    "type": "musl-cross",
+    //    "target": "sh2eb-unknown-linux-muslfdpic",
+    //    "config": "sh2eb-linux-muslfdpic",
+    //    "gcc_config": "--with-cpu=mj2"
+    //},
     //{
     //    "type": "musl-cross",
     //    "target": "sh3eb-unknown-linux-muslfdpic",

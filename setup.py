@@ -1002,11 +1002,19 @@ class ConfigureCommand(VersionCommand):
         self.configure(cmake_template, cmake, False, [
             ('PROCESSOR', image.processor),
             ('OS', os),
+            ('TRIPLE', image.config),
         ])
 
         # Configure the symlinks.
         symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
         self.configure(symlink_template, symlink, True, [
+            ('ARCH', image.processor),
+            ('FLAGS', image.cflags),
+            ('HARDCODED', image.hardcoded_cpulist),
+            ('LD_LIBRARY_PATH', image.ld_library_path),
+            ('LD_PRELOAD', image.ld_preload),
+            ('OPTIONAL_FLAGS', image.optional_cflags),
+            ('TRIPLE', image.triple),
         ])
 
     def configure_crosstool(self, image):

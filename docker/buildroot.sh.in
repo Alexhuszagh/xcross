@@ -58,12 +58,16 @@ cd buildroot-^BUILDROOT_VERSION^
 
 # Copy our configurations over.
 cp /src/.config ./
-make -j ^JOBS^
+make sdk -j ^JOBS^
 
-# TODO(ahuszagh)
-# The images will be installed here:
-#   output/images
-# TODO(ahuszagh) Add more here...
+# Now need to copy over the toolchain to our install prefix.
+mv output/host /home/crosstoolng/buildroot
+/home/crosstoolng/buildroot/relocate-sdk.sh
 
-# Build our buildroot toolchain.
-# TODO(ahuszagh) Here...
+# Cleanup
+# Even though we didn't install GCC, it doesn't get autoremoved,
+# which takes up a lot of space.
+cd /
+rm -rf /src
+apt-get remove --purge --assume-yes "${diff[@]}"
+apt-get autoremove --assume-yes
