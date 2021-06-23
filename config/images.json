@@ -1385,13 +1385,12 @@
     //    "config": "sh4eb-linux-muslfdpicsf",
     //    "qemu": true
     //},
-    //{
-    //    "type": "musl-cross",
-    //    "target": "x86_64-unknown-linux-muslx32",
-    //    "config": "x86_64-linux-muslx32",
-    //    "processor": "x86_64",
-    //    "qemu": true
-    //},
+    {
+        "type": "musl-cross",
+        "target": "x86_64-unknown-linux-muslx32",
+        "config": "x86_64-linux-muslx32",
+        "processor": "x86_64"
+    },
 
     // RISC-V
     // We also have some extensive flags for specific configurations of RISC-V.
