@@ -71,8 +71,10 @@ def eh_frame_header(linker):
     )
     os.unlink('main.cc')
     os.unlink('main.o')
-    os.unlink('main')
-    return code == 0
+    if code == 0:
+        os.unlink('main')
+        return True
+    return False
 
 def alignof(c_type):
     '''Calculate the alignment of a given type.'''
