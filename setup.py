@@ -603,12 +603,12 @@ class RiscvImage(Image):
         return int(re.match(r'^riscv(\d+)$', self.processor).group(1))
 
     @property
-    def optional_cflags(self):
+    def optional_flags(self):
         march = f'rv{self.bits}{self.extensions}'
         flags = f'-march={march} -mabi={self.abi}'
-        if self.optional_flags:
-            flags= f'{self.optional_flags} {flags}'
-        return f'OPTIONAL_CFLAGS="{flags}" '
+        if Image.optional_flags.fget(self):
+            flags = f'{self.optional_flags} {flags}'
+        return flags
 
 class OtherImage(Image):
     '''Specialized properties for miscellaneous images.'''
@@ -903,7 +903,8 @@ class ConfigureCommand(VersionCommand):
         with_qemu,
         replacements,
         use_base=True,
-        use_toolchain=True
+        use_toolchain=True,
+        use_spec=True,
     ):
         '''Configure a Dockerfile from template.'''
 
@@ -917,6 +918,7 @@ class ConfigureCommand(VersionCommand):
         qemu = f'{HOME}/docker/Dockerfile.qemu.in'
         symlink = f'{HOME}/docker/Dockerfile.symlink.in'
         toolchain = f'{HOME}/docker/Dockerfile.toolchain.in'
+        spec = f'{HOME}/docker/Dockerfile.spec.in'
         entrypoint = f'{HOME}/docker/Dockerfile.entrypoint.in'
         contents = []
         if use_base:
@@ -931,6 +933,9 @@ class ConfigureCommand(VersionCommand):
             contents.append(file.read())
         if use_toolchain:
             with open(toolchain, 'r') as file:
+                contents.append(file.read())
+        if use_spec:
+            with open(spec, 'r') as file:
                 contents.append(file.read())
         with open(entrypoint, 'r') as file:
             contents.append(file.read())
@@ -947,6 +952,9 @@ class ConfigureCommand(VersionCommand):
             ('ARCH', image.arch),
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('FLAGS', f'"{image.flags}"'),
+            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
+            ('OS', image.os.to_triple() or 'unknown'),
             ('TARGET', image.target),
             ('TOOLCHAIN', image.toolchain),
         ])
@@ -954,7 +962,6 @@ class ConfigureCommand(VersionCommand):
         # Configure the CMake toolchain.
         cmake_template = f'{HOME}/cmake/android.cmake.in'
         cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        os = image.os.to_cmake()
         self.configure(cmake_template, cmake, False, [
             ('ABI', image.abi),
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
@@ -994,6 +1001,9 @@ class ConfigureCommand(VersionCommand):
             ('BIN', f'"{bin_directory}"'),
             ('CONFIG', image.config),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('FLAGS', f'"{image.flags}"'),
+            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
+            ('OS', image.os.to_triple() or 'unknown'),
             ('TARGET', image.target),
         ])
 
@@ -1036,7 +1046,10 @@ class ConfigureCommand(VersionCommand):
             ('BIN', f'"{bin_directory}"'),
             ('CONFIG', image.config),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('FLAGS', f'"{image.flags}"'),
             ('PATCH', patches),
+            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
+            ('OS', image.os.to_triple() or 'unknown'),
             ('TARGET', image.target),
         ])
 
@@ -1081,8 +1094,11 @@ class ConfigureCommand(VersionCommand):
             ('ARCH', image.processor),
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('FLAGS', f'"{image.flags}"'),
             ('G++', image.cxx),
             ('LIBC', image.libc),
+            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
+            ('OS', image.os.to_triple() or 'unknown'),
             ('TARGET', image.target),
         ])
 
@@ -1138,6 +1154,9 @@ class ConfigureCommand(VersionCommand):
             ('ARCH', image.processor),
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
+            ('FLAGS', f'"{image.flags}"'),
+            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
+            ('OS', image.os.to_triple() or 'unknown'),
             ('TARGET', image.target),
             ('TRIPLE', image.config),
         ])
@@ -1183,6 +1202,9 @@ class ConfigureCommand(VersionCommand):
         self.configure_dockerfile(image.target, template, image.qemu, [
             ('ARCH', image.processor),
             ('BIN', f'"{bin_directory}"'),
+            ('FLAGS', f'"{image.flags}"'),
+            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
+            ('OS', image.os.to_triple() or 'unknown'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('TARGET', image.target),
             ('TRIPLE', image.triple),
@@ -1218,7 +1240,7 @@ class ConfigureCommand(VersionCommand):
             ('BINDIR', bin_directory),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('TARGET', image.target),
-        ], use_base=False, use_toolchain=False)
+        ], use_base=False, use_toolchain=False, use_spec=False)
 
         # Configure the CMake toolchain.
         cmake_template = f'{HOME}/cmake/{image.target}.cmake.in'

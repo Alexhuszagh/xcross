@@ -53,6 +53,7 @@
     // FAILS DURING BUILDING GDB:
     //      gdb/location.c:527:19: error: ISO C++ forbids comparison
     //      between pointer and integer [-fpermissive]
+    //      Therefore, disable GDB.
     {
         "type": "buildroot",
         "target": "csky-unknown-linux-gnu",

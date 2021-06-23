@@ -226,6 +226,7 @@ shortcut_util() {
         "gcov"
         "gcov-dump"
         "gcov-tool"
+        "gdb"
         "gprof"
         "ld"
         "ld.bfd"
