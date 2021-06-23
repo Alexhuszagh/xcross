@@ -15,10 +15,9 @@ import subprocess
 def find_linker():
     '''Get the executable for the linker.'''
 
-    devnull = subprocess.DEVNULL
     for linker in ['ld', 'ld.bfd', 'ld.gold']:
-        code = subprocess.call(['which', linker], stdin=devnull, stdout=devnull)
-        if code == 0:
+        path = os.path.join('/opt/bin', linker)
+        if os.path.exists(path):
             return linker
     raise ValueError('Unable to find linker.')
 
