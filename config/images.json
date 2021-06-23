@@ -50,6 +50,9 @@
         "triple": "arcebhs38-buildroot-linux-gnu",
         "processor": "arcebhs38"
     },
+    // FAILS DURING BUILDING GDB:
+    //      gdb/location.c:527:19: error: ISO C++ forbids comparison
+    //      between pointer and integer [-fpermissive]
     {
         "type": "buildroot",
         "target": "csky-unknown-linux-gnu",

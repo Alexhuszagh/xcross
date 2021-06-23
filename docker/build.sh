@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build all the docker images.
 
-set -ex
+set -x
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/images.sh"
@@ -24,6 +24,7 @@ tag_semver() {
     done
 }
 
+failures=()
 for image in "${images[@]}"; do
     if [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
@@ -33,16 +34,29 @@ for image in "${images[@]}"; do
         project_dir="$scriptdir"/..
         dockerfile="$scriptdir/images/Dockerfile.$image"
         docker build -t "$image_name" "$project_dir" --file "$dockerfile"
-        tag_semver "$image_name"
-        if [[ "$image" == *-unknown-linux-gnu ]]; then
-            base="${image%-unknown-linux-gnu}"
-            base_image="$username/$repository:$base"
-            docker tag "$image_name" "$base_image"
-            tag_semver "$base_image"
+        if [ $? -eq 0 ]; then
+            tag_semver "$image_name"
+            if [[ "$image" == *-unknown-linux-gnu ]]; then
+                base="${image%-unknown-linux-gnu}"
+                base_image="$username/$repository:$base"
+                docker tag "$image_name" "$base_image"
+                tag_semver "$base_image"
+            fi
+        else
+            failures+=("$image")
         fi
+
     fi
 
     if [ "$STOP" = "$image" ]; then
         break
     fi
 done
+
+if [ ${#failures[@]} -ne 0 ]; then
+    echo "Error: Failures occurred."
+    echo "-------------------------"
+    for failure in "${failures[@]}"; do
+        echo "$failure"
+    done
+fi
