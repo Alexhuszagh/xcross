@@ -25,7 +25,7 @@ def linker_is_gnu(linker):
     '''Determine if the linker flavor is GNU.'''
 
     with subprocess.Popen(
-        [linker, '--version'],
+        [f'/opt/bin/{linker}', '--version'],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
@@ -43,7 +43,7 @@ def parse_defines():
     '''Dump and parse the GCC compiler defines.'''
 
     with subprocess.Popen(
-        'cc -dM -E - < /dev/null',
+        '/opt/bin/cc -dM -E - < /dev/null',
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
@@ -63,9 +63,9 @@ def eh_frame_header(linker):
     devnull = subprocess.DEVNULL
     with open('main.cc', 'w') as file:
         file.write('int main() { return 0; }')
-    subprocess.check_call(['c++', '-c', 'main.cc', '-o', 'main.o'], stdin=devnull, stdout=devnull)
+    subprocess.check_call(['/opt/bin/c++', '-c', 'main.cc', '-o', 'main.o'], stdin=devnull, stdout=devnull)
     code = subprocess.call(
-        [linker, 'main.o', '-o', 'main', '--eh-frame-hdr'],
+        [f'/opt/bin/{linker}', 'main.o', '-o', 'main', '--eh-frame-hdr'],
         stderr=devnull,
         stdout=devnull
     )
@@ -86,7 +86,7 @@ def alignof(c_type):
         file.write('int main() { return 0; }\n')
 
     with subprocess.Popen(
-        ['cc', 'main.c', '-o', 'main', '-std=c11'],
+        ['/opt/bin/cc', 'main.c', '-o', 'main', '-std=c11'],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
     ) as process:
