@@ -27,7 +27,7 @@
     {
         "type": "buildroot",
         "target": "mips64el-unknown-linux-uclibcn32",
-        "config": "mips64el-buildroot-linux-uclibc",
+        "triple": "mips64el-buildroot-linux-uclibc",
         "processor": "mips64el"
     },
     // TODO(ahuszagh) Extend here...
