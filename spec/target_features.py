@@ -82,7 +82,7 @@ def alignof(c_type):
     with open('main.c', 'w') as file:
         file.write('#include <stdalign.h>\n')
         file.write('#include <stdint.h>\n')
-        file.write(f'char (*alignment)[alignof({c_type})] = 1;\n')
+        file.write(f'char (*alignment)[alignof({c_type})] = 1.0;\n')
         file.write('int main() { return 0; }\n')
 
     with subprocess.Popen(
@@ -96,11 +96,15 @@ def alignof(c_type):
     os.unlink('main.c')
 
     # Match the type size.
-    regex = re.compile(r'\[(\d+)\]\' with an expression of type')
+    regex = re.compile(r'\[(\d+)\][\'‘’] with an expression of type')
     match = regex.search(stdout)
     if match is not None:
         return match.group(1)
-    regex = re.compile(r'\[(\d+)\][\'‘’] from [\'‘’]int[\'‘’] makes pointer')
+    regex = re.compile(r'\[(\d+)\][\'‘’] from [\'‘’](?:double|float)[\'‘’] makes pointer')
+    match = regex.search(stdout)
+    if match is not None:
+        return match.group(1)
+    regex = re.compile(r'\[(\d+)\][\'‘’] using type [\'‘’](?:double|float)[\'‘’]')
     match = regex.search(stdout)
     if match is not None:
         return match.group(1)
@@ -173,6 +177,7 @@ def main():
         'int128': '__int128',
         'float128': '__float128',
     }
+    # TODO(ahuszagh) Fails with csky...
     for label, c_type in c_types.items():
         define = f'__SIZEOF_{label.upper()}__'
         if define in defines:
