@@ -71,10 +71,11 @@ def eh_frame_header(linker):
     )
     os.unlink('main.cc')
     os.unlink('main.o')
-    if code == 0:
+    try:
         os.unlink('main')
-        return True
-    return False
+    except FileNotFoundError:
+        pass
+    return code == 0
 
 def alignof(c_type):
     '''Calculate the alignment of a given type.'''
@@ -96,6 +97,10 @@ def alignof(c_type):
 
     # Delete file after getting output.
     os.unlink('main.c')
+    try:
+        os.unlink('main')
+    except FileNotFoundError:
+        pass
 
     # Match the type size.
     regex = re.compile(r'\[(\d+)\][\'‘’] with an expression of type')
@@ -179,7 +184,6 @@ def main():
         'int128': '__int128',
         'float128': '__float128',
     }
-    # TODO(ahuszagh) Fails with csky...
     for label, c_type in c_types.items():
         define = f'__SIZEOF_{label.upper()}__'
         if define in defines:
