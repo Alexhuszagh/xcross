@@ -103,18 +103,16 @@ def alignof(c_type):
         pass
 
     # Match the type size.
-    regex = re.compile(r'\[(\d+)\][\'‘’] with an expression of type')
-    match = regex.search(stdout)
-    if match is not None:
-        return match.group(1)
-    regex = re.compile(r'\[(\d+)\][\'‘’] from [\'‘’](?:double|float)[\'‘’] makes pointer')
-    match = regex.search(stdout)
-    if match is not None:
-        return match.group(1)
-    regex = re.compile(r'\[(\d+)\][\'‘’] using type [\'‘’](?:double|float)[\'‘’]')
-    match = regex.search(stdout)
-    if match is not None:
-        return match.group(1)
+    regexes = [
+        re.compile(r'\[(\d+)\][\'‘’] with an expression of type'),
+        re.compile(r'\[(\d+)\][\'‘’] with an expression of incompatible type'),
+        re.compile(r'\[(\d+)\][\'‘’] from [\'‘’](?:double|float)[\'‘’] makes pointer'),
+        re.compile(r'\[(\d+)\][\'‘’] using type [\'‘’](?:double|float)[\'‘’]'),
+    ]
+    for regex in regexes:
+        match = regex.search(stdout)
+        if match is not None:
+            return match.group(1)
 
     raise ValueError(stdout)
 
