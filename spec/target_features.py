@@ -56,7 +56,6 @@ def parse_defines():
     regex = re.compile(r'^#define (\S+) ?(.*)$')
     data = [regex.match(i).groups() for i in lines]
     return {k: v for k, v in data}
-    # __HAVE_LONG_DOUBLE64__
 
 def eh_frame_header(linker):
     '''Determine if the linker supports --eh-frame-hdr.'''
@@ -101,7 +100,7 @@ def alignof(c_type):
     match = regex.search(stdout)
     if match is not None:
         return match.group(1)
-    regex = re.compile(r'\[(\d+)\]\' from \'int\' makes pointer')
+    regex = re.compile(r'\[(\d+)\][\'‘’] from [\'‘’]int[\'‘’] makes pointer')
     match = regex.search(stdout)
     if match is not None:
         return match.group(1)
