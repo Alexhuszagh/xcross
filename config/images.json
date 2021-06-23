@@ -24,17 +24,31 @@
     },
 
     // BUILDROOT
+    // FAILS DURING BUILDING GCC:
+    //      msort.c:201: Error: opcode 'dmb' not supported for target arc700
+    //{
+    //    "type": "buildroot",
+    //    "target": "arc-unknown-linux-gnu",
+    //    "triple": "arc-buildroot-linux-gnu",
+    //    "processor": "arc"
+    //},
+    //{
+    //    "type": "buildroot",
+    //    "target": "arceb-unknown-linux-gnu",
+    //    "triple": "arceb-buildroot-linux-gnu",
+    //    "processor": "arceb"
+    //},
     {
         "type": "buildroot",
-        "target": "arc-unknown-linux-gnu",
-        "triple": "arc-buildroot-linux-gnu",
-        "processor": "arc"
+        "target": "archs38-unknown-linux-gnu",
+        "triple": "archs38-buildroot-linux-gnu",
+        "processor": "archs38"
     },
     {
         "type": "buildroot",
-        "target": "arceb-unknown-linux-gnu",
-        "triple": "arceb-buildroot-linux-gnu",
-        "processor": "arceb"
+        "target": "arcebhs38-unknown-linux-gnu",
+        "triple": "arcebhs38-buildroot-linux-gnu",
+        "processor": "arcebhs38"
     },
     {
         "type": "buildroot",
