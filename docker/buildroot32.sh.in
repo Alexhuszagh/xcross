@@ -24,8 +24,8 @@ apt-get install --assume-yes --no-install-recommends \
     flex \
     g++ \
     gawk \
-    libc6:i386 \
-    libstdc++6:i386 \
+    libc6-i386 \
+    lib32stdc++6 \
     help2man \
     libncurses-dev \
     libtool-bin \
@@ -38,7 +38,7 @@ apt-get install --assume-yes --no-install-recommends \
     unzip \
     wget \
     xz-utils \
-    zlib1g:i386
+    lib32z1
 after_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
 
 # Calculate the packages we need to remove later.
