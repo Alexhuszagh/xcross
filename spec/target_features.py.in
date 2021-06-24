@@ -225,6 +225,40 @@ def pie(defines):
         return '-fPIE'
     return None
 
+def data_model(data):
+    '''Determine the correct data model, such as ilp32, for the toolchain.'''
+
+    try:
+        c_short = data['target-c-short']['size']
+        c_int = data['target-c-int']['size']
+        c_long = data['target-c-long']['size']
+        c_long_long = data['target-c-long-long']['size']
+        c_pointer = data['target-pointer']['size']
+
+        # (short, int, long, long long, pointer)
+        # short is at least 16 bits
+        # long is at least 32 bits
+        # long long is at least 64 bits
+        models = {
+            ('2', '2', '4', '8', '2'): 'sip2',
+            ('2', '2', '4', '8', '4'): 'lp32',
+            ('2', '4', '4', '8', '4'): 'ilp32',
+            ('2', '4', '4', '8', '8'): 'llp64',
+            ('2', '4', '8', '8', '8'): 'lp64',
+            ('2', '8', '8', '8', '8'): 'ilp64',
+            ('8', '8', '8', '8', '8'): 'silp64',
+        }
+        return models[(c_short, c_int, c_long, c_long_long, c_pointer)]
+    except KeyError:
+        return 'unknown'
+
+def add_exec(path):
+    '''Give a file executable permissions.'''
+
+    flags = stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+    st = os.stat(path)
+    os.chmod(path, st.st_mode | flags)
+
 def main():
     '''Entry point.'''
 
@@ -276,14 +310,36 @@ def main():
                 'align': alignof(c_type, cc)
             }
 
-    with open(f'{bin_dir}/target-specs.json', 'w') as file:
+    # Determine the appropriate data model.
+    data['data-model'] = data_model(data)
+
+    # Create a filtered view of our data.
+    data_filtered = {
+        'arch': data['arch'],
+        'os': data['os'],
+        'eh-frame-header': data['eh-frame-header'],
+        'linker-is-gnu': data['linker-is-gnu'],
+        'target-endian': data['target-endian'],
+        'pic': data['pic'],
+        'pie': data['pie'],
+        'char-is-signed': data['target-c-char']['signed'],
+        'data-model': data['data-model'],
+    }
+
+    target_specs = f'{bin_dir}/target-specs'
+    target_specs_full = f'{bin_dir}/target-specs-full'
+    with open(f'{target_specs}.json', 'w') as file:
+        json.dump(data_filtered, file)
+    with open(f'{target_specs_full}.json', 'w') as file:
         json.dump(data, file)
-    with open(f'{bin_dir}/target-specs', 'w') as file:
+    with open(target_specs, 'w') as file:
         file.write('#/bin/bash\n')
-        file.write(f'cat {bin_dir}/target-specs.json | jq\n')
-    flags = stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-    st = os.stat(f'{bin_dir}/target-specs')
-    os.chmod(f'{bin_dir}/target-specs', st.st_mode | flags)
+        file.write(f'cat {target_specs}.json | jq\n')
+    with open(target_specs_full, 'w') as file:
+        file.write('#/bin/bash\n')
+        file.write(f'cat {target_specs_full}.json | jq\n')
+    add_exec(target_specs)
+    add_exec(target_specs_full)
 
 if __name__ == '__main__':
     main()
