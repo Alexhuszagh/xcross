@@ -21,42 +21,29 @@ cd cpp-helloworld
 
 # Check our run conditions.
 has_run=no
+run_toolchain1=no
+run_toolchain2=no
 if command -v run &> /dev/null; then
     has_run=yes
-fi
-is_android=no
-if [[ "$IMAGE" = *-android ]] || [[ "$IMAGE" = *-androideabi ]]; then
-    is_android=yes
-fi
-is_armeb=no
-if [[ "$IMAGE" = armeb-* ]] || [[ "$IMAGE" = arm64eb-* ]] || [[ "$IMAGE" = thumbeb-* ]]; then
-    is_armeb=yes
-fi
-is_ppc32=no
-if [[ "$IMAGE" = ppc-* ]]; then
-    is_ppc32=yes
-fi
-is_microblaze_uclibc=no
-if [[ "$IMAGE" = microblaze*-uclibc ]]; then
-    is_microblaze_uclibc=yes
-fi
-is_sh4be=no
-if [[ "$IMAGE" = sh4be-* ]]; then
-    is_sh4be=yes
-fi
-run_toolchain2=no
-if [ "$has_run" = yes ] && [ "$is_ppc32" = no ]; then
-    run_toolchain2=yes
-fi
-run_toolchain1=no
-if [ "$has_run" = yes ] && [ "$is_android" = no ] && [ "$is_armeb" = no ] && [ "$is_microblaze_uclibc" = no ] && [ "$is_sh4be" = no ]; then
     run_toolchain1=yes
-fi
-if [[ "$IMAGE" = xtensa* ]]; then
-    # Bug with Xtensa where Qemu cannot properly emulate it,
-    # even with valid instructions.
-    run_toolchain1=no
-    run_toolchain2=no
+    run_toolchain2=yes
+
+    if [[ "$IMAGE" = armeb-* ]] || [[ "$IMAGE" = arm64eb-* ]] || [[ "$IMAGE" = thumbeb-* ]]; then
+        run_toolchain1=no
+    fi
+    if [[ "$IMAGE" = ppc-* ]]; then
+        run_toolchain2=no
+    fi
+    if [[ "$image" = microblazeel-xilinx-linux-gnu ]]; then
+        run_toolchain2=no
+    fi
+
+    if [[ "$IMAGE" = xtensa* ]]; then
+        # Bug with Xtensa where Qemu cannot properly emulate it,
+        # even with valid instructions.
+        run_toolchain1=no
+        run_toolchain2=no
+    fi
 fi
 
 # Test CMake.

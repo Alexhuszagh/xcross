@@ -454,6 +454,14 @@ class BuildRootImage(Image):
     '''Specialized properties for buildroot images.'''
 
     @property
+    def use_32(self):
+        return getattr(self, '_use_32', False)
+
+    @use_32.setter
+    def use_32(self, value):
+        self._use_32 = value
+
+    @property
     def config(self):
         return getattr(self, '_config', self.target)
 
@@ -725,6 +733,7 @@ class ConfigureCommand(VersionCommand):
 
         android = f'{HOME}/docker/android.sh'
         buildroot = f'{HOME}/docker/buildroot.sh'
+        buildroot32 = f'{HOME}/docker/buildroot32.sh'
         cmake = f'{HOME}/docker/cmake.sh'
         entrypoint = f'{HOME}/docker/entrypoint.sh'
         gcc = f'{HOME}/docker/gcc.sh'
@@ -745,6 +754,10 @@ class ConfigureCommand(VersionCommand):
             ('UBUNTU_NAME', config['ubuntu']['version']['name']),
         ])
         self.configure(f'{buildroot}.in', buildroot, True, [
+            ('BUILDROOT_VERSION', buildroot_version),
+            ('JOBS', config["options"]["build_jobs"]),
+        ])
+        self.configure(f'{buildroot32}.in', buildroot32, True, [
             ('BUILDROOT_VERSION', buildroot_version),
             ('JOBS', config["options"]["build_jobs"]),
         ])
@@ -994,8 +1007,11 @@ class ConfigureCommand(VersionCommand):
         else:
             cmake_template = f'{HOME}/cmake/buildroot.cmake.in'
             symlink_template = f'{HOME}/symlink/buildroot.sh.in'
+        if image.use_32:
+            template = f'{HOME}/docker/Dockerfile.buildroot32.in'
+        else:
+            template = f'{HOME}/docker/Dockerfile.buildroot.in'
 
-        template = f'{HOME}/docker/Dockerfile.buildroot.in'
         self.configure_dockerfile(image.target, template, image.qemu, [
             ('ARCH', image.processor),
             ('BIN', f'"{bin_directory}"'),

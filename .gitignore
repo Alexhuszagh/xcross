@@ -15,6 +15,7 @@ cmake/toolchain/
 ct-ng/patch.sh
 docker/android.sh
 docker/buildroot.sh
+docker/buildroot32.sh
 docker/cmake.sh
 docker/entrypoint.sh
 docker/gcc.sh

@@ -67,7 +67,6 @@
         "processor": "m68k",
         "qemu": true
     },
-    // TODO(ahuszagh) Ensure all the triples are accurate.
     {
         "type": "buildroot",
         "target": "microblaze-unknown-linux-uclibc",
@@ -75,6 +74,7 @@
         "processor": "microblaze",
         "qemu": true
     },
+    // TODO(ahuszagh) Ensure all the triples are accurate.
     {
         "type": "buildroot",
         "target": "microblazeel-unknown-linux-uclibc",
@@ -113,7 +113,8 @@
         "target": "nds32",
         // TODO(ahuszagh) Unknown the true triple
         "triple": "nds32",
-        "processor": "nds32"
+        "processor": "nds32",
+        "use_32": true
     },
     {
         "type": "buildroot",
