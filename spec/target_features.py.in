@@ -12,13 +12,20 @@ import re
 import stat
 import subprocess
 
-bin_dir = "/opt/bin/"
+bin_dir = ^BIN^
 
 def find_executable(executables, name):
     '''Find an executable if available.'''
 
+    devnull = subprocess.DEVNULL
     for exe in executables:
-        if os.path.exists(exe):
+        if exe.startswith('/') and os.path.exists(exe):
+            return exe
+        elif subprocess.call(
+            ['which', exe],
+            stderr=devnull,
+            stdout=devnull,
+        ) == 0:
             return exe
     raise ValueError(f'Unable to find {name}.')
 
@@ -224,7 +231,7 @@ def main():
     linker = find_linker()
     cc = find_cc()
     cxx = find_cxx()
-    defines = parse_defines()
+    defines = parse_defines(cc)
     data = {
         'arch': os.environ['ARCH'],
         'os': os.environ['OS'],

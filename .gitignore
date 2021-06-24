@@ -28,6 +28,7 @@ docker/qemu-apt.sh
 docker/riscv-gcc.sh
 docker/version.sh
 musl/config/
+spec/target_features.py
 symlink/emmake
 symlink/shortcut.sh
 symlink/toolchain/

@@ -753,6 +753,7 @@ class ConfigureCommand(VersionCommand):
         qemu_apt = f'{HOME}/docker/qemu-apt.sh'
         riscv_gcc = f'{HOME}/docker/riscv-gcc.sh'
         shortcut = f'{HOME}/symlink/shortcut.sh'
+        target_features = f'{HOME}/spec/target_features.py'
         self.configure(f'{android}.in', android, True, [
             ('CLANG_VERSION', config['android']['clang_version']),
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
@@ -822,6 +823,9 @@ class ConfigureCommand(VersionCommand):
             ('TOOLCHAIN_VERSION', riscv_toolchain_version),
         ])
         self.configure(f'{shortcut}.in', shortcut, True, [
+            ('BIN', f'"{bin_directory}"'),
+        ])
+        self.configure(f'{target_features}.in', target_features, True, [
             ('BIN', f'"{bin_directory}"'),
         ])
 
