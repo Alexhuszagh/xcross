@@ -228,9 +228,9 @@
     {
         "type": "buildroot",
         "target": "xtensa-unknown-linux-uclibc",
-        "triple": "xtensa-unknown-linux-uclibc",
-        "processor": "xtensa"
-        // TODO(ahuszagh) Needs qemu
+        "triple": "xtensa-buildroot-linux-uclibc",
+        "processor": "xtensaeb",
+        "qemu": true
     },
 
     // CROSSTOOL-NG
