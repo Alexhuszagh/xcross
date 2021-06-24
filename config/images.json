@@ -64,7 +64,8 @@
         "type": "buildroot",
         "target": "m68k-unknown-linux-uclibc",
         "triple": "m68k-buildroot-linux-uclibc",
-        "processor": "m68k"
+        "processor": "m68k",
+        "qemu": true
     },
     // TODO(ahuszagh) Ensure all the triples are accurate.
     {
@@ -225,9 +226,12 @@
         "processor": "sparc",
         "qemu": true
     },
+    // NOTE:
+    //      Qemu currently fails, but seems to be a Qemu error, since
+    //      the instructions seem to all be valid.
     {
         "type": "buildroot",
-        "target": "xtensa-unknown-linux-uclibc",
+        "target": "xtensaeb-unknown-linux-uclibc",
         "triple": "xtensa-buildroot-linux-uclibc",
         "processor": "xtensaeb",
         "qemu": true
@@ -1019,13 +1023,15 @@
     // NOTE:
     //      Qemu currently fails, but seems to be a Qemu error, since
     //      the instructions seem to all be valid.
-    {
-        "type": "crosstool",
-        "target": "xtensabe-unknown-linux-uclibc",
-        "triple": "xtensa-unknown-linux-uclibc",
-        "processor": "xtensaeb",
-        "qemu": true
-    },
+    //      We use the buildroot image, although these are
+    //      practically identical.
+    //{
+    //    "type": "crosstool",
+    //    "target": "xtensabe-unknown-linux-uclibc",
+    //    "triple": "xtensa-unknown-linux-uclibc",
+    //    "processor": "xtensaeb",
+    //    "qemu": true
+    //},
 
     // DEBIAN
     {

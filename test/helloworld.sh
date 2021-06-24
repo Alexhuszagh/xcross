@@ -36,20 +36,20 @@ is_ppc32=no
 if [[ "$IMAGE" = ppc-* ]]; then
     is_ppc32=yes
 fi
-is_microblaze=no
-if [[ "$IMAGE" = microblaze* ]]; then
-    is_microblaze=yes
+is_microblaze_uclibc=no
+if [[ "$IMAGE" = microblaze*-uclibc ]]; then
+    is_microblaze_uclibc=yes
 fi
 is_sh4be=no
 if [[ "$IMAGE" = sh4be-* ]]; then
     is_sh4be=yes
 fi
 run_toolchain2=no
-if [ "$has_run" = yes ] && [ "$is_ppc32" = no ] && [ "$is_microblaze" = no ]; then
+if [ "$has_run" = yes ] && [ "$is_ppc32" = no ]; then
     run_toolchain2=yes
 fi
 run_toolchain1=no
-if [ "$has_run" = yes ] && [ "$is_android" = no ] && [ "$is_armeb" = no ] && [ "$is_sh4be" = no ]; then
+if [ "$has_run" = yes ] && [ "$is_android" = no ] && [ "$is_armeb" = no ] && [ "$is_microblaze_uclibc" = no ] && [ "$is_sh4be" = no ]; then
     run_toolchain1=yes
 fi
 if [[ "$IMAGE" = xtensa* ]]; then
