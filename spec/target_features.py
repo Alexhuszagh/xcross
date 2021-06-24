@@ -176,6 +176,26 @@ def target_c_int(defines):
         'align': align,
     }
 
+def pic(defines):
+    '''Determine the flag to support position-independent code.'''
+
+    value = defines.get('__PIC__', '0')
+    if value == '1':
+        return '-fpic'
+    if value == '2':
+        return '-fPIC'
+    return None
+
+def pie(defines):
+    '''Determine the flag to support position-independent executables.'''
+
+    value = defines.get('__PIE__', '0')
+    if value == '1':
+        return '-fpie'
+    if value == '2':
+        return '-fPIE'
+    return None
+
 def main():
     '''Entry point.'''
 
@@ -196,9 +216,15 @@ def main():
         'target-endian': target_endian(defines),
         'target-pointer': target_pointer(defines),
         'target-c-int': target_c_int(defines),
-        'pic': defines.get('__PIC__', '0'),
-        'pie': defines.get('__PIE__', '0'),
+        'pic': pic(defines),
+        'pie': pie(defines),
         'target-c-char': {
+            # Both the size and alignment are guaranteed
+            # by the standard to be 1 in both C and C++,
+            # although this is redundant, it's just for
+            # consistency.
+            'size': '1',
+            'align': '1',
             'signed': char_is_signed()
         },
     }
