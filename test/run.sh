@@ -73,7 +73,8 @@ done
 
 # Test other images.
 wasm() {
-    TOOLCHAIN1=jsonly TOOLCHAIN2=wasm TOOLCHAIN1_FLAGS="-s WASM=0" TOOLCHAIN2_FLAGS="-s WASM=1" "$@"
+    NO_PERIPHERALS=1 TOOLCHAIN1=jsonly TOOLCHAIN2=wasm TOOLCHAIN1_FLAGS="-s WASM=0" \
+        TOOLCHAIN2_FLAGS="-s WASM=1" "$@"
 }
 wasm "$scriptdir/docker-run.sh" helloworld wasm
 CMAKE_FLAGS="-DJS_ONLY=1" wasm "$scriptdir/docker-run.sh" helloworld wasm

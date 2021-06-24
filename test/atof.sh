@@ -32,3 +32,12 @@ CXXFLAGS="$CXXFLAGS $FLAGS" make
 
 # Test symbolic links
 c++ atof.cc $TOOLCHAIN_FLAGS $FLAGS
+
+# Test peripherals.
+if [ "$NO_PERIPHERALS" = "" ]; then
+    cc-cpu-list > /dev/null 2>&1
+    if which run > /dev/null 2>&1; then
+        run-cpu-list > /dev/null 2>&1
+    fi
+    target-specs > /dev/null 2>&1
+fi
