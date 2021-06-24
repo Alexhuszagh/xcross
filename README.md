@@ -27,6 +27,7 @@ Note that this project is similar to [dockercross](https://github.com/dockcross/
 - [Travis CI Example](#travis-ci-example)
 - [Using xcross](#using-xcross)
 - [Sharing Binaries To Host](#sharing-binaries-to-host)
+- [Other Utilities](#other-utilities)
 - [Building/Running Dockerfiles](#building-running-dockerfiles)
 - [Images](#images)
 - [Development Dependencies](#development-dependencies)
@@ -427,6 +428,19 @@ ls -lh build-alpha/hello
 # -rwxr-xr-x. 1 root root 2.4M May 30 20:50 build-alpha/hello
 ```
 
+# Other Utilities
+
+Each image also contains a few custom utilities to probe image configurations:
+
+- **cc-cpu-list**: List the valid CPU values to pass to `--cpu` for the C/C++ compiler.
+- **run-cpu-list**: List the valid CPU values to pass to `--cpu` for Qemu.
+- **target-specs**: Print basic specifications about the target architecture.
+- **target-specs-full**: Print extensive specifications about the target architecture.
+
+```bash
+export CROSS_TARGET=ppc-unknown-linux-gnu
+```
+
 # Building/Running Dockerfiles
 
 To build all Docker images, run `docker/build.sh`. To build and run a single docker image, use
@@ -646,6 +660,7 @@ Currently, we only create images that are supported by:
 - Debian packages
 - Android NDK's
 - musl-cross-make.
+- buildroot
 - RISCV GNU utils.
 
 We therefore support:
@@ -656,7 +671,9 @@ We therefore support:
 - ARM64-BE (Linux, Android, Bare-Metal)
 - alpha (Linux)
 - ARC (Linux, Bare-Metal)
+- ARC-BE (Linux, Bare-Metal)
 - AVR (Bare-Metal)
+- CSKY (Linux)
 - HPPA (Linux)
 - i386-i686 (Bare-Metal)
 - i686 (Linux, MinGW, Android)
@@ -674,15 +691,16 @@ We therefore support:
 - PowerPC-LE (Linux, Bare-Metal)
 - PowerPC64 (Linux, Bare-Metal)
 - PowerPC64-LE (Linux, Bare-Metal)
+- OpenRISC (Linux)
 - RISCV32 (Linux, Bare-Metal)
 - RISCV64 (Linux, Bare-Metal)
 - s390 (Linux)  
 - s390x (Linux) 
 - SH1-4 (Linux, Bare-Metal)
-- Sparc (Linux)
+- Sparc (LEON3 and v8, Linux)
 - Sparc64 (Linux)
 - x86_64 (Linux, MinGW, Android, Bare-Metal)
-- xtensa (Linux)
+- xtensa-BE (Linux)
 - wasm
 
 Platform-specific details:

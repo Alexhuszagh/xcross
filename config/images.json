@@ -121,20 +121,20 @@
     {
         "type": "buildroot",
         "target": "openrisc-unknown-linux-musl",
-        "triple": "openrisc-unknown-linux-musl",
+        "triple": "or1k-buildroot-linux-musl",
         "processor": "openrisc"
     },
     {
         "type": "buildroot",
         "target": "openrisc-unknown-linux-uclibc",
-        "triple": "openrisc-unknown-linux-uclibc",
+        "triple": "or1k-buildroot-linux-uclibc",
         "processor": "openrisc"
     },
     // "G" is an alias for IMAFDZicsr_Zifencei
     {
         "type": "buildroot",
         "target": "riscv32-g-ilp32-unknown-linux-gnu",
-        "triple": "riscv32-unknown-linux-gnu",
+        "triple": "riscv32-buildroot-linux-gnu",
         "processor": "riscv32",
         "qemu": true
     },
@@ -150,28 +150,28 @@
     {
         "type": "buildroot",
         "target": "riscv32-g-ilp32d-unknown-linux-gnu",
-        "triple": "riscv32-unknown-linux-gnu",
+        "triple": "riscv32-buildroot-linux-gnu",
         "processor": "riscv32",
         "qemu": true
     },
     {
         "type": "buildroot",
         "target": "riscv64-g-lp64-unknown-linux-gnu",
-        "triple": "riscv64-unknown-linux-gnu",
+        "triple": "riscv64-buildroot-linux-gnu",
         "processor": "riscv64",
         "qemu": true
     },
     {
         "type": "buildroot",
         "target": "riscv64-g-lp64-unknown-linux-musl",
-        "triple": "riscv64-unknown-linux-musl",
+        "triple": "riscv64-buildroot-linux-musl",
         "processor": "riscv64",
         "qemu": true
     },
     {
         "type": "buildroot",
         "target": "riscv64-g-lp64-unknown-linux-uclibc",
-        "triple": "riscv64-unknown-linux-uclibc",
+        "triple": "riscv64-buildroot-linux-uclibc",
         "processor": "riscv64",
         "qemu": true
     },
@@ -187,7 +187,7 @@
     {
         "type": "buildroot",
         "target": "riscv64-g-lp64f-unknown-linux-musl",
-        "triple": "riscv64-unknown-linux-musl",
+        "triple": "riscv64-buildroot-linux-musl",
         "processor": "riscv64",
         "qemu": true
     },
@@ -203,35 +203,35 @@
     {
         "type": "buildroot",
         "target": "riscv64-g-lp64d-unknown-linux-gnu",
-        "triple": "riscv64-unknown-linux-gnu",
+        "triple": "riscv64-buildroot-linux-gnu",
         "processor": "riscv64",
         "qemu": true
     },
     {
         "type": "buildroot",
         "target": "riscv64-g-lp64d-unknown-linux-musl",
-        "triple": "riscv64-unknown-linux-musl",
+        "triple": "riscv64-buildroot-linux-musl",
         "processor": "riscv64",
         "qemu": true
     },
     {
         "type": "buildroot",
         "target": "riscv64-g-lp64d-unknown-linux-uclibc",
-        "triple": "riscv64-unknown-linux-uclibc",
+        "triple": "riscv64-buildroot-linux-uclibc",
         "processor": "riscv64",
         "qemu": true
     },
     {
         "type": "buildroot",
         "target": "sparcleon3-unknown-linux-uclibc",
-        "triple": "sparc-unknown-linux-uclibc",
+        "triple": "sparc-buildroot-linux-uclibc",
         "processor": "sparc",
         "qemu": true
     },
     {
         "type": "buildroot",
         "target": "sparcv8-unknown-linux-uclibc",
-        "triple": "sparc-unknown-linux-uclibc",
+        "triple": "sparc-buildroot-linux-uclibc",
         "processor": "sparc",
         "qemu": true
     },
