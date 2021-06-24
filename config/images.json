@@ -66,20 +66,18 @@
         "triple": "m68k-buildroot-linux-uclibc",
         "processor": "m68k"
     },
-    // TODO(ahuszagh) These 2 seem to be failing...
-    // Also need to ensure we have the proper triples for everything
-    //  This is necessary so I can get the proper target features...
+    // TODO(ahuszagh) Ensure all the triples are accurate.
     {
         "type": "buildroot",
         "target": "microblaze-unknown-linux-uclibc",
-        "config": "microblaze-linux-uclibc",
+        "triple": "microblaze-buildroot-linux-uclibc",
         "processor": "microblaze",
         "qemu": true
     },
     {
         "type": "buildroot",
         "target": "microblazeel-unknown-linux-uclibc",
-        "config": "microblazeel-linux-uclibc",
+        "triple": "microblazeel-buildroot-linux-uclibc",
         "processor": "microblazeel",
         "qemu": true
     },
