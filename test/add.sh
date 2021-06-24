@@ -20,14 +20,14 @@ cd cpp-add
 mkdir build && cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/$TOOLCHAIN.cmake \
     $CMAKE_FLAGS \
-    -DCMAKE_C_FLAGS="$CFLAGS $FLAGS" \
-    -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
+    -DCMAKE_C_FLAGS="$CFLAGS $FLAGS $TOOLCHAIN_FLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS $TOOLCHAIN_FLAGS"
 cmake --build .
 
 # Test Makefile.
 cd ..
 source /env/$TOOLCHAIN
-CXXFLAGS="$CXXFLAGS $FLAGS" make
+CXXFLAGS="$CXXFLAGS $FLAGS $TOOLCHAIN_FLAGS" make
 
 # Test symbolic links
 c++ add.cc $TOOLCHAIN_FLAGS $FLAGS

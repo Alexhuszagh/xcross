@@ -63,8 +63,8 @@ fi
 mkdir build && cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/$TOOLCHAIN1.cmake \
     $CMAKE_FLAGS \
-    -DCMAKE_C_FLAGS="$CFLAGS $FLAGS" \
-    -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
+    -DCMAKE_C_FLAGS="$CFLAGS $FLAGS $TOOLCHAIN1_FLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS $TOOLCHAIN1_FLAGS"
 cmake --build .
 if [ "$run_toolchain1" = yes ]; then
     cmake --build . -- run
@@ -74,8 +74,8 @@ fi
 rm -rf ./*
 cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/$TOOLCHAIN2.cmake \
     $CMAKE_FLAGS \
-    -DCMAKE_C_FLAGS="$CFLAGS $FLAGS" \
-    -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS"
+    -DCMAKE_C_FLAGS="$CFLAGS $FLAGS $TOOLCHAIN2_FLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS $FLAGS $TOOLCHAIN2_FLAGS"
 cmake --build .
 if [ "$run_toolchain2" = yes ]; then
     cmake --build . -- run
@@ -85,25 +85,25 @@ fi
 # Test Makefile.
 cd ..
 source /env/$TOOLCHAIN1
-CXXFLAGS="$CXXFLAGS $FLAGS" make
+CXXFLAGS="$CXXFLAGS $FLAGS $TOOLCHAIN1_FLAGS" make
 if [ "$run_toolchain1" = yes ]; then
     run helloworld
 fi
 
 make clean
 source /env/$TOOLCHAIN2
-CXXFLAGS="$CXXFLAGS $FLAGS" make
+CXXFLAGS="$CXXFLAGS $FLAGS $TOOLCHAIN2_FLAGS" make
 if [ "$run_toolchain2" = yes ]; then
     run helloworld
 fi
 
 # Test symbolic links
-c++ helloworld.cc $TOOLCHAIN1_FLAGS -o hello $FLAGS
+c++ helloworld.cc -o hello $FLAGS $TOOLCHAIN1_FLAGS
 if [ "$run_toolchain1" = yes ]; then
     run hello
 fi
 
-c++ helloworld.cc $TOOLCHAIN2_FLAGS -o hello $FLAGS
+c++ helloworld.cc -o hello $FLAGS $TOOLCHAIN2_FLAGS
 if [ "$run_toolchain2" = yes ]; then
     run hello
 fi

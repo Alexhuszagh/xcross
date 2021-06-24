@@ -126,13 +126,6 @@
         "triple": "openrisc-unknown-linux-uclibc",
         "processor": "openrisc"
     },
-    {
-        "type": "buildroot",
-        "target": "xtensa-unknown-linux-uclibc",
-        "triple": "xtensa-unknown-linux-uclibc",
-        "processor": "xtensa"
-        // TODO(ahuszagh) Needs qemu
-    },
     // "G" is an alias for IMAFDZicsr_Zifencei
     {
         "type": "buildroot",
@@ -231,6 +224,13 @@
         "triple": "sparc-unknown-linux-uclibc",
         "processor": "sparc",
         "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "xtensa-unknown-linux-uclibc",
+        "triple": "xtensa-unknown-linux-uclibc",
+        "processor": "xtensa"
+        // TODO(ahuszagh) Needs qemu
     },
 
     // CROSSTOOL-NG
