@@ -164,9 +164,7 @@ def char_is_signed():
         os.unlink('main')
     except FileNotFoundError:
         pass
-    if code == 0:
-        return 'unsigned'
-    return 'signed'
+    return code != 0
 
 def target_c_int(defines):
     '''Get the size and alignment of `int`.'''
@@ -200,7 +198,9 @@ def main():
         'target-c-int': target_c_int(defines),
         'pic': defines.get('__PIC__', '0'),
         'pie': defines.get('__PIE__', '0'),
-        'target-c-char': char_is_signed(),
+        'target-c-char': {
+            'signed': char_is_signed()
+        },
     }
     c_types = {
         'size_t': 'size_t',
