@@ -26,7 +26,6 @@ def linker_is_gnu(linker):
 
     with subprocess.Popen(
         [f'/opt/bin/{linker}', '--version'],
-        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
     ) as process:
@@ -63,11 +62,15 @@ def eh_frame_header(linker):
     devnull = subprocess.DEVNULL
     with open('main.cc', 'w') as file:
         file.write('int main() { return 0; }')
-    subprocess.check_call(['/opt/bin/c++', '-c', 'main.cc', '-o', 'main.o'], stdin=devnull, stdout=devnull)
+    subprocess.check_call(
+        ['/opt/bin/c++', '-c', 'main.cc', '-o', 'main.o'],
+        stderr=devnull,
+        stdout=devnull,
+    )
     code = subprocess.call(
         [f'/opt/bin/{linker}', 'main.o', '-o', 'main', '--eh-frame-hdr'],
         stderr=devnull,
-        stdout=devnull
+        stdout=devnull,
     )
     os.unlink('main.cc')
     os.unlink('main.o')
@@ -141,6 +144,30 @@ def target_pointer(defines):
         'align': align,
     }
 
+def char_is_signed():
+    '''Determine if a character is signed.'''
+
+    devnull = subprocess.DEVNULL
+    with open('main.c', 'w') as file:
+        file.write('#include <limits.h>\n')
+        file.write('#if CHAR_MIN < 0\n')
+        file.write('#error signed char\n')
+        file.write('#endif\n')
+        file.write('int main() { return 0; }\n')
+    code = subprocess.call(
+        ['/opt/bin/cc', 'main.c', '-o', 'main'],
+        stdout=devnull,
+        stderr=devnull,
+    )
+    os.unlink('main.c')
+    try:
+        os.unlink('main')
+    except FileNotFoundError:
+        pass
+    if code == 0:
+        return 'unsigned'
+    return 'signed'
+
 def target_c_int(defines):
     '''Get the size and alignment of `int`.'''
 
@@ -173,17 +200,20 @@ def main():
         'target-c-int': target_c_int(defines),
         'pic': defines.get('__PIC__', '0'),
         'pie': defines.get('__PIE__', '0'),
+        'target-c-char': char_is_signed(),
     }
     c_types = {
         'size_t': 'size_t',
         'wchar_t': 'wchar_t',
         'float': 'float',
         'double': 'double',
+        'long_double': 'long double',
+        'float80': '__float80',
+        'float128': '__float128',
         'short': 'short',
         'long': 'long',
         'long_long': 'long long',
         'int128': '__int128',
-        'float128': '__float128',
     }
     for label, c_type in c_types.items():
         define = f'__SIZEOF_{label.upper()}__'
