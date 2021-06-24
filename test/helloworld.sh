@@ -34,7 +34,10 @@ if command -v run &> /dev/null; then
     if [[ "$IMAGE" = ppc-* ]]; then
         run_toolchain2=no
     fi
-    if [[ "$image" = microblazeel-xilinx-linux-gnu ]]; then
+    if [[ "$IMAGE" = microblaze*-unknown-linux-uclibc ]]; then
+        run_toolchain1=no
+    fi
+    if [[ "$IMAGE" = microblazeel-xilinx-linux-gnu ]]; then
         run_toolchain2=no
     fi
 
