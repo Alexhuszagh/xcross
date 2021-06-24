@@ -113,6 +113,7 @@
         "target": "nds32",
         "triple": "nds32le-linux",
         "processor": "nds32le",
+        "system": "nds32",
         "use_32": true
     },
     {

@@ -296,6 +296,11 @@ triple_string = {
 cmake_os = {v: k for k, v in cmake_string.items()}
 triple_os = {v: k for k, v in triple_string.items()}
 
+oses = {
+    'linux': OperatingSystem.Linux,
+    'none': OperatingSystem.BareMetal,
+}
+
 def extract_triple(triple):
     '''Extract components from the LLVM triple.'''
 
@@ -307,9 +312,14 @@ def extract_triple(triple):
     split = triple.split('-')
     arch = split[0]
     if len(split) == 1:
-        # ('arch',) format.
+        # ('arch',)
         vendor = None
         os = OperatingSystem.BareMetal
+        system = None
+    elif len(split) == 2 and split[1] in oses:
+        # ('arch', 'os')
+        vendor = None
+        os = oses[split[1]]
         system = None
     elif len(split) == 3 and split[2] == 'mingw32':
         # ('arch', 'vendor', 'system')
