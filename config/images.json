@@ -122,13 +122,15 @@
         "type": "buildroot",
         "target": "openrisc-unknown-linux-musl",
         "triple": "or1k-buildroot-linux-musl",
-        "processor": "openrisc"
+        "processor": "or1k",
+        "qemu": true
     },
     {
         "type": "buildroot",
         "target": "openrisc-unknown-linux-uclibc",
         "triple": "or1k-buildroot-linux-uclibc",
-        "processor": "openrisc"
+        "processor": "or1k",
+        "qemu": true
     },
     // "G" is an alias for IMAFDZicsr_Zifencei
     {
