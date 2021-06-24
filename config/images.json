@@ -110,7 +110,7 @@
     {
         "type": "buildroot",
         "target": "nds32",
-        // Unknown the true triple
+        // TODO(ahuszagh) Unknown the true triple
         "triple": "nds32",
         "processor": "nds32"
     },
@@ -133,8 +133,105 @@
         "processor": "xtensa"
         // TODO(ahuszagh) Needs qemu
     },
-
-    // TODO(ahuszagh) Extend here...
+    // "G" is an alias for IMAFDZicsr_Zifencei
+    {
+        "type": "buildroot",
+        "target": "riscv32-g-ilp32-unknown-linux-gnu",
+        "triple": "riscv32-unknown-linux-gnu",
+        "processor": "riscv32",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv32-g-ilp32f-unknown-linux-gnu",
+        "triple": "riscv32-unknown-linux-gnu",
+        "processor": "riscv32",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv32-g-ilp32d-unknown-linux-gnu",
+        "triple": "riscv32-unknown-linux-gnu",
+        "processor": "riscv32",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64-unknown-linux-gnu",
+        "triple": "riscv64-unknown-linux-gnu",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64-unknown-linux-musl",
+        "triple": "riscv64-unknown-linux-musl",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64-unknown-linux-uclibc",
+        "triple": "riscv64-unknown-linux-uclibc",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64f-unknown-linux-gnu",
+        "triple": "riscv64-unknown-linux-gnu",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64f-unknown-linux-musl",
+        "triple": "riscv64-unknown-linux-musl",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64f-unknown-linux-uclibc",
+        "triple": "riscv64-unknown-linux-uclibc",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64d-unknown-linux-gnu",
+        "triple": "riscv64-unknown-linux-gnu",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64d-unknown-linux-musl",
+        "triple": "riscv64-unknown-linux-musl",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "riscv64-g-lp64d-unknown-linux-uclibc",
+        "triple": "riscv64-unknown-linux-uclibc",
+        "processor": "riscv64",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "sparcleon3-unknown-linux-uclibc",
+        "triple": "sparc-unknown-linux-uclibc",
+        "processor": "sparc",
+        "qemu": true
+    },
+    {
+        "type": "buildroot",
+        "target": "sparcv8-unknown-linux-uclibc",
+        "triple": "sparc-unknown-linux-uclibc",
+        "processor": "sparc",
+        "qemu": true
+    },
 
     // CROSSTOOL-NG
     {
