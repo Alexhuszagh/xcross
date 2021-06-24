@@ -111,9 +111,8 @@
     {
         "type": "buildroot",
         "target": "nds32",
-        // TODO(ahuszagh) Unknown the true triple
-        "triple": "nds32",
-        "processor": "nds32",
+        "triple": "nds32le-linux",
+        "processor": "nds32le",
         "use_32": true
     },
     {
