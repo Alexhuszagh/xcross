@@ -31,6 +31,7 @@ symlink/emmake
 symlink/shortcut.sh
 symlink/toolchain/
 xcross/__init__.py
+*.old
 
 # Distribution / packaging
 .Python

@@ -6,6 +6,7 @@ source "$scriptdir/shortcut.sh"
 export PREFIX=^TRIPLE^
 export DIR=/home/crosstoolng/buildroot/
 export ARCH=^ARCH^
+export LIBPATH="$DIR$PREFIX"/sysroot
 ^HARDCODED^^LD_PRELOAD^^LD_LIBRARY_PATH^
 ^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util
