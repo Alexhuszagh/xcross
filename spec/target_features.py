@@ -103,11 +103,14 @@ def alignof(c_type):
         pass
 
     # Match the type size.
+    capture = r'\[(\d+)\]'
+    quote = r'[\'‘’]'
+    floats = r'(?:double|float|long double)'
     regexes = [
-        re.compile(r'\[(\d+)\][\'‘’] with an expression of type'),
-        re.compile(r'\[(\d+)\][\'‘’] with an expression of incompatible type'),
-        re.compile(r'\[(\d+)\][\'‘’] from [\'‘’](?:double|float)[\'‘’] makes pointer'),
-        re.compile(r'\[(\d+)\][\'‘’] using type [\'‘’](?:double|float)[\'‘’]'),
+        re.compile(fr'{capture}{quote} with an expression of type'),
+        re.compile(fr'{capture}{quote} with an expression of incompatible type'),
+        re.compile(fr'{capture}{quote} from {quote}{floats}{quote} makes pointer'),
+        re.compile(fr'{capture}{quote} using type {quote}{floats}{quote}'),
     ]
     for regex in regexes:
         match = regex.search(stdout)
