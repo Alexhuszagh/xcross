@@ -108,14 +108,16 @@
         "processor": "mips64el",
         "qemu": true
     },
-    {
-        "type": "buildroot",
-        "target": "nds32",
-        "triple": "nds32le-linux",
-        "processor": "nds32le",
-        "system": "nds32",
-        "use_32": true
-    },
+    // FAILS DURING COMPILING WITH:
+    //      error trying to exec '.../bin/as': execv: No such file or directory
+    //{
+    //    "type": "buildroot",
+    //    "target": "nds32",
+    //    "triple": "nds32le-linux",
+    //    "processor": "nds32le",
+    //    "system": "nds32",
+    //    "use_32": true
+    //},
     {
         "type": "buildroot",
         "target": "openrisc-unknown-linux-musl",
