@@ -472,6 +472,14 @@ class BuildRootImage(Image):
         self._use_32 = value
 
     @property
+    def symlink_sysroot(self):
+        return getattr(self, '_symlink_sysroot', False)
+
+    @symlink_sysroot.setter
+    def symlink_sysroot(self, value):
+        self._symlink_sysroot = value
+
+    @property
     def config(self):
         return getattr(self, '_config', self.target)
 
@@ -1015,7 +1023,10 @@ class ConfigureCommand(VersionCommand):
 
         # Get the proper dependent parameters for our image.
         os = image.os.to_cmake()
-        if image.qemu:
+        if image.symlink_sysroot:
+            cmake_template = f'{HOME}/cmake/buildroot-qemu.cmake.in'
+            symlink_template = f'{HOME}/symlink/buildroot-qemu-sysroot.sh.in'
+        elif image.qemu:
             cmake_template = f'{HOME}/cmake/buildroot-qemu.cmake.in'
             symlink_template = f'{HOME}/symlink/buildroot-qemu.sh.in'
         else:

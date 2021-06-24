@@ -123,6 +123,7 @@
         "target": "openrisc-unknown-linux-musl",
         "triple": "or1k-buildroot-linux-musl",
         "processor": "or1k",
+        "symlink_sysroot": true,
         "qemu": true
     },
     {
