@@ -38,8 +38,8 @@ shortcut() {
             local flag="${value%\/*}"
             local ident="${value#*\/}"
             echo "if [ \"\$$ident\" != \"\" ]; then" >> "$2"
-            echo "    if ! find \"$flag\" \"\${@:2}\"; then" >> "$2"
-            echo "        args+=(\"$flag\$$ident\")" >> "$2"
+            echo "    if ! find $flag \"\${@:2}\"; then" >> "$2"
+            echo "        args+=($flag\"\$$ident\")" >> "$2"
             echo "    fi" >> "$2"
             echo "fi" >> "$2"
         done
