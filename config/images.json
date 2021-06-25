@@ -193,6 +193,7 @@
         "target": "riscv64-g-lp64f-unknown-linux-musl",
         "triple": "riscv64-buildroot-linux-musl",
         "processor": "riscv64",
+	"symlink_sysroot": true,
         "qemu": true
     },
     // FAILS IN LIBC BUILD PASS 2:
@@ -216,6 +217,7 @@
         "target": "riscv64-g-lp64d-unknown-linux-musl",
         "triple": "riscv64-buildroot-linux-musl",
         "processor": "riscv64",
+	"symlink_sysroot": true,
         "qemu": true
     },
     {

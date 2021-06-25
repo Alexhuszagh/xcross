@@ -40,6 +40,13 @@ if command -v run &> /dev/null; then
     if [[ "$IMAGE" = microblazeel-xilinx-linux-gnu ]]; then
         run_toolchain2=no
     fi
+    if [[ "$IMAGE" = riscv64-g-lp64*-unknown-linux-uclibc ]]; then
+        run_toolchain1=no
+	run_toolchain2=no
+    fi
+    if [[ "$IMAGE" = sparcleon3-unknown-linux-uclibc ]]; then
+        run_toolchain1=no
+    fi
 
     if [[ "$IMAGE" = xtensa* ]]; then
         # Bug with Xtensa where Qemu cannot properly emulate it,
