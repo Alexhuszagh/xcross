@@ -1,6 +1,31 @@
 #!/bin/bash
 
 export PATH=^BIN^:"$PATH"
+
+# Issue a warning for a Qemu executable.
+warn_qemu() {
+    if [ "$1" == "true" ]; then
+        echo -e "> \033[31mIssues \033[0mwere detected in $2-linked executables."
+    else
+        echo -e "> \033[34mNo issues \033[0mwere detected in $2-linked executables."
+    fi
+}
+
+# Echo any warnings if they exist.
+# Need JQ and `warnings.json` to exist, or we have
+# no warnings.
+warnings="^BIN^/warnings.json"
+if [ -f "$warnings" ] && [ "$SILENT" = "" ] && command -v jq --version >/dev/null 2>&1; then
+    qemu=$(cat "$warnings" | jq '.qemu')
+    if [ "$qemu" != "null" ]; then
+        echo "WARNING: There may be errors in emulation while running compiled binaries."
+        shared=$(echo "$qemu" | jq '.shared')
+        static=$(echo "$qemu" | jq '.static')
+        warn_qemu "$shared" "dynamically"
+        warn_qemu "$static" "statically"
+    fi
+fi
+
 source env/base
 if [ $# -eq 0 ]; then
     exec bash

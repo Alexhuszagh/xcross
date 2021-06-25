@@ -6,6 +6,7 @@
     Detect target features for a given architecture.
 '''
 
+import collections
 import json
 import os
 import re
@@ -259,12 +260,9 @@ def add_exec(path):
     st = os.stat(path)
     os.chmod(path, st.st_mode | flags)
 
-def main():
-    '''Entry point.'''
+def add_specifications(linker, cc, cxx):
+    '''Add scripts to display the target specifications.'''
 
-    linker = find_linker()
-    cc = find_cc()
-    cxx = find_cxx()
     defines = parse_defines(cc)
     data = {
         'arch': os.environ['ARCH'],
@@ -340,6 +338,56 @@ def main():
         file.write(f'cat {target_specs_full}.json | jq\n')
     add_exec(target_specs)
     add_exec(target_specs_full)
+
+def check_run(cxx, is_static):
+    '''Check if an image successfully runs.'''
+
+    devnull = subprocess.DEVNULL
+    with open('main.cc', 'w') as file:
+        file.write('int main() { return 0; }')
+    command = [cxx, 'main.cc', '-o', 'main']
+    if is_static:
+        command.append('-static')
+    else:
+        command.append('-fPIC')
+    subprocess.check_call(
+        command,
+        stderr=devnull,
+        stdout=devnull,
+    )
+    code = subprocess.call(
+        [f'{bin_dir}/run', 'main'],
+        stderr=devnull,
+        stdout=devnull,
+    )
+    os.unlink('main.cc')
+    os.unlink('main')
+    return code == 0
+
+def add_warnings(cxx):
+    '''Add any warnings to a JSON image.'''
+
+    # This is after any symlinks, so we can check
+    # if /opt/bin/run exists.
+    warnings = collections.defaultdict(dict)
+    if os.path.exists(f'{bin_dir}/run'):
+        if not check_run(cxx, True):
+            warnings['qemu']['static'] = True
+        if not check_run(cxx, False):
+            warnings['qemu']['shared'] = True
+
+    if warnings:
+        with open(f'{bin_dir}/warnings.json', 'w') as file:
+            json.dump(warnings, file)
+
+def main():
+    '''Entry point.'''
+
+    linker = find_linker()
+    cc = find_cc()
+    cxx = find_cxx()
+    add_specifications(linker, cc, cxx)
+    add_warnings(cxx)
 
 if __name__ == '__main__':
     main()
