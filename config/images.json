@@ -1307,8 +1307,8 @@
         "type": "musl-cross",
         "target": "ppc-unknown-linux-muslsf",
         "config": "powerpc-linux-muslsf",
-        "processor": "mips64el",
-        "qemu": true
+        "processor": "ppc",
+	"qemu": true
     },
     {
         "type": "musl-cross",
