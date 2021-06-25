@@ -15,7 +15,7 @@ warn_qemu() {
 # Need JQ and `warnings.json` to exist, or we have
 # no warnings.
 warnings="^BIN^/warnings.json"
-if [ -f "$warnings" ] && [ "$SILENT" = "" ] && command -v jq --version >/dev/null 2>&1; then
+if [ -f "$warnings" ] && [ "$QUIET" = "" ] && command -v jq --version >/dev/null 2>&1; then
     qemu=$(cat "$warnings" | jq '.qemu')
     if [ "$qemu" != "null" ]; then
         echo "WARNING: There may be errors in emulation while running compiled binaries."

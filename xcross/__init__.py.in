@@ -105,6 +105,18 @@ This may also be supplied via the environment variable `CROSS_UPDATE`.''',
     action='store_true'
 )
 parser.add_argument(
+    '--quiet',
+    help='''Silence any warnings when running the image.
+This may also be supplied via the environment variable `CROSS_QUIET`.''',
+    action='store_true'
+)
+parser.add_argument(
+    '--remove-image',
+    help='''Remove the image after executing the command.
+This may also be supplied via the environment variable `CROSS_REMOVE_IMAGE`.''',
+    action='store_true'
+)
+parser.add_argument(
     '-V', '--version',
     action='version',
     version=f'%(prog)s {__version__}',
@@ -291,6 +303,8 @@ def validate_arguments(args):
     args.engine_type = engine_type(args.engine)
     args.non_interactive = args.non_interactive or bool(os.environ.get('CROSS_NONINTERACTIVE', False))
     args.update = args.update or bool(os.environ.get('CROSS_UPDATE', False))
+    args.quiet = args.quiet or bool(os.environ.get('CROSS_QUIET', False))
+    args.remove_image = args.remove_image or bool(os.environ.get('CROSS_REMOVE_IMAGE', False))
 
     # Validate our arguments.
     if args.target is None or not validate_target(args.target):
@@ -323,6 +337,8 @@ def docker_command(args, parent_dir, relpath):
         command.append('--interactive')
     for var in env:
         command += ['--env', var]
+    if args.quiet:
+        command += ['--env', 'QUIET=1']
     # Docker by default uses root as the main user.
     # We therefore want to map to the current user.
     if args.engine_type == 'docker' and os.name == 'posix':
@@ -352,6 +368,15 @@ def update_image(engine, image):
     code = subprocess.call([engine, 'pull', image], stdin=devnull, stdout=devnull)
     if code != 0:
         error('Unable to pull image', code)
+
+def remove_image(engine, image):
+    '''Pull the latest version of the image'''
+
+    devnull = subprocess.DEVNULL
+    code = subprocess.call([engine, 'rmi', image], stdin=devnull, stdout=devnull)
+    if code != 0:
+        error('Unable to remove image', code)
+
 
 def main(argv=None):
     '''Entry point'''
@@ -403,5 +428,9 @@ def main(argv=None):
     finally:
         # Guarantee we cleanup the script afterwards.
         os.remove(args.script_name)
+
+        # Update the image, if required.
+        if args.remove_image:
+            remove_image(args.engine, get_image(args))
 
     sys.exit(code)
