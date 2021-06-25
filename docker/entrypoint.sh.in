@@ -5,9 +5,9 @@ export PATH=^BIN^:"$PATH"
 # Issue a warning for a Qemu executable.
 warn_qemu() {
     if [ "$1" == "true" ]; then
-        echo -e "> \033[31mIssues \033[0mwere detected in $2-linked executables."
+        echo -e "> \033[31mIssues \033[0mwere detected in running Qemu with $2-linked executables."
     else
-        echo -e "> \033[34mNo issues \033[0mwere detected in $2-linked executables."
+        echo -e "> \033[34mNo issues \033[0mwere detected in running Qemu with $2-linked executables."
     fi
 }
 
