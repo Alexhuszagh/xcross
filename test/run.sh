@@ -38,7 +38,7 @@ done
 
 # Run a special test.
 run_special() {
-    if [ "$has_failed" = no ]; then
+    if [ "$has_failed" != yes ]; then
         "$@"
 
         if [ $? -ne 0 ]; then
