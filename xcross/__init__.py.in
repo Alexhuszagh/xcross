@@ -99,21 +99,21 @@ This may also be supplied via the environment variable `CROSS_NONINTERACTIVE`.''
     action='store_true'
 )
 parser.add_argument(
-    '--update',
+    '--update-image',
     help='''Update the container on run.
-This may also be supplied via the environment variable `CROSS_UPDATE`.''',
-    action='store_true'
-)
-parser.add_argument(
-    '--quiet',
-    help='''Silence any warnings when running the image.
-This may also be supplied via the environment variable `CROSS_QUIET`.''',
+This may also be supplied via the environment variable `CROSS_UPDATE_IMAGE`.''',
     action='store_true'
 )
 parser.add_argument(
     '--remove-image',
     help='''Remove the image after executing the command.
 This may also be supplied via the environment variable `CROSS_REMOVE_IMAGE`.''',
+    action='store_true'
+)
+parser.add_argument(
+    '--quiet',
+    help='''Silence any warnings when running the image.
+This may also be supplied via the environment variable `CROSS_QUIET`.''',
     action='store_true'
 )
 parser.add_argument(
@@ -302,7 +302,7 @@ def validate_arguments(args):
     args.engine = args.engine or find_container_engine()
     args.engine_type = engine_type(args.engine)
     args.non_interactive = args.non_interactive or bool(os.environ.get('CROSS_NONINTERACTIVE', False))
-    args.update = args.update or bool(os.environ.get('CROSS_UPDATE', False))
+    args.update_image = args.update_image or bool(os.environ.get('CROSS_UPDATE_IMAGE', False))
     args.quiet = args.quiet or bool(os.environ.get('CROSS_QUIET', False))
     args.remove_image = args.remove_image or bool(os.environ.get('CROSS_REMOVE_IMAGE', False))
 
@@ -332,7 +332,7 @@ def docker_command(args, parent_dir, relpath):
     # for the command, to ensure we avoid any malicious
     # escapes. This allows us to have internal `'` characters
     # in our commands, without actually providing a dangerous escape.
-    command = [args.engine, 'run', '--tty']
+    command = [args.engine, 'run', '--tty', '--name', args.image_name]
     if not args.non_interactive:
         command.append('--interactive')
     for var in env:
@@ -359,23 +359,40 @@ def process_args(argv=None):
     args, unknown = parser.parse_known_args(argv)
     args.command = unknown
     args.script_name = f'{base_script_name}{uuid.uuid4().hex}'
+    args.image_name = args.script_name[3:]
     return args
 
-def update_image(engine, image):
+def has_image(args):
+    '''Check if a given image exists locally.'''
+
+    devnull = subprocess.DEVNULL
+    image = get_image(args)
+    code = subprocess.call([args.engine, 'image', 'inspect', image], stderr=devnull, stdout=devnull)
+    return code == 0
+
+def pull_image(args):
+    '''Pull the latest version of the image'''
+
+    image = get_image(args)
+    code = subprocess.call([args.engine, 'pull', image, '--quiet'])
+    if code != 0:
+        error('Unable to pull image', code, show_help=False)
+
+def remove_stopped_container(args):
+    '''Remove the stopped container.'''
+
+    # Don't care if this fails.
+    devnull = subprocess.DEVNULL
+    subprocess.call([args.engine, 'rm', args.image_name], stderr=devnull, stdout=devnull)
+
+def remove_image(args):
     '''Pull the latest version of the image'''
 
     devnull = subprocess.DEVNULL
-    code = subprocess.call([engine, 'pull', image], stdin=devnull, stdout=devnull)
+    image = get_image(args)
+    code = subprocess.call([args.engine, 'rmi', image], stderr=devnull, stdout=devnull)
     if code != 0:
-        error('Unable to pull image', code)
-
-def remove_image(engine, image):
-    '''Pull the latest version of the image'''
-
-    devnull = subprocess.DEVNULL
-    code = subprocess.call([engine, 'rmi', image], stdin=devnull, stdout=devnull)
-    if code != 0:
-        error('Unable to remove image', code)
+        error('Unable to remove image', code, show_help=False)
 
 
 def main(argv=None):
@@ -386,8 +403,8 @@ def main(argv=None):
     validate_arguments(args)
 
     # Update the image, if required.
-    if args.update:
-        update_image(args.engine, get_image(args))
+    if args.update_image or not has_image(args):
+        pull_image(args)
 
     # Normalize our paths here.
     parent_dir = get_parent_dir(args)
@@ -428,9 +445,10 @@ def main(argv=None):
     finally:
         # Guarantee we cleanup the script afterwards.
         os.remove(args.script_name)
+        remove_stopped_container(args)
 
         # Update the image, if required.
         if args.remove_image:
-            remove_image(args.engine, get_image(args))
+            remove_image(args)
 
     sys.exit(code)

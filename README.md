@@ -384,14 +384,30 @@ xcross --non-interactive ...
 CROSS_NONINTERACTIVE=1 xcross ...
 ```
 
-- `--update`, `CROSS_UPDATE`: Update the container image before running.
+- `--update-image`, `CROSS_UPDATE_IMAGE`: Update the container image before running.
 
-This defaults to using the existing container version if not `--update` is not provided and if `CROSS_UPDATE` does not exist, or is set to an empty string.
+This defaults to using the existing container version if not `--update-image` is not provided and if `CROSS_UPDATE_IMAGE` does not exist, or is set to an empty string.
 
 ```bash
 # These are all identical.
-xcross --update ...
-CROSS_UPDATE=1 xcross ...
+xcross --update-image ...
+CROSS_UPDATE_IMAGE=1 xcross ...
+```
+
+- `--remove-image`, `CROSS_REMOVE_IMAGE`: Remove the container image from local storage after running the command.
+
+```bash
+# These are all identical.
+xcross --remove-image ...
+CROSS_REMOVE_IMAGE=1 xcross ...
+```
+
+- `--quiet`, `CROSS_QUIET`: Silence any warnings when running the image.
+
+```bash
+# These are all identical.
+xcross --quiet ...
+CROSS_QUIET=1 xcross ...
 ```
 
 # Sharing Binaries To Host
