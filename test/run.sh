@@ -1,10 +1,12 @@
 #!/bin/bash
 # Run all tests.
 
-set -ex
+set -x
 
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/../docker/images.sh"
+cd "$scriptdir"
+run="$scriptdir/run-test.sh"
 
 has_started=yes
 has_stopped=no
@@ -12,11 +14,20 @@ if [ "$START" != "" ]; then
     has_started=no
 fi
 
-# Generic tests
+# OS TESTS
+# --------
+
+# Do our "Hello World" tests for images with an OS layer,
+git clone https://github.com/Alexhuszagh/cpp-helloworld.git buildtests
 for image in "${OS_IMAGES[@]}"; do
     if [ "$has_started" = yes ] || [ "$START" = "$image" ]; then
         has_started=yes
-        "$scriptdir/docker-run.sh" helloworld "$image"
+        "$run" "$image" os
+    fi
+
+    if [ $? -ne 0 ]; then
+        has_failed=yes
+        has_stopped=yes
     fi
 
     if [ "$STOP" = "$image" ]; then
@@ -24,6 +35,46 @@ for image in "${OS_IMAGES[@]}"; do
         break
     fi
 done
+
+# Run a special test.
+run_special() {
+    if [ "$has_failed" = no ]; then
+        "$@"
+
+        if [ $? -ne 0 ]; then
+            has_failed=yes
+        fi
+    fi
+}
+
+# Test other images.
+wasm() {
+    NO_PERIPHERALS=1 TOOLCHAIN1=jsonly TOOLCHAIN2=wasm TOOLCHAIN1_FLAGS="-s WASM=0" \
+        TOOLCHAIN2_FLAGS="-s WASM=1" "$@"
+}
+if [ "$has_started" = yes ] && [ "$has_stopped" = no ]; then
+    run_special wasm "$run" wasm "script"
+    run_special CMAKE_FLAGS="-DJS_ONLY=1" wasm "$run" wasm "script"
+
+    # Test Ninja generators.
+    run_special CMAKE_FLAGS="-GNinja" "$run" "${OS_IMAGES[0]}" "os"
+    run_special CMAKE_FLAGS="-GNinja" wasm "$run" wasm "script"
+
+    # Specific hardware examples.
+    "$run" ppc-unknown-linux-gnu os e500mc
+    "$run" ppc64-unknown-linux-gnu os power9
+    "$run" mips-unknown-linux-gnu os 24Kf
+fi
+
+# Cleanup our tests.
+rm -rf buildtests
+
+if [ "$has_failed" = yes ]; then
+    exit 1
+fi
+
+# METAL TESTS
+# -----------
 
 startfiles() {
     case "$1" in
@@ -54,6 +105,8 @@ skip() {
     esac
 }
 
+# Do our "atoi" tests for bare-metal images,
+git clone https://github.com/Alexhuszagh/cpp-atoi.git buildtests
 for image in "${METAL_IMAGES[@]}"; do
     if [ "$has_stopped" = yes ]; then
         break
@@ -61,8 +114,13 @@ for image in "${METAL_IMAGES[@]}"; do
         has_started=yes
         if ! skip "$image"; then
             flags=$(startfiles "$image")
-            FLAGS="$flags" "$scriptdir/docker-run.sh" atoi "$image"
+            FLAGS="$flags" "$run" "$image" metal
         fi
+    fi
+
+    if [ $? -ne 0 ]; then
+        has_failed=yes
+        has_stopped=yes
     fi
 
     if [ "$STOP" = "$image" ]; then
@@ -71,24 +129,14 @@ for image in "${METAL_IMAGES[@]}"; do
     fi
 done
 
-# Test other images.
-wasm() {
-    NO_PERIPHERALS=1 TOOLCHAIN1=jsonly TOOLCHAIN2=wasm TOOLCHAIN1_FLAGS="-s WASM=0" \
-        TOOLCHAIN2_FLAGS="-s WASM=1" "$@"
-}
-wasm "$scriptdir/docker-run.sh" helloworld wasm
-CMAKE_FLAGS="-DJS_ONLY=1" wasm "$scriptdir/docker-run.sh" helloworld wasm
+# Clean up our tests.
+rm -rf buildtests
 
-# Test Ninja generators.
-CMAKE_FLAGS="-GNinja" "$scriptdir/docker-run.sh" helloworld "${OS_IMAGES[0]}"
-CMAKE_FLAGS="-GNinja" wasm "$scriptdir/docker-run.sh" helloworld wasm
+if [ "$has_failed" = yes ]; then
+    exit 1
+fi
 
 # Extensive custom OS tests.
 if [ "$METAL_TESTS" != "" ]; then
-    "$scriptdir/docker-run.sh" ppc_metal "ppc-unknown-elf"
+    COMMAND="ppc-metal" "$run" "ppc-unknown-elf" "metal"
 fi
-
-# Specific hardware examples.
-"$scriptdir/docker-run.sh" helloworld ppc-unknown-linux-gnu e500mc
-"$scriptdir/docker-run.sh" helloworld ppc64-unknown-linux-gnu power9
-"$scriptdir/docker-run.sh" helloworld mips-unknown-linux-gnu 24Kf

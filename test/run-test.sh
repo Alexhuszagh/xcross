@@ -6,14 +6,19 @@ set -e
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 echo "$scriptdir"
 
-command="/test/$1.sh"
-image="$2"
+command="/test/image-test.sh"
+if [ "$COMMAND" != "" ]; then
+    command="/test/$COMMAND.sh"
+fi
+image="$1"
+type="$2"
 if [ "$3" != "" ]; then
     command="export CPU=$3; $command"
 fi
 
 docker run -v "$scriptdir:/test" \
     --env IMAGE="$image" \
+    --env TYPE="$type" \
     --env CMAKE_FLAGS \
     --env TOOLCHAIN \
     --env TOOLCHAIN_FLAGS \
