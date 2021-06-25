@@ -169,6 +169,7 @@
         "target": "riscv64-g-lp64-unknown-linux-musl",
         "triple": "riscv64-buildroot-linux-musl",
         "processor": "riscv64",
+        "symlink_sysroot": true,
         "qemu": true
     },
     {
