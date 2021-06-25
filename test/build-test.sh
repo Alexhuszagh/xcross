@@ -103,7 +103,7 @@ fi
 rm -f exe exe.o exe.js exe.wasm
 
 # Test peripherals.
-if [ "$NO_PERIPHERALS" = "" ]; then
+if [ "$NO_PERIPHERALS" = "" ] && [ "$TYPE" != "script" ]; then
     cc-cpu-list > /dev/null 2>&1
     if which run > /dev/null 2>&1; then
         run-cpu-list > /dev/null 2>&1
