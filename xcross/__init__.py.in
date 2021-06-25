@@ -373,8 +373,12 @@ def has_image(args):
 def pull_image(args):
     '''Pull the latest version of the image'''
 
+    devnull = subprocess.DEVNULL
     image = get_image(args)
-    code = subprocess.call([args.engine, 'pull', image, '--quiet'])
+    kwds = {}
+    if args.quiet:
+        kwds = { 'stderr': devnull, 'stdout': devnull }
+    code = subprocess.call([args.engine, 'pull', image], **kwds)
     if code != 0:
         error('Unable to pull image', code, show_help=False)
 
@@ -393,7 +397,6 @@ def remove_image(args):
     code = subprocess.call([args.engine, 'rmi', image], stderr=devnull, stdout=devnull)
     if code != 0:
         error('Unable to remove image', code, show_help=False)
-
 
 def main(argv=None):
     '''Entry point'''
