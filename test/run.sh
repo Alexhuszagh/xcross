@@ -55,11 +55,11 @@ wasm() {
 }
 if [ "$has_started" = yes ] && [ "$has_stopped" = no ]; then
     run_special wasm "$run" wasm "script"
-    run_special CMAKE_FLAGS="-DJS_ONLY=1" wasm "$run" wasm "script"
+    CMAKE_FLAGS="-DJS_ONLY=1" run_special wasm "$run" wasm "script"
 
     # Test Ninja generators.
-    run_special CMAKE_FLAGS="-GNinja" "$run" "${OS_IMAGES[0]}" "os"
-    run_special CMAKE_FLAGS="-GNinja" wasm "$run" wasm "script"
+    CMAKE_FLAGS="-GNinja" run_special "$run" "${OS_IMAGES[0]}" "os"
+    CMAKE_FLAGS="-GNinja" run_special wasm "$run" wasm "script"
 
     # Specific hardware examples.
     NORUN2=1 run_special "$run" ppc-unknown-linux-gnu os e500mc
