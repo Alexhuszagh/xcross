@@ -109,4 +109,5 @@ if [ "$NO_PERIPHERALS" = "" ] && [ "$TYPE" != "script" ]; then
         run-cpu-list > /dev/null 2>&1
     fi
     target-specs > /dev/null 2>&1
+    target-specs-full > /dev/null 2>&1
 fi
