@@ -28,6 +28,7 @@ for image in "${OS_IMAGES[@]}"; do
     if [ $? -ne 0 ]; then
         has_failed=yes
         has_stopped=yes
+        break
     fi
 
     if [ "$STOP" = "$image" ]; then
@@ -61,6 +62,8 @@ if [ "$has_started" = yes ] && [ "$has_stopped" = no ]; then
     run_special CMAKE_FLAGS="-GNinja" wasm "$run" wasm "script"
 
     # Specific hardware examples.
+    # TODO(ahuszagh) Fails running...
+    # /test/buildtests/build-ppc-unknown-linux-gnu
     "$run" ppc-unknown-linux-gnu os e500mc
     "$run" ppc64-unknown-linux-gnu os power9
     "$run" mips-unknown-linux-gnu os 24Kf
