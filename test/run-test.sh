@@ -26,6 +26,8 @@ docker run -v "$scriptdir:/test" \
     --env TOOLCHAIN1_FLAGS \
     --env TOOLCHAIN2 \
     --env TOOLCHAIN2_FLAGS \
+    --env NORUN1 \
+    --env NORUN2 \
     --env FLAGS="$FLAGS" \
     ahuszagh/cross:"$image" \
     /bin/bash -c "$command"

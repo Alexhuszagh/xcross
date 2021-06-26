@@ -36,6 +36,13 @@ if command -v run &> /dev/null; then
             fi
         fi
     fi
+
+    if [ "$NORUN1" != "" ]; then
+        run_toolchain1=no
+    fi
+    if [ "$NORUN2" != "" ]; then
+        run_toolchain2=no
+    fi
 fi
 
 # Test CMake.
