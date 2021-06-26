@@ -339,12 +339,20 @@ def add_specifications(linker, cc, cxx):
     add_exec(target_specs)
     add_exec(target_specs_full)
 
-def check_run(cxx, is_static):
+def check_run(cxx, is_static, has_os):
     '''Check if an image successfully runs.'''
 
     devnull = subprocess.DEVNULL
     with open('main.cc', 'w') as file:
-        file.write('int main() { return 0; }')
+        if has_os:
+            file.write('#include <iostream>\n')
+            file.write('#include <string>\n')
+            file.write('int main() {\n')
+            file.write('std::string hello = std::string("Hello world!");\n')
+            file.write('std::cout << hello << std::endl;\n')
+            file.write('}\n')
+        else:
+            file.write('int main() { return 0; }\n')
     command = [cxx, 'main.cc', '-o', 'main']
     if is_static:
         command.append('-static')
@@ -364,16 +372,16 @@ def check_run(cxx, is_static):
     os.unlink('main')
     return code == 0
 
-def add_warnings(cxx):
+def add_warnings(cxx, has_os):
     '''Add any warnings to a JSON image.'''
 
     # This is after any symlinks, so we can check
     # if /opt/bin/run exists.
     warnings = collections.defaultdict(dict)
     if os.path.exists(f'{bin_dir}/run'):
-        if not check_run(cxx, True):
+        if not check_run(cxx, True, has_os):
             warnings['qemu']['static'] = True
-        if not check_run(cxx, False):
+        if not check_run(cxx, False, has_os):
             warnings['qemu']['shared'] = True
 
     if warnings:
@@ -387,7 +395,7 @@ def main():
     cc = find_cc()
     cxx = find_cxx()
     add_specifications(linker, cc, cxx)
-    add_warnings(cxx)
+    add_warnings(cxx, os.environ['OS'] != 'unknown')
 
 if __name__ == '__main__':
     main()
