@@ -62,9 +62,9 @@ if [ "$has_started" = yes ] && [ "$has_stopped" = no ]; then
     run_special CMAKE_FLAGS="-GNinja" wasm "$run" wasm "script"
 
     # Specific hardware examples.
-    NORUN2=1 "$run" ppc-unknown-linux-gnu os e500mc
-    "$run" ppc64-unknown-linux-gnu os power9
-    "$run" mips-unknown-linux-gnu os 24Kf
+    NORUN2=1 run_special "$run" ppc-unknown-linux-gnu os e500mc
+    run_special "$run" ppc64-unknown-linux-gnu os power9
+    run_special "$run" mips-unknown-linux-gnu os 24Kf
 fi
 
 # Cleanup our tests.
@@ -138,6 +138,6 @@ if [ "$has_failed" = yes ]; then
 fi
 
 # Extensive custom OS tests.
-if [ "$METAL_TESTS" != "" ]; then
+if [ "$METAL_TESTS" != "" ] && [ "$has_stopped" = no ]; then
     COMMAND="ppc-metal" "$run" "ppc-unknown-elf" "metal"
 fi
