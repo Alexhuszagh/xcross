@@ -86,6 +86,12 @@ This may also be supplied via the environment variable `CROSS_REPOSITORY`.
 Ex: `--repository=cross`''',
 )
 parser.add_argument(
+    '--image-version',
+    help='''The version of the target image.
+This may also be supplied via the environment variable `CROSS_VERSION`.
+Ex: `--image-version=0.1`''',
+)
+parser.add_argument(
     '--engine',
     help='''The path or name of the container engine executable.
 This may also be supplied via the environment variable `CROSS_ENGINE`.
@@ -117,6 +123,12 @@ This may also be supplied via the environment variable `CROSS_QUIET`.''',
     action='store_true'
 )
 parser.add_argument(
+    '-v', '--verbose',
+    help='''Print verbose output.
+This may also be supplied via the environment variable `CROSS_VERBOSE`.''',
+    action='store_true'
+)
+parser.add_argument(
     '-V', '--version',
     action='version',
     version=f'%(prog)s {__version__}',
@@ -130,6 +142,12 @@ def error(message, code=126, show_help=True):
     if show_help:
         parser.print_help()
     sys.exit(code)
+
+def print_verbose(message, verbose):
+    '''Print a message if verbose logging is on.'''
+
+    if verbose:
+        print(message)
 
 def get_current_dir():
     return pathlib.PurePath(os.getcwd())
@@ -150,7 +168,10 @@ def validate_target(target):
 def get_image(args):
     '''Format the image parameters to a string.'''
 
-    image = f'{args.repository}:{args.target}'
+    target = args.target
+    if args.image_version:
+        target = f'{target}-{args.image_version}'
+    image = f'{args.repository}:{target}'
     if args.username:
         image = f'{args.username}/{image}'
     if args.server:
@@ -202,8 +223,9 @@ def normpath(args):
 def format_command(args):
     '''Format a list of commands normalized to be executed in the shell.'''
 
-    if args.command is None:
-        return ''
+    if not args.command:
+        # Use the default entrypoint, `/bin/bash` if we have no args.
+        return '/bin/bash'
     elif len(args.command) == 1:
         # This could still be a path, but we allow any escape characters here.
         normpath(args)
@@ -247,14 +269,16 @@ def image_command(args, relpath):
     command.append(format_command(args))
     return '\n'.join(command)
 
-def find_container_engine():
+def find_container_engine(args):
     '''Find the container engine binary (docker or podman) if one isn't provided.'''
 
-    devnull = subprocess.DEVNULL
+    print_verbose('Finding container engine...', args.verbose)
     for engine in ['docker', 'podman']:
+        print_verbose(f'Trying to find engine {engine}...', args.verbose)
         try:
-            code = subprocess.call([engine, '-v'], stdin=devnull, stdout=devnull)
+            code = subprocess.call([engine, '-v'], **args.subprocess_devnull)
             if code == 0:
+                print_verbose(f'Found engine {engine}.', args.verbose)
                 return engine
         except OSError as error:
             if error.errno != os.errno.ENOENT:
@@ -262,22 +286,29 @@ def find_container_engine():
 
     error('Could not find docker or podman')
 
-def engine_type(engine):
+def engine_type(args):
     '''Determine the container engine type.'''
 
+    print_verbose('Finding container engine type...', args.verbose)
     try:
-        proc = subprocess.Popen([engine, '-v'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        devnull = subprocess.DEVNULL
+        pipe = subprocess.PIPE
+        proc = subprocess.Popen([args.engine, '-v'], stdin=devnull, stdout=pipe, stderr=pipe)
         stdout, stderr = proc.communicate()
-        if b'docker' in stdout.lower():
-            return 'docker'
-        elif b'podman' in stdout.lower():
-            return 'podman'
+        if stdout:
+            print_verbose(stdout.decode("utf-8"), args.verbose)
         if stderr:
             error(f'Got error when probing engine type of "{stderr.decode("utf-8")}"', show_help=False)
+        if b'docker' in stdout.lower():
+            print_verbose('Found docker container engine type.', args.verbose)
+            return 'docker'
+        elif b'podman' in stdout.lower():
+            print_verbose('Found podman container engine type.', args.verbose)
+            return 'podman'
         error(f'Unrecognized engine type, got "{stderr.decode("utf-8")}"', show_help=False)
     except OSError as err:
         if err.errno == errno.ENOENT:
-            error(f'Unable to find command {engine}', code=err.errno, show_help=False)
+            error(f'Unable to find command {args.engine}', code=err.errno, show_help=False)
         raise
 
 def validate_arguments(args):
@@ -298,15 +329,24 @@ def validate_arguments(args):
         args.username = 'ahuszagh'
     args.repository = args.repository or os.environ.get('CROSS_REPOSITORY')
     args.repository = args.repository or 'cross'
-    args.engine = args.engine or os.environ.get('CROSS_ENGINE')
-    args.engine = args.engine or find_container_engine()
-    args.engine_type = engine_type(args.engine)
     args.non_interactive = args.non_interactive or bool(os.environ.get('CROSS_NONINTERACTIVE', False))
     args.update_image = args.update_image or bool(os.environ.get('CROSS_UPDATE_IMAGE', False))
     args.quiet = args.quiet or bool(os.environ.get('CROSS_QUIET', False))
     args.remove_image = args.remove_image or bool(os.environ.get('CROSS_REMOVE_IMAGE', False))
+    args.subprocess_devnull = {}
+    if not args.verbose:
+        args.subprocess_devnull['stdin'] = subprocess.DEVNULL
+        args.subprocess_devnull['stdout'] = subprocess.DEVNULL
+        args.subprocess_devnull['stderr'] = subprocess.DEVNULL
+
+    # Find dependent arguments.
+    args.engine = args.engine or os.environ.get('CROSS_ENGINE')
+    args.engine = args.engine or find_container_engine(args)
+    args.engine_type = engine_type(args)
 
     # Validate our arguments.
+    if args.quiet and args.verbose:
+        error('Cannot have both verbose and quiet output.')
     if args.target is None or not validate_target(args.target):
         error('Must provide a valid target')
     if args.username is None or not validate_username(args.username):
@@ -367,7 +407,8 @@ def has_image(args):
 
     devnull = subprocess.DEVNULL
     image = get_image(args)
-    code = subprocess.call([args.engine, 'image', 'inspect', image], stderr=devnull, stdout=devnull)
+    print_verbose(f'Finding if image {image} exists locally...', args.verbose)
+    code = subprocess.call([args.engine, 'image', 'inspect', image], **args.subprocess_devnull)
     return code == 0
 
 def pull_image(args):
@@ -376,6 +417,7 @@ def pull_image(args):
     devnull = subprocess.DEVNULL
     image = get_image(args)
     kwds = {}
+    print_verbose(f'Pulling image {image}...', args.verbose)
     if args.quiet:
         kwds = { 'stderr': devnull, 'stdout': devnull }
     code = subprocess.call([args.engine, 'pull', image], **kwds)
@@ -386,15 +428,16 @@ def remove_stopped_container(args):
     '''Remove the stopped container.'''
 
     # Don't care if this fails.
-    devnull = subprocess.DEVNULL
-    subprocess.call([args.engine, 'rm', args.image_name], stderr=devnull, stdout=devnull)
+    print_verbose(f'Remove stopped container...', args.verbose)
+    subprocess.call([args.engine, 'rm', args.image_name], **args.subprocess_devnull)
 
 def remove_image(args):
     '''Pull the latest version of the image'''
 
     devnull = subprocess.DEVNULL
     image = get_image(args)
-    code = subprocess.call([args.engine, 'rmi', image], stderr=devnull, stdout=devnull)
+    print_verbose(f'Remove image {image} from local storage...', args.verbose)
+    code = subprocess.call([args.engine, 'rmi', image], **args.subprocess_devnull)
     if code != 0:
         error('Unable to remove image', code, show_help=False)
 
@@ -424,6 +467,7 @@ def main(argv=None):
     # and then written. We don't actually care enough to use
     # mkstemp, and since we create the file only if it doesn't
     # exist, in practice it's identical to mkstemp.
+    print_verbose('Writing script to file...', args.verbose)
     open_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     try:
         command = image_command(args, relpath)
@@ -438,6 +482,7 @@ def main(argv=None):
             raise
 
     # Create our docker command and call the script.
+    print_verbose('Entering image and calling command...', args.verbose)
     try:
         code = subprocess.call(
             docker_command(args, parent_dir, relpath),
@@ -446,6 +491,7 @@ def main(argv=None):
             stderr=sys.stderr
         )
     finally:
+        print_verbose('Removing temporary files...', args.verbose)
         # Guarantee we cleanup the script afterwards.
         os.remove(args.script_name)
         remove_stopped_container(args)

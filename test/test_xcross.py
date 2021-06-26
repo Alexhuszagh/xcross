@@ -55,9 +55,15 @@ def test_get_image():
         '--server', '',
         '--username', '',
     ], 'cross:alpha-unknown-linux-gnu')
+    run_get_image([
+        '--target', 'alpha-unknown-linux-gnu',
+        '--image-version', '0.1',
+        '--server', '',
+        '--username', '',
+    ], 'cross:alpha-unknown-linux-gnu-0.1')
 
 def test_simple_format_command():
-    run_format_command([], '')
+    run_format_command([], '/bin/bash')
     run_format_command(['make'], 'make')
     run_format_command(['cmake ..'], 'cmake ..')
     run_format_command(['cmake', '..'], 'cmake ..')

@@ -83,6 +83,11 @@ if patch != '0':
     version = f'{version}.{patch}'
 py2exe_version = f'{major}.{minor}.{patch}'
 
+docker_major, docker_minor, docker_patch, docker_build = get_version('docker')
+docker_version = f'{docker_major}.{docker_minor}'
+if docker_patch != '0':
+    docker_version = f'{docker_version}.{docker_patch}'
+
 # Read the dependency version information.
 # This is the GCC and other utilities version from crosstool-NG.
 gcc_major, gcc_minor, gcc_patch, _ = get_version('gcc')
@@ -1311,12 +1316,12 @@ class ConfigureCommand(VersionCommand):
         make = f'{HOME}/symlink/make.in'
         images_sh = f'{HOME}/docker/images.sh'
         self.configure(f'{shell}.in', shell, True, [
-            ('VERSION_MAJOR', f"'{major}'"),
-            ('VERSION_MINOR', f"'{minor}'"),
-            ('VERSION_PATCH', f"'{patch}'"),
-            ('VERSION_BUILD', f"'{build}'"),
-            ('VERSION_INFO', f"('{major}' '{minor}' '{patch}' '{build}')"),
-            ('VERSION', f"'{version}'"),
+            ('VERSION_MAJOR', f"'{docker_major}'"),
+            ('VERSION_MINOR', f"'{docker_minor}'"),
+            ('VERSION_PATCH', f"'{docker_patch}'"),
+            ('VERSION_BUILD', f"'{docker_build}'"),
+            ('VERSION_INFO', f"('{docker_major}' '{docker_minor}' '{docker_patch}' '{docker_build}')"),
+            ('VERSION', f"'{docker_version}'"),
         ])
         self.configure(f'{cmake}.in', cmake, True, [
             ('CMAKE', f"'/usr/bin/cmake'"),

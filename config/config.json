@@ -23,7 +23,16 @@
             "major": "0",
             "minor": "1",
             "patch": "5",
-            "build": "2021-06-25"
+            "build": "2021-06-26"
+        }
+    },
+    // Version for Docker images.
+    "docker": {
+        "version": {
+            "major": "0",
+            "minor": "1",
+            "patch": "0",
+            "build": "2021-06-26"
         }
     },
     // Ubuntu version for Docker images.

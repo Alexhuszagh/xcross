@@ -364,6 +364,16 @@ xcross --repository=cross ...
 CROSS_REPOSITORY=cross xcross ...
 ```
 
+- `--image-version`, `CROSS_VERSION`: The version of the image to use.
+
+If not provided, this will always use the latest version.
+
+```bash
+# These are all identical.
+xcross --image-version=0.1 ...
+CROSS_VERSION=cross xcross ...
+```
+
 - `--engine`, `CROSS_ENGINE`: The command for the container engine executable.
 
 If not provided or empty, this searches for `docker` then `podman`.
@@ -408,6 +418,14 @@ CROSS_REMOVE_IMAGE=1 xcross ...
 # These are all identical.
 xcross --quiet ...
 CROSS_QUIET=1 xcross ...
+```
+
+- `--verbose`, `CROSS_VERBOSE`: Print verbose debugging output when running the image.
+
+```bash
+# These are all identical.
+xcross --verbose ...
+CROSS_VERBOSE=1 xcross ...
 ```
 
 # Sharing Binaries To Host
@@ -526,10 +544,10 @@ We also do not support certain cross-compilers for popular architectures, like H
 
 **Versioning**
 
-Image names may optionally contain a trailing version, which will always use the same host OS, GCC, and C-runtime version.
+Image names have an optional, trailing version, which will always use a compatible host OS, GCC, and C-runtime version. Images without a version will always use the latest available version.
 
 - **No Version**: Alias for the latest version listed.
-- **0.1**: GCC 10.2.0, glibc 2.31, and Ubuntu 20.04.
+- **0.1**: GCC 10.x, glibc 2.31+, musl 1.2.2, uCLibc-NG 1.0.31, Android r22b, and Ubuntu 20.04.
 
 Pre-1.0, minor versions signify backwards-incompatible changes to toolchains. Patch increments signify bug fixes, and build increments signify the addition of new toolchains.
 
