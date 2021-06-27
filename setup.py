@@ -1781,6 +1781,7 @@ setuptools.setup(
         'build_py': BuildCommand,
         'clean': CleanCommand,
         'configure': ConfigureCommand,
+        'publish': PublishCommand,
         'push': PushCommand,
         'tag': TagCommand,
         'test_images': TestImagesCommand,
