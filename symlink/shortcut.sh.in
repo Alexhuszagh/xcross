@@ -65,24 +65,21 @@ shortcut_gcc_cpu_list() {
     # does not list the valid architectures. Some other
     # architectures have a single, hard-coded value.
     use_run=no
-    use_hardcoded=no
+    if which ^BIN^/qemu* > /dev/null 2>&1; then
+        # Only use_run if Qemu is installed.
     if [[ "$PREFIX" = alpha* ]]; then
-        use_run=yes
-    fi
-    if [[ "$PREFIX" = riscv* ]]; then
-        use_run=yes
-    fi
-    if [[ "$PREFIX" = sh4-* ]]; then
-        use_run=yes
-    fi
-    if [[ "$PREFIX" = hppa* ]]; then
-        use_hardcoded=yes
+            use_run=yes
+        elif [[ "$PREFIX" = riscv* ]]; then
+            use_run=yes
+        elif [[ "$PREFIX" = sh4-* ]]; then
+            use_run=yes
+        fi
     fi
 
     echo '#!/bin/bash' >> "$BIN/cc-cpu-list"
     if [ "$use_run" = yes ]; then
         echo 'run-cpu-list' >> "$BIN/cc-cpu-list"
-    elif [ "$use_hardcoded" = yes ]; then
+    elif [ "$HARDCODED" != "" ]; then
         echo "echo \"$HARDCODED\"" >> "$BIN/cc-cpu-list"
     else
         echo "cpus=\$(echo \"int main() { return 0; }\" | CPU=unknown c++ -x c++ - 2>&1)" >> "$BIN/cc-cpu-list"
