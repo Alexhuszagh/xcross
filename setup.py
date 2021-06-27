@@ -30,6 +30,7 @@ import os
 import setuptools
 import shutil
 import stat
+import subprocess
 import sys
 
 try:
@@ -143,6 +144,23 @@ with open(f'{HOME}/README.md') as file:
 # COMMANDS
 # --------
 
+def check_call(code):
+    '''Wrap `subprocess.call` to exit on failure.'''
+
+    if code != 0:
+        sys.exit(code)
+
+def has_module(module):
+    '''Check if the given module is installed.'''
+
+    devnull = subprocess.DEVNULL
+    code = subprocess.call(
+        [sys.executable, '-m', module],
+        stdout=devnull,
+        stderr=devnull,
+    )
+    return code == 0
+
 class CleanCommand(Command):
     '''A custom command to clean any previous builds.'''
 
@@ -239,6 +257,211 @@ class VersionCommand(Command):
             ('VERSION_INFO', f"version_info(major='{major}', minor='{minor}', patch='{patch}', build='{build}')"),
             ('VERSION', f"'{version}'"),
         ])
+
+class TagCommand(Command):
+    '''Scripts to automatically tag new versions.'''
+
+    description = 'tag version for release'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Tag version for git release.'''
+
+        # Get our config.
+        git = shutil.which('git')
+        if not git:
+            raise FileNotFoundError('Unable to find program git.')
+        tag = f'v{version}'
+
+        # Delete any existing, conflicting tags.
+        devnull = subprocess.DEVNULL
+        code = subprocess.call(
+            f'GIT_DIR="{HOME}/.git" git rev-parse "{tag}"',
+            shell=True,
+            stdout=devnull,
+            stderr=devnull,
+        )
+        if code == 0:
+            check_call(subprocess.call(
+                ['git', 'tag', '-d', tag],
+                stdout=devnull,
+                stderr=devnull,
+            ))
+
+        # Tag the release.
+        check_call(subprocess.call(
+            ['git', 'tag', tag],
+            stdout=devnull,
+            stderr=devnull,
+        ))
+
+class BuildImageCommand(Command):
+    '''Build all Docker images.'''
+
+    description = 'build all docker images'
+    user_options = [
+        ('start=', None, 'Start point for test suite.'),
+        ('stop=', None, 'Stop point for test suite.'),
+    ]
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Build all Docker images.'''
+
+        command = f'{HOME}/docker/build.sh'
+        if self.stop is not None:
+            command = f'STOP="{self.stop}" {command}'
+        if self.start is not None:
+            command = f'START="{self.start}" {command}'
+        check_call(subprocess.call(command, shell=True))
+
+class BuildAllCommand(BuildImageCommand):
+    '''Build Docker images and the Python library for dist.'''
+
+    description = 'build all docker images and wheels for release'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Build all images and package for release.'''
+
+        BuildImageCommand.run(self)
+        self.run_command('clean')
+        self.run_command('configure')
+        self.run_command('build')
+        self.run_command('sdist')
+        self.run_command('bdist_wheel')
+
+class BuildCommand(build_py):
+    '''Override build.py to configure builds.'''
+
+    def run(self):
+        self.run_command('version')
+        build_py.run(self)
+
+class PushCommand(Command):
+    '''Push all Docker images to Docker hub.'''
+
+    description = 'push all docker images to docker hub'
+    user_options = [
+        ('start=', None, 'Start point for test suite.'),
+        ('stop=', None, 'Stop point for test suite.'),
+    ]
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Push all Docker images to Docker hub.'''
+
+        command = f'{HOME}/docker/push.sh'
+        if self.stop is not None:
+            command = f'STOP="{self.stop}" {command}'
+        if self.start is not None:
+            command = f'START="{self.start}" {command}'
+        check_call(subprocess.call(command, shell=True))
+
+class PublishCommand(Command):
+    '''Publish a Python version.'''
+
+    description = 'publish python version to PyPi'
+    user_options = [
+        ('test=', None, 'Upload to the test repository.'),
+    ]
+
+    def initialize_options(self):
+        self.test = None
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Run the unittest suite.'''
+
+        if not has_module('twine'):
+            raise FileNotFoundError('Unable to find module twine.')
+        self.run_command('clean')
+        self.run_command('configure')
+        self.run_command('build')
+        self.run_command('sdist')
+        self.run_command('bdist_wheel')
+        if self.test:
+            command = f'twine upload --repository testpypi {HOME}/dist/*'
+        else:
+            command = f'twine upload {HOME}/dist/*'
+        check_call(subprocess.call())
+
+class TestCommand(Command):
+    '''Run the unittest suite.'''
+
+    description = 'run unittest suite'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Run the unittest suite.'''
+
+        if not has_module('tox'):
+            raise FileNotFoundError('Unable to find module tox.')
+        check_call(subprocess.call(['tox', HOME]))
+
+class TestImagesCommand(Command):
+    '''Run the Docker test suite.'''
+
+    description = 'run docker test suite'
+    user_options = [
+        ('start=', None, 'Start point for test suite.'),
+        ('stop=', None, 'Stop point for test suite.'),
+    ]
+
+    def initialize_options(self):
+        self.start = None
+        self.stop = None
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Run the docker test suite.'''
+
+        command = f'{HOME}/test/run.sh'
+        if self.stop is not None:
+            command = f'STOP="{self.stop}" {command}'
+        if self.start is not None:
+            command = f'START="{self.start}" {command}'
+        check_call(subprocess.call(command, shell=True))
+
+class TestAllCommand(TestImagesCommand):
+    '''Run the Python and Docker test suites.'''
+
+    def run(self):
+        '''Run the docker test suite.'''
+        self.run_command('test')
+        TestImagesCommand.run(self)
 
 # IMAGES
 # ------
@@ -1269,15 +1492,6 @@ class ConfigureCommand(VersionCommand):
             ('SCRIPT_IMAGES', create_array(script_images)),
         ])
 
-
-class BuildCommand(build_py):
-    """Override build.py to configure builds."""
-
-    def run(self):
-        self.run_command('version')
-        build_py.run(self)
-
-
 script = f'{HOME}/bin/xcross'
 if len(sys.argv) >= 2 and sys.argv[1] == 'py2exe':
     params = {
@@ -1336,9 +1550,15 @@ setuptools.setup(
         'Topic :: Software Development :: Embedded Systems',
     ],
     cmdclass={
+        'build_all': BuildAllCommand,
         'build_py': BuildCommand,
         'clean': CleanCommand,
         'configure': ConfigureCommand,
+        'push': PushCommand,
+        'tag': TagCommand,
+        'test_images': TestImagesCommand,
+        'test': TestCommand,
+        'test_all': TestAllCommand,
         'version': VersionCommand,
     },
 )
