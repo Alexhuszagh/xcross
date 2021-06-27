@@ -556,7 +556,7 @@ class TestImagesCommand(Command):
 
     def git_clone(self, git, repository):
         '''Clone a given repository.'''
-        check_call(subprocess.call([git, repository, f'{HOME}/buildtests']))
+        check_call(subprocess.call([git, 'clone', repository, f'{HOME}/buildtests']))
 
     def run_test(
         self,
@@ -565,27 +565,49 @@ class TestImagesCommand(Command):
         os_type,
         script=None,
         cpu=None,
+        **envvars
     ):
         '''Run test for a single target.'''
 
+        # Get our command.
         if script is None:
             script = 'image-test'
-        command = f'/test/{script}.sh'
+        command = f'/test/test/{script}.sh'
         if cpu is not None:
-            command = f'export CPU="{cpu}"; {command}'
+            command = f'export CPU={cpu}; {command}'
 
-        subprocess.check_call([
-            'echo',     # TODO(ahuszagh) Remove...
+        # Check for additional flags.
+        if self.nostartfiles(target):
+            flags = envvars.get('FLAGS')
+            if flags:
+                flags = f'{flags} -nostartfiles'
+            else:
+                flags = '-nostartfiles'
+            envvars['FLAGS'] = flags
+
+        # Build and call our docker command.
+        docker_command = [
             docker,
-            '--env', f'IMAGE="{target}"',
-        ])
-
-        # TODO(ahuszagh) Need a lot more variables here...
-        # TODO(ahuszagh) Needs to be a full command.
-        import pdb; pdb.set_trace()
+            'run',
+            '-v', f'{HOME}:/test',
+            '--env', f'IMAGE={target}',
+            '--env', f'TYPE={os_type}',
+        ]
+        for key, value in envvars.items():
+            docker_command += ['--env', f'{key}={value}']
+        docker_command.append(image_from_target(target))
+        docker_command += ['/bin/bash', '-c', command]
+        subprocess.check_call(docker_command)
 
     def nostartfiles(self, target):
         '''Check if an image does not have startfiles.'''
+
+        # i[3-6]86 does not provide start files, a known bug with newlib.
+        # moxie cannot find `__bss_start__` and `__bss_end__`.
+        # sparc cannot find `__stack`.
+        # there is no crt0 for x86_64
+        regex = re.compile(r'^(?:(?:i[3-7]86-unknown-elf)|(?:moxie.*-none-elf)|(?:sparc-unknown-elf)|(?:x86_64-unknown-elf))$')
+        return regex.match(target)
 
     def skip(self, target):
         '''Check if we should skip a given target.'''
@@ -595,6 +617,21 @@ class TestImagesCommand(Command):
         # proper symbols, but still fails with an error:
         #   undefined reference to `_savegpr_29`.
         return target == 'ppcle-unknown-elf'
+
+    def run_wasm(self, docker, **envvars):
+        '''Run a web-assembly target.'''
+
+        self.run_test(
+            docker,
+            'wasm',
+            'script',
+            **envvars,
+            NO_PERIPHERALS='1',
+            TOOLCHAIN1='jsonly',
+            TOOLCHAIN2='wasm',
+            TOOLCHAIN1_FLAGS='-s WASM=0',
+            TOOLCHAIN2_FLAGS='-s WASM=1',
+        )
 
     def run(self):
         '''Run the docker test suite.'''
@@ -623,9 +660,24 @@ class TestImagesCommand(Command):
                     has_started = True
                     if not self.skip(target):
                         self.run_test(docker, target, 'os')
-            # TODO(ahuszagh) Need special images here..
+
+                if self.stop == target:
+                    has_stopped = True
+                    break
+
+            # Run the special images.
+            if has_started and not has_stopped:
+                self.run_wasm(docker)
+                self.run_wasm(docker, CMAKE_FLAGS='-DJS_ONLY=1')
+                self.run_test(docker, os_images[0], 'os', CMAKE_FLAGS='-GNinja')
+                self.run_wasm(docker, CMAKE_FLAGS='-GNinja')
+                self.run_test(docker, 'ppc-unknown-linux-gnu', 'os', cpu='e500mc', NORUN2='1')
+                self.run_test(docker, 'ppc64-unknown-linux-gnu', 'os', cpu='power9')
+                self.run_test(docker, 'mips-unknown-linux-gnu', 'os', cpu='24Kf')
         finally:
             shutil.rmtree(f'{HOME}/buildtests', ignore_errors=True)
+        if has_stopped:
+            return
 
         # Run metal images.
         self.git_clone(git, 'https://github.com/Alexhuszagh/cpp-atoi.git')
@@ -635,14 +687,18 @@ class TestImagesCommand(Command):
                     has_started = True
                     if not self.skip(target):
                         self.run_test(docker, target, 'metal')
-            # TODO(ahuszagh) Need nostartfiles images here..
+
+                if self.stop == target:
+                    has_stopped = True
+                    break
         finally:
             shutil.rmtree(f'{HOME}/buildtests', ignore_errors=True)
+        if has_stopped:
+            return
 
         # Check the full system tests.
         if self.system:
-            #self.run_test
-            import pdb; pdb.set_trace()
+            self.run_test(docker, 'ppc-unknown-elf', 'metal', script='ppc-metal')
 
 class TestAllCommand(TestImagesCommand):
     '''Run the Python and Docker test suites.'''
@@ -1620,19 +1676,9 @@ class ConfigureCommand(VersionCommand):
         os.makedirs(f'{HOME}/symlink/toolchain', exist_ok=True)
 
         # Configure base version info.
-        shell = f'{HOME}/docker/version.sh'
         cmake = f'{HOME}/cmake/cmake'
         emmake = f'{HOME}/symlink/emmake'
         make = f'{HOME}/symlink/make.in'
-        images_sh = f'{HOME}/docker/images.sh'
-        self.configure(f'{shell}.in', shell, True, [
-            ('VERSION_MAJOR', f"'{docker_major}'"),
-            ('VERSION_MINOR', f"'{docker_minor}'"),
-            ('VERSION_PATCH', f"'{docker_patch}'"),
-            ('VERSION_BUILD', f"'{docker_build}'"),
-            ('VERSION_INFO', f"('{docker_major}' '{docker_minor}' '{docker_patch}' '{docker_build}')"),
-            ('VERSION', f"'{docker_version}'"),
-        ])
         self.configure(f'{cmake}.in', cmake, True, [
             ('CMAKE', f"'/usr/bin/cmake'"),
             ('WRAPPER', ''),
@@ -1671,17 +1717,6 @@ class ConfigureCommand(VersionCommand):
             self.configure_riscv(image)
         for image in other_images:
             self.configure_other(image)
-
-        # Need to write the total image list.
-        # TODO(ahuszagh) Can remove this likely...
-        metal_images = sorted([i.target for i in images if i.os.is_baremetal()])
-        script_images = sorted([i.target for i in images if i.os.is_script()])
-        os_images = sorted([i.target for i in images if i.os.is_os()])
-        self.configure(f'{images_sh}.in', images_sh, True, [
-            ('OS_IMAGES', create_array(os_images)),
-            ('METAL_IMAGES', create_array(metal_images)),
-            ('SCRIPT_IMAGES', create_array(script_images)),
-        ])
 
 script = f'{HOME}/bin/xcross'
 if len(sys.argv) >= 2 and sys.argv[1] == 'py2exe':

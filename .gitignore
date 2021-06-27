@@ -21,12 +21,10 @@ docker/entrypoint.sh
 docker/gcc.sh
 docker/gcc-patch.sh
 docker/images/
-docker/images.sh
 docker/musl.sh
 docker/qemu.sh
 docker/qemu-apt.sh
 docker/riscv-gcc.sh
-docker/version.sh
 musl/config/
 spec/target_features.py
 symlink/emmake
