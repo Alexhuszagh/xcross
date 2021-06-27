@@ -254,9 +254,9 @@ shortcut_run_cpu_list() {
         echo "readarray -t lines <<<\"\$cpus\"" >> "$BIN/run-cpu-list"
         echo "names=()" >> "$BIN/run-cpu-list"
         if [ "$RUN_CPU_LIST" = "keep-first" ]; then
-            echo "for line in \"\${lines[@]:1}\"; do" >> "$BIN/run-cpu-list"
-        else
             echo "for line in \"\${lines[@]}\"; do" >> "$BIN/run-cpu-list"
+        else
+            echo "for line in \"\${lines[@]:1}\"; do" >> "$BIN/run-cpu-list"
         fi
         echo "    if [ \"\$line\" != \"\" ]; then" >> "$BIN/run-cpu-list"
         echo "        name=\$(echo \"\$line\" | cut -d ' ' -f 2)" >> "$BIN/run-cpu-list"
