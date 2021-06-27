@@ -60,24 +60,11 @@ shortcut() {
 
 # Create a utility to list the CPUs for the GCC compiler.
 shortcut_gcc_cpu_list() {
-    # Detect if we need to use run-cpu-list
     # Certain architectures have bugs where gcc
     # does not list the valid architectures. Some other
     # architectures have a single, hard-coded value.
-    use_run=no
-    if which ^BIN^/qemu* > /dev/null 2>&1; then
-        # Only use_run if Qemu is installed.
-    if [[ "$PREFIX" = alpha* ]]; then
-            use_run=yes
-        elif [[ "$PREFIX" = riscv* ]]; then
-            use_run=yes
-        elif [[ "$PREFIX" = sh4-* ]]; then
-            use_run=yes
-        fi
-    fi
-
     echo '#!/bin/bash' >> "$BIN/cc-cpu-list"
-    if [ "$use_run" = yes ]; then
+    if [ "$CC_CPU_LIST" = "run" ]; then
         echo 'run-cpu-list' >> "$BIN/cc-cpu-list"
     elif [ "$HARDCODED" != "" ]; then
         echo "echo \"$HARDCODED\"" >> "$BIN/cc-cpu-list"
@@ -253,33 +240,20 @@ shortcut_util() {
 
 # Create a utility to list the CPUs for Qemu emulation.
 shortcut_run_cpu_list() {
-    # Detect if we need to use a single, hard-coded value.
-    use_cc=no
-    use_hardcoded=no
-    skip_first=yes
-    # HPPA has a single, hard-coded valid arch (1.0).
-    if [ "$ARCH" = hppa ]; then
-        use_hardcoded=yes
-    fi
-    # SH4 does not have an entry line.
-    if [ "$ARCH" = sh4 ]; then
-        skip_first=no
-    fi
-    # Sparc has an incorrect output format.
-    if [[ "$ARCH" = sparc* ]]; then
-        use_cc=yes
-    fi
-
+    # Certain architectures have bugs where Qemu
+    # does not list the valid architectures. Some other
+    # architectures have a single, hard-coded value.
     echo '#!/bin/bash' >> "$BIN/run-cpu-list"
-    if [ "$use_cc" = yes ]; then
+    if [ "$RUN_CPU_LIST" = cc ]; then
         echo 'cc-cpu-list' >> "$BIN/run-cpu-list"
-    elif [ "$use_hardcoded" = yes ]; then
+    elif [ "$HARDCODED" != "" ]; then
+        # HPPA has a single, hard-coded valid arch (1.0).
         echo "echo \"$HARDCODED\"" >> "$BIN/run-cpu-list"
     else
         echo "cpus=\"\$(run -cpu help)\"" >> "$BIN/run-cpu-list"
         echo "readarray -t lines <<<\"\$cpus\"" >> "$BIN/run-cpu-list"
         echo "names=()" >> "$BIN/run-cpu-list"
-        if [ "$skip_first" = yes ]; then
+        if [ "$RUN_CPU_LIST" = "keep-first" ]; then
             echo "for line in \"\${lines[@]:1}\"; do" >> "$BIN/run-cpu-list"
         else
             echo "for line in \"\${lines[@]}\"; do" >> "$BIN/run-cpu-list"

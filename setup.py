@@ -287,7 +287,8 @@ class OperatingSystem(enum.Enum):
 cmake_string = {
     OperatingSystem.Android: 'Android',
     OperatingSystem.BareMetal: 'Generic',
-    # script is not implemented
+    # This gets ignored anyway.
+    OperatingSystem.Script: 'Script',
     OperatingSystem.Linux: 'Linux',
     OperatingSystem.Windows: 'Windows',
 }
@@ -370,6 +371,14 @@ class Image:
         return image_types[image_type].from_dict(data)
 
     @property
+    def config(self):
+        return getattr(self, '_config', self.target)
+
+    @config.setter
+    def config(self, value):
+        self._config = value
+
+    @property
     def hardcoded_cpulist(self):
         cpus = getattr(self, 'cpulist', '')
         if cpus:
@@ -388,6 +397,20 @@ class Image:
         path = getattr(self, 'preload', '')
         if path:
             return f'export LD_PRELOAD="{path}"\n'
+        return ''
+
+    @property
+    def cc_cpu_list(self):
+        cpulist = getattr(self, 'cc_cpulist', '')
+        if cpulist:
+            return f'export CC_CPU_LIST="{cpulist}"\n'
+        return ''
+
+    @property
+    def run_cpu_list(self):
+        cpulist = getattr(self, 'run_cpulist', '')
+        if cpulist:
+            return f'export RUN_CPU_LIST="{cpulist}"\n'
         return ''
 
     @property
@@ -429,6 +452,22 @@ class Image:
         if isinstance(value, str):
             value = OperatingSystem.from_triple(value)
         self._os = value
+
+    @property
+    def processor(self):
+        return getattr(self, '_processor', self.arch)
+
+    @processor.setter
+    def processor(self, value):
+        self._processor = value
+
+    @property
+    def qemu(self):
+        return getattr(self, '_qemu', False)
+
+    @qemu.setter
+    def qemu(self, value):
+        self._qemu = value
 
 class AndroidImage(Image):
     '''Specialized properties for Android images.'''
@@ -484,48 +523,8 @@ class BuildRootImage(Image):
     def symlink_sysroot(self, value):
         self._symlink_sysroot = value
 
-    @property
-    def config(self):
-        return getattr(self, '_config', self.target)
-
-    @config.setter
-    def config(self, value):
-        self._config = value
-
-    @property
-    def processor(self):
-        return getattr(self, '_processor', self.arch)
-
-    @processor.setter
-    def processor(self, value):
-        self._processor = value
-
-    @property
-    def qemu(self):
-        return getattr(self, '_qemu', False)
-
-    @qemu.setter
-    def qemu(self, value):
-        self._qemu = value
-
 class CrosstoolImage(Image):
     '''Specialized properties for crosstool-NG images.'''
-
-    @property
-    def config(self):
-        return getattr(self, '_config', self.target)
-
-    @config.setter
-    def config(self, value):
-        self._config = value
-
-    @property
-    def processor(self):
-        return getattr(self, '_processor', self.arch)
-
-    @processor.setter
-    def processor(self, value):
-        self._processor = value
 
     @property
     def patches(self):
@@ -534,14 +533,6 @@ class CrosstoolImage(Image):
     @patches.setter
     def patches(self, value):
         self._patches = value
-
-    @property
-    def qemu(self):
-        return getattr(self, '_qemu', False)
-
-    @qemu.setter
-    def qemu(self, value):
-        self._qemu = value
 
 class DebianImage(Image):
     '''Specialized properties for Debian images.'''
@@ -573,14 +564,6 @@ class DebianImage(Image):
         self._prefix = value
 
     @property
-    def processor(self):
-        return getattr(self, '_processor', self.arch)
-
-    @processor.setter
-    def processor(self, value):
-        self._processor = value
-
-    @property
     def qemu(self):
         return True
 
@@ -598,36 +581,12 @@ class MuslCrossImage(Image):
     def gcc_config(self, value):
         self._gcc_config = value
 
-    @property
-    def processor(self):
-        return getattr(self, '_processor', self.arch)
-
-    @processor.setter
-    def processor(self, value):
-        self._processor = value
-
-    @property
-    def qemu(self):
-        return getattr(self, '_qemu', False)
-
-    @qemu.setter
-    def qemu(self, value):
-        self._qemu = value
-
 class RiscvImage(Image):
     '''Specialized properties for RISC-V images.'''
 
     @property
     def processor(self):
         return self.target.split('-')[0]
-
-    @property
-    def qemu(self):
-        return getattr(self, '_qemu', False)
-
-    @qemu.setter
-    def qemu(self, value):
-        self._qemu = value
 
     @property
     def bits(self):
@@ -938,9 +897,8 @@ class ConfigureCommand(VersionCommand):
 
     def configure_dockerfile(
         self,
-        target,
+        image,
         template,
-        with_qemu,
         replacements,
         use_base=True,
         use_toolchain=True,
@@ -954,7 +912,7 @@ class ConfigureCommand(VersionCommand):
         #   change rarely. Qemu is an apt package, and unlikely to change.
         #   Symlinks, toolchains, and entrypoints change often, but are
         #   cheap and easy to fix.
-        outfile = f'{HOME}/docker/images/Dockerfile.{target}'
+        outfile = f'{HOME}/docker/images/Dockerfile.{image.target}'
         qemu = f'{HOME}/docker/Dockerfile.qemu.in'
         symlink = f'{HOME}/docker/Dockerfile.symlink.in'
         toolchain = f'{HOME}/docker/Dockerfile.toolchain.in'
@@ -966,7 +924,7 @@ class ConfigureCommand(VersionCommand):
         if template is not None:
             with open(template, 'r') as file:
                 contents.append(file.read())
-        if with_qemu:
+        if image.qemu:
             with open(qemu, 'r') as file:
                 contents.append(file.read())
         with open(symlink, 'r') as file:
@@ -980,29 +938,60 @@ class ConfigureCommand(VersionCommand):
         with open(entrypoint, 'r') as file:
             contents.append(file.read())
         contents = '\n'.join(contents)
-        contents = self.replace(contents, replacements)
-        self.write_file(outfile, contents, False)
 
-    def configure_android(self, image):
-        '''Configure an Android-SDK image.'''
-
-        # Configure the dockerfile.
-        template = f'{HOME}/docker/Dockerfile.android.in'
-        self.configure_dockerfile(image.target, template, image.qemu, [
-            ('ARCH', image.arch),
+        # Add to the replacements all the shared values.
+        replacements = replacements + [
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('FLAGS', f'"{image.flags}"'),
             ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
             ('OS', image.os.to_triple() or 'unknown'),
             ('TARGET', image.target),
+        ]
+
+        # Replace the contents and write the output to file.
+        contents = self.replace(contents, replacements)
+        self.write_file(outfile, contents, False)
+
+    def configure_cmake(self, image, template, replacements):
+        '''Configure a CMake template.'''
+
+        replacements = replacements + [
+            ('PROCESSOR', image.processor),
+            ('OS', image.os.to_cmake()),
+        ]
+        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
+        self.configure(template, cmake, False, replacements)
+
+    def configure_symlinks(self, image, template, replacements):
+        '''Configure a symlink template.'''
+
+        replacements = replacements + [
+            ('CC_CPU_LIST', image.cc_cpu_list),
+            ('FLAGS', image.cflags),
+            ('HARDCODED', image.hardcoded_cpulist),
+            ('LD_LIBRARY_PATH', image.ld_library_path),
+            ('LD_PRELOAD', image.ld_preload),
+            ('OPTIONAL_FLAGS', image.optional_cflags),
+            ('RUN_CPU_LIST', image.run_cpu_list),
+            ('TRIPLE', image.triple),
+        ]
+        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
+        self.configure(template, symlink, True, replacements)
+
+    def configure_android(self, image):
+        '''Configure an Android-SDK image.'''
+
+        # Configure the dockerfile.
+        template = f'{HOME}/docker/Dockerfile.android.in'
+        self.configure_dockerfile(image, template, [
+            ('ARCH', image.arch),
             ('TOOLCHAIN', image.toolchain),
         ])
 
         # Configure the CMake toolchain.
         cmake_template = f'{HOME}/cmake/android.cmake.in'
-        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        self.configure(cmake_template, cmake, False, [
+        self.configure_cmake(image, cmake_template, [
             ('ABI', image.abi),
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
             ('SDK_VERSION', config['android']['sdk_version']),
@@ -1010,14 +999,8 @@ class ConfigureCommand(VersionCommand):
 
         # Configure the symlinks.
         symlink_template = f'{HOME}/symlink/android.sh.in'
-        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
-        self.configure(symlink_template, symlink, True, [
-            ('FLAGS', image.cflags),
-            ('HARDCODED', image.hardcoded_cpulist),
-            ('LD_LIBRARY_PATH', image.ld_library_path),
-            ('LD_PRELOAD', image.ld_preload),
+        self.configure_symlinks(image, symlink_template, [
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
-            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('PREFIX', f'{image.prefix}-linux-{image.system}'),
             ('SDK_VERSION', config['android']['sdk_version']),
             ('TOOLCHAIN', image.toolchain),
@@ -1027,7 +1010,6 @@ class ConfigureCommand(VersionCommand):
         '''Configure a buildroot image.'''
 
         # Get the proper dependent parameters for our image.
-        os = image.os.to_cmake()
         if image.symlink_sysroot:
             cmake_template = f'{HOME}/cmake/buildroot-qemu.cmake.in'
             symlink_template = f'{HOME}/symlink/buildroot-qemu-sysroot.sh.in'
@@ -1042,34 +1024,19 @@ class ConfigureCommand(VersionCommand):
         else:
             template = f'{HOME}/docker/Dockerfile.buildroot.in'
 
-        self.configure_dockerfile(image.target, template, image.qemu, [
+        self.configure_dockerfile(image, template, [
             ('ARCH', image.processor),
-            ('BIN', f'"{bin_directory}"'),
             ('CONFIG', image.config),
-            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
-            ('FLAGS', f'"{image.flags}"'),
-            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
-            ('OS', image.os.to_triple() or 'unknown'),
-            ('TARGET', image.target),
         ])
 
         # Configure the CMake toolchain.
-        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        self.configure(cmake_template, cmake, False, [
-            ('PROCESSOR', image.processor),
-            ('OS', os),
+        self.configure_cmake(image, cmake_template, [
             ('TRIPLE', image.config),
         ])
 
         # Configure the symlinks.
-        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
-        self.configure(symlink_template, symlink, True, [
+        self.configure_symlinks(image, symlink_template, [
             ('ARCH', image.processor),
-            ('FLAGS', image.cflags),
-            ('HARDCODED', image.hardcoded_cpulist),
-            ('LD_LIBRARY_PATH', image.ld_library_path),
-            ('LD_PRELOAD', image.ld_preload),
-            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])
 
@@ -1087,20 +1054,13 @@ class ConfigureCommand(VersionCommand):
         else:
             template = f'{HOME}/docker/Dockerfile.crosstool.in'
             patches = ''
-        self.configure_dockerfile(image.target, template, image.qemu, [
+        self.configure_dockerfile(image, template, [
             ('ARCH', image.processor),
-            ('BIN', f'"{bin_directory}"'),
             ('CONFIG', image.config),
-            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
-            ('FLAGS', f'"{image.flags}"'),
             ('PATCH', patches),
-            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
-            ('OS', image.os.to_triple() or 'unknown'),
-            ('TARGET', image.target),
         ])
 
         # Get the proper dependent parameters for our image.
-        os = image.os.to_cmake()
         if image.os == OperatingSystem.BareMetal:
             cmake_template = f'{HOME}/cmake/crosstool-elf.cmake.in'
             symlink_template = f'{HOME}/symlink/crosstool.sh.in'
@@ -1112,22 +1072,13 @@ class ConfigureCommand(VersionCommand):
             symlink_template = f'{HOME}/symlink/crosstool.sh.in'
 
         # Configure the CMake toolchain.
-        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        self.configure(cmake_template, cmake, False, [
+        self.configure_cmake(image, cmake_template, [
             ('TRIPLE', image.triple),
-            ('PROCESSOR', image.processor),
-            ('OS', os),
         ])
 
         # Configure the symlinks.
-        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
-        self.configure(symlink_template, symlink, True, [
+        self.configure_symlinks(image, symlink_template, [
             ('ARCH', image.processor),
-            ('FLAGS', image.cflags),
-            ('HARDCODED', image.hardcoded_cpulist),
-            ('LD_LIBRARY_PATH', image.ld_library_path),
-            ('LD_PRELOAD', image.ld_preload),
-            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])
 
@@ -1136,23 +1087,16 @@ class ConfigureCommand(VersionCommand):
 
         # Configure the dockerfile.
         template = f'{HOME}/docker/Dockerfile.debian.in'
-        self.configure_dockerfile(image.target, template, image.qemu, [
+        self.configure_dockerfile(image, template, [
             ('ARCH', image.processor),
-            ('BIN', f'"{bin_directory}"'),
-            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
-            ('FLAGS', f'"{image.flags}"'),
             ('G++', image.cxx),
             ('LIBC', image.libc),
-            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
-            ('OS', image.os.to_triple() or 'unknown'),
-            ('TARGET', image.target),
         ])
 
         # Get the proper dependent parameters for our image.
         if image.os != OperatingSystem.Linux:
             raise NotImplementedError
 
-        os = image.os.to_cmake()
         if image.target == 'x86_64-unknown-linux-gnu':
             cmake_template = f'{HOME}/cmake/native.cmake.in'
             symlink_template = f'{HOME}/symlink/native.sh.in'
@@ -1161,23 +1105,13 @@ class ConfigureCommand(VersionCommand):
             symlink_template = f'{HOME}/symlink/debian.sh.in'
 
         # Configure the CMake toolchain.
-        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        self.configure(cmake_template, cmake, False, [
-            ('PROCESSOR', image.processor),
-            ('OS', os),
-        ])
+        self.configure_cmake(image, cmake_template, [])
 
         # Configure the symlinks.
-        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
-        self.configure(symlink_template, symlink, True, [
-            ('FLAGS', image.cflags),
+        self.configure_symlinks(image, symlink_template, [
             ('GCC_MAJOR', gcc_major),
-            ('HARDCODED', image.hardcoded_cpulist),
-            ('LD_LIBRARY_PATH', image.ld_library_path),
-            ('LD_PRELOAD', image.ld_preload),
             ('PREFIX', image.prefix),
             ('PROCESSOR', image.processor),
-            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('OS', image.os.to_triple()),
             ('SYSTEM', image.system),
         ])
@@ -1196,34 +1130,19 @@ class ConfigureCommand(VersionCommand):
 
         # Configure the dockerfile.
         template = f'{HOME}/docker/Dockerfile.musl.in'
-        self.configure_dockerfile(image.target, template, image.qemu, [
+        self.configure_dockerfile(image, template, [
             ('ARCH', image.processor),
-            ('BIN', f'"{bin_directory}"'),
-            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
-            ('FLAGS', f'"{image.flags}"'),
-            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
-            ('OS', image.os.to_triple() or 'unknown'),
-            ('TARGET', image.target),
             ('TRIPLE', image.config),
         ])
 
         # Configure the CMake toolchain.
-        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        self.configure(cmake_template, cmake, False, [
-            ('PROCESSOR', image.processor),
-            ('OS', os),
+        self.configure_cmake(image, cmake_template, [
             ('TRIPLE', image.config),
         ])
 
         # Configure the symlinks.
-        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
-        self.configure(symlink_template, symlink, True, [
+        self.configure_symlinks(image, symlink_template, [
             ('ARCH', image.processor),
-            ('FLAGS', image.cflags),
-            ('HARDCODED', image.hardcoded_cpulist),
-            ('LD_LIBRARY_PATH', image.ld_library_path),
-            ('LD_PRELOAD', image.ld_preload),
-            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.config),
         ])
 
@@ -1231,7 +1150,6 @@ class ConfigureCommand(VersionCommand):
         '''Configure a RISC-V-based image.'''
 
         # Get the proper dependent parameters for our image.
-        os = image.os.to_cmake()
         if image.os == OperatingSystem.Linux:
             cmake_template = f'{HOME}/cmake/riscv-linux.cmake.in'
         elif image.os == OperatingSystem.BareMetal:
@@ -1245,33 +1163,17 @@ class ConfigureCommand(VersionCommand):
 
         # Configure the dockerfile.
         template = f'{HOME}/docker/Dockerfile.riscv.in'
-        self.configure_dockerfile(image.target, template, image.qemu, [
+        self.configure_dockerfile(image, template, [
             ('ARCH', image.processor),
-            ('BIN', f'"{bin_directory}"'),
-            ('FLAGS', f'"{image.flags}"'),
-            ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
-            ('OS', image.os.to_triple() or 'unknown'),
-            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
-            ('TARGET', image.target),
             ('TRIPLE', image.triple),
         ])
 
         # Configure the CMake toolchain.
-        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        self.configure(cmake_template, cmake, False, [
-            ('PROCESSOR', image.processor),
-            ('OS', os),
-        ])
+        self.configure_cmake(image, cmake_template, [])
 
         # Configure the symlinks.
-        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
-        self.configure(symlink_template, symlink, True, [
+        self.configure_symlinks(image, symlink_template, [
             ('ARCH', image.processor),
-            ('FLAGS', image.cflags),
-            ('HARDCODED', image.hardcoded_cpulist),
-            ('LD_LIBRARY_PATH', image.ld_library_path),
-            ('LD_PRELOAD', image.ld_preload),
-            ('OPTIONAL_FLAGS', image.optional_cflags),
             ('TRIPLE', image.triple),
         ])
 
@@ -1280,23 +1182,18 @@ class ConfigureCommand(VersionCommand):
 
         # Configure the dockerfile.
         template = f'{HOME}/docker/Dockerfile.{image.target}.in'
-        self.configure_dockerfile(image.target, template, False, [
+        self.configure_dockerfile(image, template, [
             ('ARCH', image.target),
-            ('BIN', f'"{bin_directory}"'),
             ('BINDIR', bin_directory),
-            ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
-            ('TARGET', image.target),
         ], use_base=False, use_toolchain=False, use_spec=False)
 
         # Configure the CMake toolchain.
         cmake_template = f'{HOME}/cmake/{image.target}.cmake.in'
-        cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        self.configure(cmake_template, cmake, False, [])
+        self.configure_cmake(image, cmake_template, [])
 
         # Configure the symlinks.
         symlink_template = f'{HOME}/symlink/{image.target}.sh.in'
-        symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
-        self.configure(symlink_template, symlink, True, [])
+        self.configure_symlinks(image, symlink_template, [])
 
     def run(self):
         '''Modify configuration files.'''

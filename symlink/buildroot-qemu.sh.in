@@ -7,7 +7,7 @@ export PREFIX=^TRIPLE^
 export DIR=/home/crosstoolng/buildroot/
 export ARCH=^ARCH^
 export LIBPATH="$DIR$PREFIX"/sysroot
-^HARDCODED^^LD_PRELOAD^^LD_LIBRARY_PATH^
+^HARDCODED^^LD_PRELOAD^^LD_LIBRARY_PATH^^CC_CPU_LIST^^RUN_CPU_LIST^
 ^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util
 shortcut_run
