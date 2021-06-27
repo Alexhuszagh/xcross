@@ -515,7 +515,7 @@ class PublishCommand(Command):
             command = f'twine upload --repository testpypi {HOME}/dist/*'
         else:
             command = f'twine upload {HOME}/dist/*'
-        check_call(subprocess.call(command))
+        check_call(subprocess.call(command, shell=True))
 
 class TestCommand(Command):
     '''Run the unittest suite.'''
