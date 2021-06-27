@@ -161,6 +161,44 @@ def has_module(module):
     )
     return code == 0
 
+def semver():
+    '''Create a list of semantic versions for images.'''
+
+    versions = [
+        f'{docker_major}.{docker_minor}',
+        f'{docker_major}.{docker_minor}.{docker_patch}'
+    ]
+    if docker_major != '0':
+        versions.append(docker_major)
+
+    return versions
+
+def image_from_target(target):
+    '''Get the full image name from the target.'''
+
+    username = config['metadata']['username']
+    repository = config['metadata']['repository']
+    return f'{username}/{repository}:{target}'
+
+def sorted_image_targets():
+    '''Get a sorted list of image targets.'''
+
+    # Need to write the total image list.
+    metal_images = sorted([i.target for i in images if i.os.is_baremetal()])
+    script_images = sorted([i.target for i in images if i.os.is_script()])
+    os_images = sorted([i.target for i in images if i.os.is_os()])
+    return os_images + metal_images + script_images
+
+def subslice_targets(start=None, stop=None):
+    '''Extract a subslice of all targets.'''
+
+    targets = sorted_image_targets()
+    if start is not None:
+        targets = targets[targets.index(start):]
+    if stop is not None:
+        targets = targets[:targets.index(stop)+1]
+    return targets
+
 class CleanCommand(Command):
     '''A custom command to clean any previous builds.'''
 
@@ -301,7 +339,7 @@ class TagCommand(Command):
             stderr=devnull,
         ))
 
-class BuildImageCommand(Command):
+class BuildImagesCommand(Command):
     '''Build all Docker images.'''
 
     description = 'build all docker images'
@@ -311,22 +349,75 @@ class BuildImageCommand(Command):
     ]
 
     def initialize_options(self):
-        pass
+        self.start = None
+        self.stop = None
 
     def finalize_options(self):
         pass
 
+    def build_image(self, docker, target):
+        '''Build a Docker image.'''
+
+        command = [
+            docker,
+            'build',
+            '-t',
+            image_from_target(target),
+            HOME,
+            '--file',
+            f'{HOME}/docker/images/Dockerfile.{target}'
+        ]
+        if subprocess.call(command) != 0:
+            self.failures.append(target)
+            return False
+        return True
+
+    def tag_image(self, docker, target, tag_name):
+        '''Tag an image.'''
+
+        image = image_from_target(target)
+        tag = image_from_target(tag_name)
+        check_call(subprocess.call([docker, 'tag', image, tag]))
+
+    def build_versions(self, docker, target):
+        '''Build all versions of a given target.'''
+
+        if not self.build_image(docker, target):
+            return
+        for version in semver():
+            self.tag_image(docker, target, f'{target}-{version}')
+        if target.endswith('-unknown-linux-gnu'):
+            self.tag_versions(docker, target, target[:-len('-unknown-linux-gnu')])
+
+    def tag_versions(self, docker, target, tag_name):
+        '''Build all versions of a given target.'''
+
+        self.tag_image(docker, target, tag_name)
+        for version in semver():
+            self.tag_image(docker, target, f'{tag_name}-{version}')
+
     def run(self):
         '''Build all Docker images.'''
 
-        command = f'{HOME}/docker/build.sh'
-        if self.stop is not None:
-            command = f'STOP="{self.stop}" {command}'
-        if self.start is not None:
-            command = f'START="{self.start}" {command}'
-        check_call(subprocess.call(command, shell=True))
+        docker = shutil.which('docker')
+        if not docker:
+            raise FileNotFoundError('Unable to find command docker.')
 
-class BuildAllCommand(BuildImageCommand):
+        # Push all our Docker images.
+        self.failures = []
+        self.build_versions(docker, 'base')
+        for target in subslice_targets(self.start, self.stop):
+            self.build_versions(docker, target)
+
+        # Print any failures.
+        if self.failures:
+            print('Error: Failures occurred.')
+            print('-------------------------')
+            for failure in self.failures:
+                print(failure)
+            sys.exit(1)
+
+class BuildAllCommand(BuildImagesCommand):
     '''Build Docker images and the Python library for dist.'''
 
     description = 'build all docker images and wheels for release'
@@ -341,7 +432,7 @@ class BuildAllCommand(BuildImageCommand):
     def run(self):
         '''Build all images and package for release.'''
 
-        BuildImageCommand.run(self)
+        BuildImagesCommand.run(self)
         self.run_command('clean')
         self.run_command('configure')
         self.run_command('build')
@@ -365,20 +456,36 @@ class PushCommand(Command):
     ]
 
     def initialize_options(self):
-        pass
+        self.start = None
+        self.stop = None
 
     def finalize_options(self):
         pass
 
+    def push_image(self, docker, target):
+        '''Push an image to Docker Hub.'''
+        check_call(subprocess.call([docker, 'push', image_from_target(target)]))
+
+    def push_versions(self, docker, target):
+        '''Push all versions of a given target.'''
+
+        self.push_image(docker, target)
+        for version in semver():
+            self.push_image(docker, f'{target}-{version}')
+
     def run(self):
         '''Push all Docker images to Docker hub.'''
 
-        command = f'{HOME}/docker/push.sh'
-        if self.stop is not None:
-            command = f'STOP="{self.stop}" {command}'
-        if self.start is not None:
-            command = f'START="{self.start}" {command}'
-        check_call(subprocess.call(command, shell=True))
+        docker = shutil.which('docker')
+        if not docker:
+            raise FileNotFoundError('Unable to find command docker.')
+
+        # Push all our Docker images.
+        self.push_versions(docker, 'base')
+        for target in subslice_targets(self.start, self.stop):
+            self.push_versions(docker, target)
+            if target.endswith('-unknown-linux-gnu'):
+                self.push_versions(docker, target[:-len('-unknown-linux-gnu')])
 
 class PublishCommand(Command):
     '''Publish a Python version.'''
@@ -408,7 +515,7 @@ class PublishCommand(Command):
             command = f'twine upload --repository testpypi {HOME}/dist/*'
         else:
             command = f'twine upload {HOME}/dist/*'
-        check_call(subprocess.call())
+        check_call(subprocess.call(command))
 
 class TestCommand(Command):
     '''Run the unittest suite.'''
@@ -436,30 +543,113 @@ class TestImagesCommand(Command):
     user_options = [
         ('start=', None, 'Start point for test suite.'),
         ('stop=', None, 'Stop point for test suite.'),
+        ('system=', None, 'Do full system tests.'),
     ]
 
     def initialize_options(self):
         self.start = None
         self.stop = None
+        self.system = None
 
     def finalize_options(self):
         pass
 
+    def git_clone(self, git, repository):
+        '''Clone a given repository.'''
+        check_call(subprocess.call([git, repository, f'{HOME}/buildtests']))
+
+    def run_test(
+        self,
+        docker,
+        target,
+        os_type,
+        script=None,
+        cpu=None,
+    ):
+        '''Run test for a single target.'''
+
+        if script is None:
+            script = 'image-test'
+        command = f'/test/{script}.sh'
+        if cpu is not None:
+            command = f'export CPU="{cpu}"; {command}'
+
+        subprocess.check_call([
+            'echo',     # TODO(ahuszagh) Remove...
+            docker,
+            '--env', f'IMAGE="{target}"',
+        ])
+
+        # TODO(ahuszagh) Need a lot more variables here...
+        # TODO(ahuszagh) Needs to be a full command.
+        import pdb; pdb.set_trace()
+
+    def nostartfiles(self, target):
+        '''Check if an image does not have startfiles.'''
+
+    def skip(self, target):
+        '''Check if we should skip a given target.'''
+
+        # Check if we should skip a test.
+        # PPCLE is linked to the proper library, which contains the
+        # proper symbols, but still fails with an error:
+        #   undefined reference to `_savegpr_29`.
+        return target == 'ppcle-unknown-elf'
+
     def run(self):
         '''Run the docker test suite.'''
 
-        command = f'{HOME}/test/run.sh'
-        if self.stop is not None:
-            command = f'STOP="{self.stop}" {command}'
+        # Find our necessary commands.
+        git = shutil.which('git')
+        docker = shutil.which('docker')
+        if not git:
+            raise FileNotFoundError('Unable to find command git.')
+        if not docker:
+            raise FileNotFoundError('Unable to find command docker.')
+
+        # Configure our test runner.
+        has_started = True
+        has_stopped = False
         if self.start is not None:
-            command = f'START="{self.start}" {command}'
-        check_call(subprocess.call(command, shell=True))
+            has_started = False
+        metal_images = sorted([i.target for i in images if i.os.is_baremetal()])
+        os_images = sorted([i.target for i in images if i.os.is_os()])
+
+        # Run OS images.
+        self.git_clone(git, 'https://github.com/Alexhuszagh/cpp-helloworld.git')
+        try:
+            for target in os_images:
+                if has_started or self.start == target:
+                    has_started = True
+                    if not self.skip(target):
+                        self.run_test(docker, target, 'os')
+            # TODO(ahuszagh) Need special images here..
+        finally:
+            shutil.rmtree(f'{HOME}/buildtests', ignore_errors=True)
+
+        # Run metal images.
+        self.git_clone(git, 'https://github.com/Alexhuszagh/cpp-atoi.git')
+        try:
+            for target in metal_images:
+                if has_started or self.start == target:
+                    has_started = True
+                    if not self.skip(target):
+                        self.run_test(docker, target, 'metal')
+            # TODO(ahuszagh) Need nostartfiles images here..
+        finally:
+            shutil.rmtree(f'{HOME}/buildtests', ignore_errors=True)
+
+        # Check the full system tests.
+        if self.system:
+            #self.run_test
+            import pdb; pdb.set_trace()
 
 class TestAllCommand(TestImagesCommand):
     '''Run the Python and Docker test suites.'''
 
     def run(self):
         '''Run the docker test suite.'''
+
         self.run_command('test')
         TestImagesCommand.run(self)
 
@@ -1483,6 +1673,7 @@ class ConfigureCommand(VersionCommand):
             self.configure_other(image)
 
         # Need to write the total image list.
+        # TODO(ahuszagh) Can remove this likely...
         metal_images = sorted([i.target for i in images if i.os.is_baremetal()])
         script_images = sorted([i.target for i in images if i.os.is_script()])
         os_images = sorted([i.target for i in images if i.os.is_os()])
@@ -1551,6 +1742,7 @@ setuptools.setup(
     ],
     cmdclass={
         'build_all': BuildAllCommand,
+        'build_images': BuildImagesCommand,
         'build_py': BuildCommand,
         'clean': CleanCommand,
         'configure': ConfigureCommand,

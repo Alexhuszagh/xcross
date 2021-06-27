@@ -17,6 +17,12 @@
     // Incrementing a major version of any of these dependencies
     // will lead to a version increment.
 
+    // Metadata associated with xcross.
+    "metadata": {
+        "username": "ahuszagh",
+        "repository": "cross"
+    },
+
     // Version for xcross.
     "xcross": {
         "version": {
