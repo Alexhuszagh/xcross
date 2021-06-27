@@ -155,7 +155,7 @@ def has_module(module):
 
     devnull = subprocess.DEVNULL
     code = subprocess.call(
-        [sys.executable, '-m', module],
+        [sys.executable, '-m', module, '--version'],
         stdout=devnull,
         stderr=devnull,
     )
