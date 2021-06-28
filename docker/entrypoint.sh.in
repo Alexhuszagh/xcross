@@ -14,8 +14,20 @@ warn_qemu() {
 # Echo any warnings if they exist.
 # Need JQ and `warnings.json` to exist, or we have
 # no warnings.
-warnings="^BIN^/warnings.json"
+warnings=^BIN^/"warnings.json"
 if [ -f "$warnings" ] && [ "$QUIET" = "" ] && command -v jq --version >/dev/null 2>&1; then
+    crt0=$(cat "$warnings" | jq '.crt0')
+    if [ "$crt0" == "true" ]; then
+        echo -e "> \033[31mcrt0 was not found.\033[0m You will need to provide your own execution startup routines."
+    fi
+    startfiles=$(cat "$warnings" | jq '.startfiles')
+    if [ "$startfiles" == "true" ]; then
+        echo -e "> \033[31mA valid entrypoint was not found in crt0. \033[0mYou will need to provide some startup routines."
+    fi
+    cxxstdlib=$(cat "$warnings" | jq '."c++-stdlib"')
+    if [ "$cxxstdlib" == "true" ]; then
+        echo -e "> \033[31mThis toolchain lacks a C++ standard library. \033[0mYou will not have access to most C++ functionality."
+    fi
     qemu=$(cat "$warnings" | jq '.qemu')
     if [ "$qemu" != "null" ]; then
         echo "WARNING: There may be errors in emulation while running compiled binaries."

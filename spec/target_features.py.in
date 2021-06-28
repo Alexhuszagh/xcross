@@ -89,6 +89,8 @@ def parse_defines(cc):
 def eh_frame_header(linker, cxx):
     '''Determine if the linker supports --eh-frame-hdr.'''
 
+    # Doesn't need `-nostartfiles`, since by default we
+    # don't provide crt0.
     devnull = subprocess.DEVNULL
     with open('main.cc', 'w') as file:
         file.write('int main() { return 0; }')
@@ -324,35 +326,107 @@ def add_specifications(linker, cc, cxx):
         'data-model': data['data-model'],
     }
 
-    target_specs = f'{bin_dir}/target-specs'
-    target_specs_full = f'{bin_dir}/target-specs-full'
-    with open(f'{target_specs}.json', 'w') as file:
-        json.dump(data_filtered, file)
-    with open(f'{target_specs_full}.json', 'w') as file:
-        json.dump(data, file)
-    with open(target_specs, 'w') as file:
-        file.write('#/bin/bash\n')
-        file.write(f'cat {target_specs}.json | jq\n')
-    with open(target_specs_full, 'w') as file:
-        file.write('#/bin/bash\n')
-        file.write(f'cat {target_specs_full}.json | jq\n')
-    add_exec(target_specs)
-    add_exec(target_specs_full)
+    return data_filtered, data
 
-def check_run(cxx, is_static, has_os):
+def has_crt0(linker):
+    '''Check if the C-runtime links to crt0.'''
+
+    # This is an approximation: we search for crt0
+    # in the standard library search path.
+    with subprocess.Popen(
+        [linker, '--verbose'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    ) as process:
+        code = process.wait()
+        if code == 0:
+            # Read the search paths.
+            # The search paths with be every-other value after the first.
+            stdout = process.stdout.read().decode('utf-8')
+            regex = re.compile(r'SEARCH_DIR\("=([^"]*)"\)\s*;\s*')
+            search_paths = regex.split(stdout)[1::2]
+
+            # crt0 can be an assembly file, or an object file.
+            # We don't want files like `cygmon-crt0.o`, so we need
+            # to match the file and extension only.
+            for path in search_paths:
+                for file in os.listdir(path):
+                    name, ext = os.path.splitext(file)
+                    if name == 'crt0' and ext.lower() in ('.s', '.o'):
+                        return True
+
+            # Exhausted our search, no crt0
+            return False
+    raise ValueError('Unable to find search path of linker.')
+
+def has_startfiles(cxx):
+    '''Check if the C-runtime has startfiles.'''
+
+    def unlink():
+        os.unlink('main.cc')
+        try:
+            os.unlink('main')
+        except FileNotFoundError:
+            pass
+
+    devnull = subprocess.DEVNULL
+    with open('main.cc', 'w') as file:
+        file.write('int main() { return 0; }\n')
+    code = subprocess.call(
+        [cxx, 'main.cc', '-o', 'main'],
+        stderr=devnull,
+        stdout=devnull,
+    )
+    if code == 0:
+        # Has startfiles, can short-circuit
+        unlink()
+        return
+
+    # Didn't compile , check to see if it works without startfiles.
+    # If it doesn't, it was another error.
+    code = subprocess.call(
+        [cxx, 'main.cc', '-o', 'main', '-nostartfiles'],
+        stderr=devnull,
+        stdout=devnull,
+    )
+    unlink()
+    return code != 0
+
+def has_cxxstdlib(cxx, has_startfiles):
+    '''Check if there is a C++ standard library.'''
+
+    devnull = subprocess.DEVNULL
+    with open('main.cc', 'w') as file:
+        file.write('#include <algorithm>\n')
+        file.write('#include <cstdint>\n')
+        file.write('int main() { return 0; }\n')
+    command = [cxx, 'main.cc', '-o', 'main']
+    if not has_startfiles:
+        command.append('-nostartfiles')
+    code = subprocess.call(
+        command,
+        stderr=devnull,
+        stdout=devnull,
+    )
+
+    os.unlink('main.cc')
+    try:
+        os.unlink('main')
+    except FileNotFoundError:
+        pass
+    return code == 0
+
+def check_run(cxx, is_static):
     '''Check if an image successfully runs.'''
 
     devnull = subprocess.DEVNULL
     with open('main.cc', 'w') as file:
-        if has_os:
-            file.write('#include <iostream>\n')
-            file.write('#include <string>\n')
-            file.write('int main() {\n')
-            file.write('std::string hello = std::string("Hello world!");\n')
-            file.write('std::cout << hello << std::endl;\n')
-            file.write('}\n')
-        else:
-            file.write('int main() { return 0; }\n')
+        file.write('#include <iostream>\n')
+        file.write('#include <string>\n')
+        file.write('int main() {\n')
+        file.write('std::string hello = std::string("Hello world!");\n')
+        file.write('std::cout << hello << std::endl;\n')
+        file.write('}\n')
     command = [cxx, 'main.cc', '-o', 'main']
     if is_static:
         command.append('-static')
@@ -372,21 +446,40 @@ def check_run(cxx, is_static, has_os):
     os.unlink('main')
     return code == 0
 
-def add_warnings(cxx, has_os):
+def add_warnings(linker, cxx, has_os):
     '''Add any warnings to a JSON image.'''
 
-    # This is after any symlinks, so we can check
-    # if /opt/bin/run exists.
     warnings = collections.defaultdict(dict)
+
+    # Check if we need `-nostartfiles`, in one
+    # of two conditions: there is no crt0, or
+    # crt0 does not provide a startup routine.
+    # Option 1:
+    #   ld: cannot find crt0.o: No such file or directory
+    # Option 2:
+    #   ld: lib/crt0.o: in function `_start':
+    #   sparc/crt0.S:38: undefined reference to `__stack
+    if not has_os:
+        startfiles = True
+        if not has_crt0(linker):
+            startfiles = False
+            warnings['crt0'] = True
+        if not has_startfiles(cxx):
+            startfiles = False
+            warnings['startfiles'] = True
+        if not has_cxxstdlib(cxx, startfiles):
+            warnings['c++-stdlib'] = True
+
+    # Check issues at runtime. This is after any symlinks,
+    # so we can check if /opt/bin/run exists.
     if os.path.exists(f'{bin_dir}/run'):
-        if not check_run(cxx, True, has_os):
+        assert has_os
+        if not check_run(cxx, True):
             warnings['qemu']['static'] = True
-        if not check_run(cxx, False, has_os):
+        if not check_run(cxx, False):
             warnings['qemu']['shared'] = True
 
-    if warnings:
-        with open(f'{bin_dir}/warnings.json', 'w') as file:
-            json.dump(warnings, file)
+    return warnings
 
 def main():
     '''Entry point.'''
@@ -394,8 +487,28 @@ def main():
     linker = find_linker()
     cc = find_cc()
     cxx = find_cxx()
-    add_specifications(linker, cc, cxx)
-    add_warnings(cxx, os.environ['OS'] != 'unknown')
+    has_os = os.environ['OS'] != 'unknown'
+    filtered, full = add_specifications(linker, cc, cxx)
+    warnings = add_warnings(linker, cxx, has_os)
+
+    # Write out our files.
+    if warnings:
+        with open(f'{bin_dir}/warnings.json', 'w') as file:
+            json.dump(warnings, file)
+    target_specs = f'{bin_dir}/target-specs'
+    target_specs_full = f'{bin_dir}/target-specs-full'
+    with open(f'{target_specs}.json', 'w') as file:
+        json.dump(filtered, file)
+    with open(f'{target_specs_full}.json', 'w') as file:
+        json.dump(full, file)
+    with open(target_specs, 'w') as file:
+        file.write('#/bin/bash\n')
+        file.write(f'cat {target_specs}.json | jq\n')
+    with open(target_specs_full, 'w') as file:
+        file.write('#/bin/bash\n')
+        file.write(f'cat {target_specs_full}.json | jq\n')
+    add_exec(target_specs)
+    add_exec(target_specs_full)
 
 if __name__ == '__main__':
     main()
