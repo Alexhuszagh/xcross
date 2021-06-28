@@ -248,6 +248,7 @@
     "options": {
         "build_jobs": "5",
         "sysroot": "/opt",
-        "username": "cross"
+        "username": "cross",
+        "timeout": "5m"
     }
 }
