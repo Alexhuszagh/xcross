@@ -131,7 +131,7 @@ for patch in /src/diff/*.sh; do
 done
 
 # Re-run the build with the applied patches.
-su ^USERNAME^ -c "RESTART=$step CT_DEBUG_CT_SAVE_STEPS=1 /src/crosstoolng/bin/ct-ng build.^JOBS^"
+su ^USERNAME^ -c "CT_DEBUG_CT_SAVE_STEPS=1 /src/crosstoolng/bin/ct-ng build.^JOBS^"
 
 # Cleanup
 # Even though we didn't install GCC, it doesn't get autoremoved,
