@@ -212,10 +212,10 @@ def subslice_targets(start=None, stop=None):
         targets = targets[:targets.index(stop)+1]
     return targets
 
-class CleanCommand(Command):
-    '''A custom command to clean any previous builds.'''
+class CleanDistCommand(Command):
+    '''A custom command to clean Python dist artifacts.'''
 
-    description = 'clean all previous builds'
+    description = 'clean artifacts from previous python builds'
     user_options = []
 
     def initialize_options(self):
@@ -238,7 +238,22 @@ class CleanCommand(Command):
         for file in dlls + exes + sos:
             os.remove(file)
 
-        # Need to remove the configured directories.
+class CleanCommand(Command):
+    '''A custom command to clean any previous builds.'''
+
+    description = 'clean all previous builds'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Clean build data.'''
+
+        self.run_command('clean_dist')
         shutil.rmtree(f'{HOME}/cmake/toolchain', ignore_errors=True)
         shutil.rmtree(f'{HOME}/docker/images', ignore_errors=True)
         shutil.rmtree(f'{HOME}/musl/config', ignore_errors=True)
@@ -444,7 +459,7 @@ class BuildAllCommand(BuildImagesCommand):
         '''Build all images and package for release.'''
 
         BuildImagesCommand.run(self)
-        self.run_command('clean')
+        self.run_command('clean_dist')
         self.run_command('configure')
         self.run_command('build')
         self.run_command('sdist')
@@ -517,7 +532,7 @@ class PublishCommand(Command):
 
         if not has_module('twine'):
             raise FileNotFoundError('Unable to find module twine.')
-        self.run_command('clean')
+        self.run_command('clean_dist')
         self.run_command('configure')
         self.run_command('build')
         self.run_command('sdist')
@@ -1792,6 +1807,7 @@ setuptools.setup(
         'build_images': BuildImagesCommand,
         'build_py': BuildCommand,
         'clean': CleanCommand,
+        'clean_dist': CleanDistCommand,
         'configure': ConfigureCommand,
         'publish': PublishCommand,
         'push': PushCommand,
