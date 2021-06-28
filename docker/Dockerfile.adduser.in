@@ -1,0 +1,2 @@
+# Add non-root user to build libraries to and for xcross.
+RUN adduser --disabled-password --gecos "" ^USERNAME^

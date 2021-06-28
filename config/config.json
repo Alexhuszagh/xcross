@@ -22,7 +22,6 @@
         "username": "ahuszagh",
         "repository": "cross"
     },
-
     // Version for xcross.
     "xcross": {
         "version": {
@@ -47,6 +46,14 @@
             "major": "20",
             "minor": "04",
             "name": "focal"
+        }
+    },
+    // Emscripten emsdk version for the Docker images.
+    "emsdk": {
+        "version": {
+            "major": "2",
+            "minor": "0",
+            "patch": "23"
         }
     },
     // Linux version for musl images.
@@ -240,6 +247,7 @@
     // Other configuration options.
     "options": {
         "build_jobs": "5",
-        "sysroot": "/opt"
+        "sysroot": "/opt",
+        "username": "cross"
     }
 }

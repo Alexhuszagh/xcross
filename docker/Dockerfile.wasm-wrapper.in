@@ -1,0 +1,4 @@
+# Copy over build tool wrappers.
+COPY ["cmake/cmake", "^BINDIR^/cmake"]
+COPY ["symlink/emmake", "^BINDIR^/make"]
+WORKDIR /

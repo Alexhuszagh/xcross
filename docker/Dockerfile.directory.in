@@ -1,0 +1,4 @@
+# Make the base directories for the toolchain.
+RUN mkdir -p /env
+RUN mkdir -p ^BIN^
+RUN mkdir -p /toolchains

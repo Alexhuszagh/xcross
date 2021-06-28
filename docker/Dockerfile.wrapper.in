@@ -1,0 +1,2 @@
+# Copy over build tool wrappers.
+COPY ["cmake/cmake", ^BIN^]

@@ -1,0 +1,10 @@
+# Add toolchains
+COPY ["cmake/toolchain/^TARGET^.cmake", "/toolchains/toolchain.cmake"]
+# This step is mostly for backward compatibility.
+COPY ["cmake/toolchain/^TARGET^.cmake", "/toolchains/^ARCH^.cmake"]
+COPY ["cmake/jsonly.cmake", "/toolchains/"]
+COPY ["cmake/wasm.cmake", "/toolchains/"]
+COPY ["env/base", "/env/"]
+COPY ["env/replace", "/env/"]
+COPY ["env/jsonly", "/env/"]
+COPY ["env/wasm", "/env/"]

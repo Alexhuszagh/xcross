@@ -2,7 +2,7 @@
 # as the global configurations.
 
 TARGET = ^TARGET^
-OUTPUT = /home/crosstoolng/musl
+OUTPUT = /home/^USERNAME^/musl
 BINUTILS_VER = ^BINUTILS_VERSION^
 GCC_VER = ^GCC_VERSION^
 MUSL_VER = ^MUSL_VERSION^

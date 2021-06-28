@@ -1,0 +1,6 @@
+# Base image for Emscripten images.
+#
+# This image should **NEVER** change except during upgrades.
+# The entire build process takes a long time,
+# so modifications can cause week-long rebuilds.
+FROM emscripten/emsdk:^EMSDK_VERSION^

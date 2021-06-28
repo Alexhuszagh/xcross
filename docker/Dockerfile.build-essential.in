@@ -1,0 +1,9 @@
+# Essential packages for a build environment.
+RUN apt-get update
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
+    autoconf \
+    ca-certificates \
+    cmake \
+    git \
+    make \
+    ninja-build

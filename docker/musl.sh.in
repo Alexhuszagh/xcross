@@ -69,7 +69,7 @@ echo "^LINUX_XZ_SHA1^  linux-^LINUX_VERSION^.tar.xz" > "hashes/linux-^LINUX_VERS
 echo "^LINUX_HEADERS_XZ_SHA1^  linux-headers-^LINUX_HEADERS_VERSION^.tar.xz" > "hashes/linux-headers-^LINUX_HEADERS_VERSION^.tar.xz.sha1"
 
 # Set our configurations.
-su crosstoolng -c "mkdir -p /home/crosstoolng/musl"
+su ^USERNAME^ -c "mkdir -p /home/^USERNAME^/musl"
 cp /src/config.mak ./
 make -j ^JOBS^
 make install
@@ -94,7 +94,7 @@ strip_dir() {
     done
 }
 
-home=/home/crosstoolng/musl
+home=/home/^USERNAME^/musl
 strip_native="$home/bin/"$ARCH"-strip"
 strip_dir "$home/bin"
 strip_dir "$home/lib"

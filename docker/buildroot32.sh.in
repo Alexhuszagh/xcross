@@ -66,8 +66,8 @@ cp /src/.config ./
 make sdk -j ^JOBS^
 
 # Now need to copy over the toolchain to our install prefix.
-mv output/host /home/crosstoolng/buildroot
-/home/crosstoolng/buildroot/relocate-sdk.sh
+mv output/host /home/^USERNAME^/buildroot
+/home/^USERNAME^/buildroot/relocate-sdk.sh
 
 # Cleanup
 # Even though we didn't install GCC, it doesn't get autoremoved,

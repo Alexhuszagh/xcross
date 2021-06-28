@@ -95,6 +95,10 @@ if docker_patch != '0':
 
 # Read the dependency version information.
 # This is the GCC and other utilities version from crosstool-NG.
+ubuntu_major, ubuntu_minor, _, _ = get_version('ubuntu')
+ubuntu_version = f'{ubuntu_major}.{ubuntu_minor}'
+emsdk_major, emsdk_minor, emsdk_patch, _ = get_version('emsdk')
+emsdk_version = f'{emsdk_major}.{emsdk_minor}.{emsdk_patch}'
 gcc_major, gcc_minor, gcc_patch, _ = get_version('gcc')
 gcc_version = f'{gcc_major}.{gcc_minor}.{gcc_patch}'
 binutils_major, binutils_minor, _, _ = get_version('binutils')
@@ -431,7 +435,6 @@ class BuildImagesCommand(Command):
 
         # Push all our Docker images.
         self.failures = []
-        self.build_versions(docker, 'base')
         for target in subslice_targets(self.start, self.stop):
             self.build_versions(docker, target)
 
@@ -507,7 +510,6 @@ class PushCommand(Command):
             raise FileNotFoundError('Unable to find command docker.')
 
         # Push all our Docker images.
-        self.push_versions(docker, 'base')
         for target in subslice_targets(self.start, self.stop):
             self.push_versions(docker, target)
             if target.endswith('-unknown-linux-gnu'):
@@ -1099,6 +1101,14 @@ class RiscvImage(Image):
 class OtherImage(Image):
     '''Specialized properties for miscellaneous images.'''
 
+    @property
+    def dockerfile(self):
+        return getattr(self, '_dockerfile', {})
+
+    @dockerfile.setter
+    def dockerfile(self, value):
+        self._dockerfile = value
+
 image_types = {
     'android': AndroidImage,
     'buildroot': BuildRootImage,
@@ -1235,10 +1245,12 @@ class ConfigureCommand(VersionCommand):
         self.configure(f'{buildroot}.in', buildroot, True, [
             ('BUILDROOT_VERSION', buildroot_version),
             ('JOBS', config["options"]["build_jobs"]),
+            ('USERNAME', config["options"]["username"]),
         ])
         self.configure(f'{buildroot32}.in', buildroot32, True, [
             ('BUILDROOT_VERSION', buildroot_version),
             ('JOBS', config["options"]["build_jobs"]),
+            ('USERNAME', config["options"]["username"]),
         ])
         self.configure(f'{entrypoint}.in', entrypoint, True, [
             ('BIN', f'"{bin_directory}"'),
@@ -1246,10 +1258,12 @@ class ConfigureCommand(VersionCommand):
         self.configure(f'{gcc}.in', gcc, True, [
             ('CROSSTOOL_VERSION', f'"{ct_version}"'),
             ('JOBS', config["options"]["build_jobs"]),
+            ('USERNAME', config["options"]["username"]),
         ])
         self.configure(f'{gcc_patch}.in', gcc_patch, True, [
             ('CROSSTOOL_VERSION', f'"{ct_version}"'),
             ('JOBS', config["options"]["build_jobs"]),
+            ('USERNAME', config["options"]["username"]),
         ])
         self.configure(f'{musl}.in', musl, True, [
             ('BINUTILS_VERSION', binutils_version),
@@ -1272,6 +1286,7 @@ class ConfigureCommand(VersionCommand):
             ('MUSL_VERSION', musl_version),
             ('MUSL_GZ_SHA1', config['musl']['version']['gz_sha1']),
             ('JOBS', config["options"]["build_jobs"]),
+            ('USERNAME', config["options"]["username"]),
         ])
         self.configure(f'{qemu}.in', qemu, True, [
             ('JOBS', config["options"]["build_jobs"]),
@@ -1389,16 +1404,19 @@ class ConfigureCommand(VersionCommand):
                 ('MPFR_VERSION', mpfr_version),
                 ('MUSL_VERSION', musl_version),
                 ('TARGET', image.config),
+                ('USERNAME', config['options']['username']),
             ])
 
     def configure_dockerfile(
         self,
         image,
-        template,
-        replacements,
-        use_base=True,
-        use_toolchain=True,
-        use_spec=True,
+        template=None,
+        replacements=None,
+        base='ubuntu',
+        spec='spec',
+        symlink='symlink',
+        toolchain='toolchain',
+        wrapper='wrapper',
     ):
         '''Configure a Dockerfile from template.'''
 
@@ -1408,44 +1426,64 @@ class ConfigureCommand(VersionCommand):
         #   change rarely. Qemu is an apt package, and unlikely to change.
         #   Symlinks, toolchains, and entrypoints change often, but are
         #   cheap and easy to fix.
-        outfile = f'{HOME}/docker/images/Dockerfile.{image.target}'
-        qemu = f'{HOME}/docker/Dockerfile.qemu.in'
-        symlink = f'{HOME}/docker/Dockerfile.symlink.in'
-        toolchain = f'{HOME}/docker/Dockerfile.toolchain.in'
-        spec = f'{HOME}/docker/Dockerfile.spec.in'
-        entrypoint = f'{HOME}/docker/Dockerfile.entrypoint.in'
         contents = []
-        if use_base:
-            contents.append('FROM ahuszagh/cross:base\n')
+
+        # Mandatory Docker templates, the base image.
+        # These will **never** change,
+        with open(f'{HOME}/docker/Dockerfile.{base}.in', 'r') as file:
+            contents.append(file.read())
+        with open(f'{HOME}/docker/Dockerfile.adduser.in', 'r') as file:
+            contents.append(file.read())
+        with open(f'{HOME}/docker/Dockerfile.build-essential.in', 'r') as file:
+            contents.append(file.read())
+        with open(f'{HOME}/docker/Dockerfile.directory.in', 'r') as file:
+            contents.append(file.read())
+
+        # Optional docker templates, in order of compiler time.
+        # These will change, but it's important later templates
+        # build faster than earlier templates. If done incorrectly,
+        # a full rebuild can take well over a week.
         if template is not None:
             with open(template, 'r') as file:
                 contents.append(file.read())
         if image.qemu:
-            with open(qemu, 'r') as file:
+            with open(f'{HOME}/docker/Dockerfile.qemu.in', 'r') as file:
                 contents.append(file.read())
-        with open(symlink, 'r') as file:
-            contents.append(file.read())
-        if use_toolchain:
-            with open(toolchain, 'r') as file:
+        if wrapper is not None:
+            with open(f'{HOME}/docker/Dockerfile.{wrapper}.in', 'r') as file:
                 contents.append(file.read())
-        if use_spec:
-            with open(spec, 'r') as file:
+        if symlink is not None:
+            with open(f'{HOME}/docker/Dockerfile.{symlink}.in', 'r') as file:
                 contents.append(file.read())
-        with open(entrypoint, 'r') as file:
+        if toolchain is not None:
+            with open(f'{HOME}/docker/Dockerfile.{toolchain}.in', 'r') as file:
+                contents.append(file.read())
+        if spec is not None:
+            with open(f'{HOME}/docker/Dockerfile.{spec}.in', 'r') as file:
+                contents.append(file.read())
+
+        # Add the mandatory entrypoint.
+        with open(f'{HOME}/docker/Dockerfile.entrypoint.in', 'r') as file:
             contents.append(file.read())
         contents = '\n'.join(contents)
 
         # Add to the replacements all the shared values.
+        if replacements is None:
+            replacements = []
         replacements = replacements + [
+            ('EMSDK_VERSION', emsdk_version),
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('FLAGS', f'"{image.flags}"'),
             ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
             ('OS', image.os.to_triple() or 'unknown'),
             ('TARGET', image.target),
+            ('UBUNTU_VERSION', ubuntu_version),
+            ('USERNAME', config['options']['username']),
         ]
 
         # Replace the contents and write the output to file.
+        outfile = f'{HOME}/docker/images/Dockerfile.{image.target}'
         contents = self.replace(contents, replacements)
         self.write_file(outfile, contents, False)
 
@@ -1455,6 +1493,7 @@ class ConfigureCommand(VersionCommand):
         replacements = replacements + [
             ('PROCESSOR', image.processor),
             ('OS', image.os.to_cmake()),
+            ('USERNAME', config["options"]["username"]),
         ]
         cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
         self.configure(template, cmake, False, replacements)
@@ -1471,6 +1510,7 @@ class ConfigureCommand(VersionCommand):
             ('OPTIONAL_FLAGS', image.optional_cflags),
             ('RUN_CPU_LIST', image.run_cpu_list),
             ('TRIPLE', image.triple),
+            ('USERNAME', config["options"]["username"]),
         ]
         symlink = f'{HOME}/symlink/toolchain/{image.target}.sh'
         self.configure(template, symlink, True, replacements)
@@ -1678,10 +1718,12 @@ class ConfigureCommand(VersionCommand):
 
         # Configure the dockerfile.
         template = f'{HOME}/docker/Dockerfile.{image.target}.in'
+        if not os.path.exists(template):
+            template = None
         self.configure_dockerfile(image, template, [
             ('ARCH', image.target),
             ('BINDIR', bin_directory),
-        ], use_base=False, use_toolchain=False, use_spec=False)
+        ], **image.dockerfile)
 
         # Configure the CMake toolchain.
         cmake_template = f'{HOME}/cmake/{image.target}.cmake.in'
@@ -1719,15 +1761,6 @@ class ConfigureCommand(VersionCommand):
         self.configure_scripts()
         self.configure_ctng_config()
         self.configure_musl_config()
-
-        # Configure the base dockerfile.
-        base_template = f'{HOME}/docker/Dockerfile.base.in'
-        base = f'{HOME}/docker/images/Dockerfile.base'
-        ubuntu = config["ubuntu"]["version"]
-        self.configure(base_template, base, False, [
-            ('UBUNTU_VERSION', f'{ubuntu["major"]}.{ubuntu["minor"]}'),
-            ('BIN', f'"{bin_directory}"'),
-        ])
 
         # Configure images.
         for image in android_images:

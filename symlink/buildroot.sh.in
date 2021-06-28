@@ -4,7 +4,7 @@ scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/shortcut.sh"
 
 export PREFIX=^TRIPLE^
-export DIR=/home/crosstoolng/buildroot/
+export DIR=/home/^USERNAME^/buildroot/
 ^HARDCODED^^LD_PRELOAD^^LD_LIBRARY_PATH^^CC_CPU_LIST^^RUN_CPU_LIST^
 ^FLAGS^^OPTIONAL_FLAGS^shortcut_gcc
 shortcut_util

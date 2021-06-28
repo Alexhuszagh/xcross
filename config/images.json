@@ -1650,6 +1650,12 @@
         "type": "other",
         "os": "script",
         "system": "javascript",
-        "target": "wasm"
+        "target": "wasm",
+        "dockerfile": {
+            "base": "emscripten",
+            "toolchain": "wasm-toolchain",
+            "wrapper": "wasm-wrapper",
+            "spec": null
+        }
     }
 ]
