@@ -1258,12 +1258,14 @@ class ConfigureCommand(VersionCommand):
         self.configure(f'{gcc}.in', gcc, True, [
             ('CROSSTOOL_VERSION', f'"{ct_version}"'),
             ('JOBS', config["options"]["build_jobs"]),
+            ('SLEEP', config["options"]["sleep"]),
             ('TIMEOUT', config["options"]["timeout"]),
             ('USERNAME', config["options"]["username"]),
         ])
         self.configure(f'{gcc_patch}.in', gcc_patch, True, [
             ('CROSSTOOL_VERSION', f'"{ct_version}"'),
             ('JOBS', config["options"]["build_jobs"]),
+            ('SLEEP', config["options"]["sleep"]),
             ('TIMEOUT', config["options"]["timeout"]),
             ('USERNAME', config["options"]["username"]),
         ])

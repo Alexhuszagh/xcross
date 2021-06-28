@@ -120,6 +120,7 @@ su ^USERNAME^ -c "mkdir -p /home/^USERNAME^/src"
 timeout ^TIMEOUT^ download
 while [ $? -eq 124 ]; do
     # Indicates a timeout, repeat the command.
+    sleep ^SLEEP^
     timeout ^TIMEOUT^ download
 done
 su ^USERNAME^ -c "RESTART=$step CT_DEBUG_CT_SAVE_STEPS=1 /src/crosstoolng/bin/ct-ng build.^JOBS^"

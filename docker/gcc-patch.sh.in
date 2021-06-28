@@ -119,6 +119,7 @@ su ^USERNAME^ -c "mkdir -p /home/^USERNAME^/src"
 timeout ^TIMEOUT^ download
 while [ $? -eq 124 ]; do
     # Indicates a timeout, repeat the command.
+    sleep ^SLEEP^
     timeout ^TIMEOUT^ download
 done
 
