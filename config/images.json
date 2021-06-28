@@ -74,7 +74,6 @@
         "processor": "microblaze",
         "qemu": true
     },
-    // TODO(ahuszagh) Ensure all the triples are accurate.
     {
         "type": "buildroot",
         "target": "microblazeel-unknown-linux-uclibc",

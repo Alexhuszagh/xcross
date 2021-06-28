@@ -18,6 +18,7 @@ A complete list of supported targets by xcross.
 
 **ARC**
 
+- arc[eb]?hs38-unknown-linux-gnu
 - arc[be]?-unknown-linux-uclibc
 
 **ARM**
@@ -41,6 +42,10 @@ A complete list of supported targets by xcross.
 
 - avr
 
+**CSKY**
+
+- csky-unknown-linux-gnu
+
 **HPPA**
 
 - hppa-unknown-linux-gnu
@@ -48,10 +53,12 @@ A complete list of supported targets by xcross.
 **m68k**
 
 - m68k-unknown-linux-gnu
+- m68k-unknown-linux-uclibc
 
 **MicroBlaze**
 
 - microblaze[el]?-unknown-linux-musl
+- microblaze[el]?-unknown-linux-uclibc
 - microblaze[el]?-xilinx-linux-gnu
 
 **MIPS**
@@ -61,11 +68,18 @@ A complete list of supported targets by xcross.
 - mips[el]?-unknown-linux-musl
 - mipsr6[el]?-unknown-linux-gnu
 - mips64[el]?-unknown-linux-gnu
+- mips64[el]?-unknown-linux-uclibcn32
+- mips64[el]?-unknown-linux-uclibcn64
 - mips64r6[el]?-unknown-linux-gnu
 
 **NIOS2**
 
 - nios2-unknown-linux-gnu
+
+**OpenRISC**
+
+- openrisc-unknown-linux-musl
+- openrisc-unknown-linux-uclibc
 
 **PowerPC**
 
@@ -79,10 +93,16 @@ A complete list of supported targets by xcross.
 
 - riscv32-multilib-linux-gnu
 - riscv32-\*-\*-multilib-linux-gnu
+- riscv32-g-\*-unknown-linux-gnu
 - riscv64-multilib-linux-gnu
 - riscv64-\*-\*-multilib-linux-gnu
+- riscv64-g-\*-unknown-linux-gnu
+- riscv64-g-\*-unknown-linux-musl
+- riscv64-g-\*-unknown-linux-uclibc
 - riscv64-unknown-linux-gnu
 - riscv64-unknown-linux-musl
+
+Supports the extensions `g`, `imaf?d?c?`, and the ABIs `ilp32d?` and `lp64d?`.
 
 **s390**
 
@@ -98,6 +118,8 @@ A complete list of supported targets by xcross.
 **Sparc**
 
 - sparc-unknown-linux-uclibc
+- sparcv8-unknown-linux-uclibc
+- sparcleon3-unknown-linux-uclibc
 - sparc64-unknown-linux-gnu
 
 **x86**
@@ -112,7 +134,7 @@ A complete list of supported targets by xcross.
 
 **xtensa**
 
-- xtensabe-unknown-linux-uclibc
+- xtensaeb-unknown-linux-uclibc
 
 ## Windows
 

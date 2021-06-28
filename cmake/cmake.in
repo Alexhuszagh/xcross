@@ -27,31 +27,53 @@
 # Check to see if our first argument is a configure command.
 # If it is, add a default toolchain file.
 cmake=^CMAKE^
-case "$1" in
-    --build | --install | --open | -E | --find-package | --help)
-        if [ "$VERBOSE" != "" ]; then
-            echo ^WRAPPER^"$cmake" "$@"
-        fi
-        ^WRAPPER^"$cmake" "$@"
-        ;;
-    *)
-        # Only add our toolchain file if it isn't provided
-        has_toolchain=no
-        for arg in "$@"; do
-            if [[ "$arg" = "-DCMAKE_TOOLCHAIN_FILE="* ]]; then
-                has_toolchain=yes
-                break
+
+# Convert the arguments to an array, and add our toolchain file if
+# we are configuring.
+arguments=("$@")
+if [ "${#arguments[@]}" -ne 0 ]; then
+    # Check to see if the next argument is invalid.
+    case "${arguments[0]}" in
+        --build | --install | --open | -E | --find-package | --help)
+            ;;
+        *)
+            # Don't provide a toolchain file if we're using
+            # a script, IE, `cmake [-D...] -P ..`.
+            is_script=no
+            index=0
+            while [ $index -lt ${#arguments[@]} ]; do
+                argument="${arguments[$index]}"
+                if [[ "$argument" = -D* ]]; then
+                    index=$(($index + 1));
+                elif [[ "$argument" = -P ]]; then
+                    is_script=yes
+                    break
+                else
+                    break
+                fi
+            done
+
+            # Don't provide a toolchain file if it's already provided.
+            has_toolchain="$is_script"
+            if [ "$has_toolchain" = no ]; then
+                for argument in "${arguments[@]}"; do
+                    if [[ "$argument" = "-DCMAKE_TOOLCHAIN_FILE="* ]]; then
+                        has_toolchain=yes
+                        break
+                    fi
+                done
             fi
-        done
 
-        toolchain=
-        if [ "$has_toolchain" = no ]; then
-            toolchain=-DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake
-        fi
+            # Add our toolchain if required.
+            if [ "$has_toolchain" = no ]; then
+                arguments+=("-DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake")
+            fi
+            ;;
+    esac
+fi
 
-        if [ "$VERBOSE" != "" ]; then
-            echo ^WRAPPER^"$cmake" "$toolchain" "$@"
-        fi
-        ^WRAPPER^"$cmake" "$toolchain" "$@"
-        ;;
-esac
+# Call our command.
+if [ "$VERBOSE" != "" ]; then
+    echo ^WRAPPER^"$cmake" "${arguments[@]}"
+fi
+^WRAPPER^"$cmake" "${arguments[@]}"

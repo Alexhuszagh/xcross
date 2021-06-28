@@ -10,7 +10,6 @@ __pycache__/
 
 # Configured files
 cmake/cmake
-cmake/emcmake
 cmake/toolchain/
 ct-ng/patch.sh
 docker/android.sh
