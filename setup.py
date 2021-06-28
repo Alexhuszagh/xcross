@@ -20,6 +20,7 @@
 # IMPORTS
 # -------
 
+import ast
 import collections
 import enum
 import glob
@@ -65,6 +66,9 @@ def load_json(path):
 
 HOME = os.path.dirname(os.path.realpath(__file__))
 config = load_json(f'{HOME}/config/config.json')
+# A lot of logic depends on being on the proper directory:
+# this allows us to do out-of-source builds.
+os.chdir(HOME)
 
 def get_version(key):
     '''Get the version data from the JSON config.'''
@@ -143,6 +147,15 @@ with open(f'{HOME}/README.md') as file:
 
 # COMMANDS
 # --------
+
+def parse_literal(value, valid_types=None):
+    '''Parse literal user options.'''
+
+    if value is not None:
+        value = ast.literal_eval(value)
+    if valid_types is not None:
+        assert isinstance(value, valid_types)
+    return value
 
 def check_call(code):
     '''Wrap `subprocess.call` to exit on failure.'''
@@ -319,11 +332,13 @@ class TagCommand(Command):
 
         # Delete any existing, conflicting tags.
         devnull = subprocess.DEVNULL
+        env = os.environ.copy()
+        env['GIT_DIR'] = f'{HOME}/.git'
         code = subprocess.call(
-            f'GIT_DIR="{HOME}/.git" git rev-parse "{tag}"',
-            shell=True,
+            ['git', 'rev-parse', tag],
             stdout=devnull,
             stderr=devnull,
+            env=env,
         )
         if code == 0:
             check_call(subprocess.call(
@@ -360,12 +375,8 @@ class BuildImagesCommand(Command):
 
         command = [
             docker,
-            'build',
-            '-t',
-            image_from_target(target),
-            HOME,
-            '--file',
-            f'{HOME}/docker/images/Dockerfile.{target}'
+            'build', '-t', image_from_target(target),
+            HOME, '--file', f'{HOME}/docker/images/Dockerfile.{target}'
         ]
         if subprocess.call(command) != 0:
             self.failures.append(target)
@@ -499,7 +510,7 @@ class PublishCommand(Command):
         self.test = None
 
     def finalize_options(self):
-        pass
+        self.test = parse_literal(self.test, (type(None), bool, int))
 
     def run(self):
         '''Run the unittest suite.'''
@@ -511,11 +522,12 @@ class PublishCommand(Command):
         self.run_command('build')
         self.run_command('sdist')
         self.run_command('bdist_wheel')
+        files = glob.glob(f'{HOME}/dist/*')
+        command = [sys.executable, '-m', 'twine', 'upload']
         if self.test:
-            command = f'twine upload --repository testpypi {HOME}/dist/*'
-        else:
-            command = f'twine upload {HOME}/dist/*'
-        check_call(subprocess.call(command, shell=True))
+            command += ['--repository', 'testpypi']
+        command += files
+        check_call(subprocess.call(command))
 
 class TestCommand(Command):
     '''Run the unittest suite.'''
@@ -552,7 +564,7 @@ class TestImagesCommand(Command):
         self.system = None
 
     def finalize_options(self):
-        pass
+        self.system = parse_literal(self.system, (type(None), bool, int))
 
     def git_clone(self, git, repository):
         '''Clone a given repository.'''
@@ -1517,7 +1529,7 @@ class ConfigureCommand(VersionCommand):
             template = f'{HOME}/docker/Dockerfile.crosstool-patch.in'
             files = []
             for patch in image.patches:
-                files += glob.glob(f'diff/{patch}.*')
+                files += glob.glob(f'{HOME}/diff/{patch}.*')
             patches = [f'COPY ["{i}", "/src/diff/"]' for i in files]
             patches = '\n'.join(patches)
         else:
