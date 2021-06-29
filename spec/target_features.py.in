@@ -466,11 +466,12 @@ def add_warnings(cxx, has_os):
     #   sparc/crt0.S:38: undefined reference to `__stack
     if not has_os:
         missing = missing_stdlib(cxx)
-        if missing:
-            warnings['missing'] = missing
-        crt0 = any([os.path.splitext(i)[0] == 'crt0' for i in missing])
+        crt0 = [i for i in missing if os.path.splitext(i)[0] == 'crt0']
         startfiles = True
         if crt0:
+            # Don't warn for redundant crt0 checks.
+            for value in crt0:
+                missing.remove(value)
             startfiles = False
             warnings['crt0'] = True
         if startfiles and not has_startfiles(cxx):
@@ -478,6 +479,8 @@ def add_warnings(cxx, has_os):
             warnings['startfiles'] = True
         if not has_cxxstdlib(cxx, startfiles):
             warnings['c++-stdlib'] = True
+        if missing:
+            warnings['missing'] = missing
 
     # Check issues at runtime. This is after any symlinks,
     # so we can check if /opt/bin/run exists.
