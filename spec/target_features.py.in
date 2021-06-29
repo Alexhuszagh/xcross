@@ -328,36 +328,34 @@ def add_specifications(linker, cc, cxx):
 
     return data_filtered, data
 
-def has_crt0(linker):
-    '''Check if the C-runtime links to crt0.'''
+def missing_stdlib(cxx):
+    '''Check if by default the library fails to link.'''
 
-    # This is an approximation: we search for crt0
-    # in the standard library search path.
+    def unlink():
+        os.unlink('main.cc')
+        try:
+            os.unlink('main')
+        except FileNotFoundError:
+            pass
+
+    # Check to see if the file compiles by default.
+    with open('main.cc', 'w') as file:
+        file.write('int main() { return 0; }\n')
     with subprocess.Popen(
-        [linker, '--verbose'],
+        [cxx, 'main.cc', '-o', 'main', '-Wl,--fatal-warnings'],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
     ) as process:
         code = process.wait()
         if code == 0:
-            # Read the search paths.
-            # The search paths with be every-other value after the first.
-            stdout = process.stdout.read().decode('utf-8')
-            regex = re.compile(r'SEARCH_DIR\("=([^"]*)"\)\s*;\s*')
-            search_paths = regex.split(stdout)[1::2]
+            unlink()
+            return []
+        stdout = process.stdout.read().decode('utf-8')
 
-            # crt0 can be an assembly file, or an object file.
-            # We don't want files like `cygmon-crt0.o`, so we need
-            # to match the file and extension only.
-            for path in search_paths:
-                for file in os.listdir(path):
-                    name, ext = os.path.splitext(file)
-                    if name == 'crt0' and ext.lower() in ('.s', '.o'):
-                        return True
-
-            # Exhausted our search, no crt0
-            return False
-    raise ValueError('Unable to find search path of linker.')
+    # If not, we need to parse the link errors to find the missing libraries.
+    unlink()
+    regex = re.compile(r'cannot find ([^:]+)(?:: No such file or directory)?')
+    return regex.findall(stdout)
 
 def has_startfiles(cxx):
     '''Check if the C-runtime has startfiles.'''
@@ -369,30 +367,31 @@ def has_startfiles(cxx):
         except FileNotFoundError:
             pass
 
+    # Make sure we treat all linker warnings as fatal,
+    # so we don't use an implicit start, like:
+    #   ld: warning: cannot find entry symbol _start; defaulting to 00000000000010dc
+    command = [cxx, 'main.cc', '-o', 'main', '-Wl,--fatal-warnings']
     devnull = subprocess.DEVNULL
     with open('main.cc', 'w') as file:
         file.write('int main() { return 0; }\n')
-    code = subprocess.call(
-        [cxx, 'main.cc', '-o', 'main'],
-        stderr=devnull,
-        stdout=devnull,
-    )
+    code = subprocess.call(command, stderr=devnull, stdout=devnull)
     if code == 0:
         # Has startfiles, can short-circuit
         unlink()
         return
 
-    # Didn't compile , check to see if it works without startfiles.
-    # If it doesn't, it was another error.
-    code = subprocess.call(
-        [cxx, 'main.cc', '-o', 'main', '-nostartfiles'],
-        stderr=devnull,
-        stdout=devnull,
-    )
+    # Didn't compile , check to see if it works with a dummy
+    # `_start` routine, to provide a fake entrypoint.
+    with open('main.cc', 'w') as file:
+        file.write('int main() { return 0; }\n')
+        file.write('extern "C" void _start() {}\n')
+    code = subprocess.call(command, stderr=devnull, stdout=devnull)
     unlink()
-    return code != 0
+    if code != 0:
+        raise ValueError('Unexpected failure, maybe missing more than `_start`?')
+    return code == 0
 
-def has_cxxstdlib(cxx, has_startfiles):
+def has_cxxstdlib(cxx, startfiles):
     '''Check if there is a C++ standard library.'''
 
     devnull = subprocess.DEVNULL
@@ -401,7 +400,7 @@ def has_cxxstdlib(cxx, has_startfiles):
         file.write('#include <cstdint>\n')
         file.write('int main() { return 0; }\n')
     command = [cxx, 'main.cc', '-o', 'main']
-    if not has_startfiles:
+    if not startfiles:
         command.append('-nostartfiles')
     code = subprocess.call(
         command,
@@ -446,7 +445,7 @@ def check_run(cxx, is_static):
     os.unlink('main')
     return code == 0
 
-def add_warnings(linker, cxx, has_os):
+def add_warnings(cxx, has_os):
     '''Add any warnings to a JSON image.'''
 
     warnings = collections.defaultdict(dict)
@@ -454,17 +453,27 @@ def add_warnings(linker, cxx, has_os):
     # Check if we need `-nostartfiles`, in one
     # of two conditions: there is no crt0, or
     # crt0 does not provide a startup routine.
+    #
+    # Note: some libraries don't provide crt0 (like AVR),
+    # but still have startup routines, and some libraries
+    # have different names for crt0. Only search the basepath,
+    # and only if the library fails to compile.
+    #
     # Option 1:
     #   ld: cannot find crt0.o: No such file or directory
     # Option 2:
     #   ld: lib/crt0.o: in function `_start':
     #   sparc/crt0.S:38: undefined reference to `__stack
     if not has_os:
+        missing = missing_stdlib(cxx)
+        if missing:
+            warnings['missing'] = missing
+        crt0 = any([os.path.splitext(i)[0] == 'crt0' for i in missing])
         startfiles = True
-        if not has_crt0(linker):
+        if crt0:
             startfiles = False
             warnings['crt0'] = True
-        if not has_startfiles(cxx):
+        if startfiles and not has_startfiles(cxx):
             startfiles = False
             warnings['startfiles'] = True
         if not has_cxxstdlib(cxx, startfiles):
@@ -489,7 +498,7 @@ def main():
     cxx = find_cxx()
     has_os = os.environ['OS'] != 'unknown'
     filtered, full = add_specifications(linker, cc, cxx)
-    warnings = add_warnings(linker, cxx, has_os)
+    warnings = add_warnings(cxx, has_os)
 
     # Write out our files.
     if warnings:
