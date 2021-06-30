@@ -378,18 +378,21 @@ def has_startfiles(cxx):
     if code == 0:
         # Has startfiles, can short-circuit
         unlink()
-        return
+        return True
 
     # Didn't compile , check to see if it works with a dummy
     # `_start` routine, to provide a fake entrypoint.
+    # We also provide `-nostartfiles`, since some images
+    # have undefined references to other required symbols,
+    # such as `__bss_start__`.
     with open('main.cc', 'w') as file:
         file.write('int main() { return 0; }\n')
         file.write('extern "C" void _start() {}\n')
-    code = subprocess.call(command, stderr=devnull, stdout=devnull)
+    code = subprocess.call(command + ['-nostartfiles'], stderr=devnull, stdout=devnull)
     unlink()
     if code != 0:
         raise ValueError('Unexpected failure, maybe missing more than `_start`?')
-    return code == 0
+    return False
 
 def has_cxxstdlib(cxx, startfiles):
     '''Check if there is a C++ standard library.'''
