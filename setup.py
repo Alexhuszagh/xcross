@@ -216,6 +216,14 @@ def subslice_targets(start=None, stop=None):
         targets = targets[:targets.index(stop)+1]
     return targets
 
+def build_image(docker, target):
+    '''Call Docker to build a single target.'''
+
+    return subprocess.call([
+        docker, 'build', '-t', image_from_target(target),
+        HOME, '--file', f'{HOME}/docker/images/Dockerfile.{target}'
+    ])
+
 class CleanDistCommand(Command):
     '''A custom command to clean Python dist artifacts.'''
 
@@ -373,13 +381,44 @@ class TagCommand(Command):
             stderr=devnull,
         ))
 
+class BuildImageCommand(Command):
+    '''Build a single Docker image.'''
+
+    description = 'build a single docker image'
+    user_options = [
+        ('target=', None, 'Target name'),
+    ]
+
+    def initialize_options(self):
+        self.target = None
+
+    def finalize_options(self):
+        assert self.target is not None
+
+    def build_image(self, docker):
+        '''Build a Docker image.'''
+
+        if build_image(docker, self.target) != 0:
+            raise
+        if subprocess.call(command) != 0:
+            print(f'Error: failed to build target {self.target}', file=sys.stderr)
+            sys.exit(1)
+
+    def run(self):
+        '''Build single Docker image.'''
+
+        docker = shutil.which('docker')
+        if not docker:
+            raise FileNotFoundError('Unable to find command docker.')
+        self.build_image(docker)
+
 class BuildImagesCommand(Command):
     '''Build all Docker images.'''
 
     description = 'build all docker images'
     user_options = [
-        ('start=', None, 'Start point for test suite.'),
-        ('stop=', None, 'Stop point for test suite.'),
+        ('start=', None, 'Start point for images to build.'),
+        ('stop=', None, 'Stop point for images to build.'),
     ]
 
     def initialize_options(self):
@@ -440,10 +479,10 @@ class BuildImagesCommand(Command):
 
         # Print any failures.
         if self.failures:
-            print('Error: Failures occurred.')
-            print('-------------------------')
+            print('Error: Failures occurred.', file=sys.stderr)
+            print('-------------------------', file=sys.stderr)
             for failure in self.failures:
-                print(failure)
+                print(failure, file=sys.stderr)
             sys.exit(1)
 
 class BuildAllCommand(BuildImagesCommand):
@@ -480,8 +519,8 @@ class PushCommand(Command):
 
     description = 'push all docker images to docker hub'
     user_options = [
-        ('start=', None, 'Start point for test suite.'),
-        ('stop=', None, 'Stop point for test suite.'),
+        ('start=', None, 'Start point for images to push.'),
+        ('stop=', None, 'Stop point for images to push.'),
     ]
 
     def initialize_options(self):
@@ -1588,7 +1627,7 @@ class ConfigureCommand(VersionCommand):
             template = f'{HOME}/docker/Dockerfile.crosstool-patch.in'
             files = []
             for patch in image.patches:
-                files += glob.glob(f'{HOME}/diff/{patch}.*')
+                files += glob.glob(f'diff/{patch}.*')
             patches = [f'COPY ["{i}", "/src/diff/"]' for i in files]
             patches = '\n'.join(patches)
         else:
@@ -1841,6 +1880,7 @@ setuptools.setup(
     ],
     cmdclass={
         'build_all': BuildAllCommand,
+        'build_image': BuildImageCommand,
         'build_images': BuildImagesCommand,
         'build_py': BuildCommand,
         'clean': CleanCommand,

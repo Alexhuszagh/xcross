@@ -477,12 +477,12 @@ export CROSS_TARGET=ppc-unknown-linux-gnu
 
 # Building/Running Dockerfiles
 
-To build all Docker images, run `docker/build.sh`. To build and run a single docker image, use
+To build all Docker images, run `python3 setup.py build_images`. Note that ca it take over 4 days to build all images. To build and run a single docker image, use:
 
 ```bash
 image=ppcle-unknown-linux-gnu
 python3 setup.py configure
-docker build -t "ahuszagh/cross:$image" . --file "docker/images/Dockerfile.$image"
+python3 setup.py build_image --target "$image"
 # Runs the image without the xcross abstraction.
 docker run -it "ahuszagh/cross:$image" /bin/bash
 # Runs the image using xcross, for a simpler interface.
