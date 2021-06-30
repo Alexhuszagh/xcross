@@ -399,8 +399,6 @@ class BuildImageCommand(Command):
         '''Build a Docker image.'''
 
         if build_image(docker, self.target) != 0:
-            raise
-        if subprocess.call(command) != 0:
             print(f'Error: failed to build target {self.target}', file=sys.stderr)
             sys.exit(1)
 
@@ -431,12 +429,7 @@ class BuildImagesCommand(Command):
     def build_image(self, docker, target):
         '''Build a Docker image.'''
 
-        command = [
-            docker,
-            'build', '-t', image_from_target(target),
-            HOME, '--file', f'{HOME}/docker/images/Dockerfile.{target}'
-        ]
-        if subprocess.call(command) != 0:
+        if build_image(docker, target) != 0:
             self.failures.append(target)
             return False
         return True
