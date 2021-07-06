@@ -2,11 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+void main(void) {
   char* v = malloc(50);
   const char* s = "Hello world!";
   strcpy(v, s);
   printf("%s\n", v);
-  while(1);
-  return 0;
 }

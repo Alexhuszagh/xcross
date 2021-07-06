@@ -1,4 +1,4 @@
-QEMU=qemu-system-riscv32
+QEMU=qemu-system-riscv64
 OBJCOPY=objcopy
 OBJDUMP=objdump
 

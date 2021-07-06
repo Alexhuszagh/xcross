@@ -743,12 +743,41 @@ Platform-specific details:
 
 # License
 
-This is free and unencumbered software released into the public domain. This project, however, does derive off of projects that are not necessarily public domain software, such as [crosstool-NG](https://github.com/crosstool-ng/crosstool-ng), [musl-cross-make](https://github.com/richfelker/musl-cross-make), [buildroot](https://buildroot.org/), the [Android NDK](https://android.googlesource.com/platform/prebuilts/ndk/+/master/NOTICE), as well as build off of GCC, the Linux kernel headers, and the relevant C-runtime (glibc, musl, uClibc-ng). Therefore, distributing any images will be subject to the GPLv3 or later (for GCC), and GPLv2 for the Linux headers.
+The code contained within the repository, except when another license exists for a directory, is unlicensed. This is free and unencumbered software released into the public domain.
 
-The diff files, used to fix bugs in toolchain components, are licensed under the terms of the original component. See [diff/README.md](https://github.com/Alexhuszagh/xcross/blob/main/diff/README.md) for more details.
+However, this only pertains to the actual code contained in the repository: this project derives off of numerous other projects which use different licenses, and the images of the resulting toolchains contain software, such as Linux, GCC, glibc, and more that are under different licenses.
 
-These licenses are only relevant if you distribute a toolchain: for merely compiling and linking code as part of a standard toolchain, the usual linking exceptions apply.
+For example, projects used by xcross and their licenses include:
+
+- [crosstool-NG](https://github.com/crosstool-ng/crosstool-ng): GNU GPLv2
+- [musl-cross-make](https://github.com/richfelker/musl-cross-make): MIT
+- [buildroot](https://buildroot.org): GNU GPLv2
+- [Android NDK](https://android.googlesource.com/platform/prebuilts/ndk/+/master/NOTICE): BSD 3-Clause
+- [newlib](https://www.sourceware.org/newlib/): MIT and BSD-like licenses
+- [GCC](https://gcc.gnu.org/): GNU GPLv3
+- [glibc](https://www.gnu.org/software/libc/): GNU LGPLv2.1 or later
+- [musl](https://musl.libc.org/): MIT
+- [musl](https://musl.libc.org/): MIT
+- [uClibc-ng](https://www.uclibc-ng.org/): GNU LGPLv2.1
+- [emscripten](https://emscripten.org/): MIT or University of Illinois/NCSA
+- [LLVM](https://llvm.org/): Apache 2.0
+- [binutils](https://www.gnu.org/software/binutils/): GNU GPLv2
+- [Linux](https://www.linux.org/): GNU GPLv2
+- [MinGW](https://osdn.net/projects/mingw/): BSD 3-Clause and GNU GPLv2
+- [Ubuntu](https://ubuntu.com/): A variety of FOSS licenses
+
+Likewise, the diffs used to patch the toolchains are subject to the licensed of the original software. See [diff/README.md](https://github.com/Alexhuszagh/xcross/blob/main/diff/README.md) for detailed license information.
+
+The test suites for bare-metal toolchains also derive from other projects, including:
+
+- [newlib-examples](https://github.com/cirosantilli/newlib-examples): GNU GPLv3
+- [ppc_hw](https://github.com/ara4711/ppc_hw): BSD 3-Clause
+- [x86-bare-metal-examples](https://github.com/cirosantilli/x86-bare-metal-examples): GNU GPLv3
+
+These licenses are only relevant if you distribute a toolchain or you redistribute the software used to build these images: for merely compiling and linking code as part of a standard toolchain, the usual linking exceptions apply.
 
 # Contributing
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in xcross by you, will be unlicensed (free and unencumbered software released into the public domain).
+
+Please note that due to licensing issues, you may not submit code that uses Github Copilot, even though Github deceptively claims you retain ownership of generated code.

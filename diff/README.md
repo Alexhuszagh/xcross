@@ -4,4 +4,4 @@ The files in these patches modify and patch bugs in various toolchain components
 
 **glibc**
 
-All patches for glibc are subject to the terms of the [GNU Lesser GPL v2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html) or later.
+All patches for glibc are subject to the terms of the [GNU Lesser GPL v2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html) or later. See `GLIBC_LICENSE` for license information.

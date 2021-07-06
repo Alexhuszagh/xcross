@@ -1,9 +1,9 @@
-QEMU=qemu-system-arm
+QEMU=qemu-system-aarch64
 OBJCOPY=objcopy
 OBJDUMP=objdump
 ENTRY=0x40000000
 UART=0x09000000
-CPU=cortex-a15
+CPU=cortex-a57
 
 .PHONY: all
 

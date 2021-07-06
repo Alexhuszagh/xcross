@@ -7,4 +7,5 @@ void main(void) {
   const char* s = "Hello world!";
   strcpy(v, s);
   printf("%s\n", v);
+  return 0;
 }
