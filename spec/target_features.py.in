@@ -339,8 +339,12 @@ def missing_stdlib(cxx):
             pass
 
     # Check to see if the file compiles by default.
+    # Need to add a dummy _start routine, since some
+    # might say "cannot find entry symbol _start", which
+    # is obviously not what we want.
     with open('main.cc', 'w') as file:
         file.write('int main() { return 0; }\n')
+        file.write('extern "C" void _start() {}\n')
     with subprocess.Popen(
         [cxx, 'main.cc', '-o', 'main', '-Wl,--fatal-warnings'],
         stdout=subprocess.PIPE,
