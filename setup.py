@@ -757,6 +757,7 @@ class TestImagesCommand(Command):
         # Check the full system tests.
         if self.system:
             self.run_test(docker, 'arm-unknown-elf', 'metal', script='arm-hw')
+            self.run_test(docker, 'avr', 'metal', script='avr-hw')
             self.run_test(docker, 'ppc-unknown-elf', 'metal', script='ppc-hw')
             self.run_test(docker, 'riscv32-unknown-elf', 'metal', script='riscv32-hw')
 
