@@ -4,9 +4,15 @@ __pycache__/
 *$py.class
 
 # C extensions
+*.o
 *.so
 *.dll
 *.exe
+
+# Images
+*.bin
+*.elf
+*.lst
 
 # Configured files
 cmake/cmake

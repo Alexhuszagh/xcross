@@ -633,7 +633,7 @@ class TestImagesCommand(Command):
         # Get our command.
         if script is None:
             script = 'image-test'
-        command = f'/test/test/{script}.sh'
+        command = f'/test/{script}.sh'
         if cpu is not None:
             command = f'export CPU={cpu}; {command}'
 
@@ -650,7 +650,7 @@ class TestImagesCommand(Command):
         docker_command = [
             docker,
             'run',
-            '-v', f'{HOME}:/test',
+            '-v', f'{HOME}/test:/test',
             '--env', f'IMAGE={target}',
             '--env', f'TYPE={os_type}',
         ]
@@ -698,10 +698,7 @@ class TestImagesCommand(Command):
         '''Run the docker test suite.'''
 
         # Find our necessary commands.
-        git = shutil.which('git')
         docker = shutil.which('docker')
-        if not git:
-            raise FileNotFoundError('Unable to find command git.')
         if not docker:
             raise FileNotFoundError('Unable to find command docker.')
 
@@ -714,7 +711,7 @@ class TestImagesCommand(Command):
         os_images = sorted([i.target for i in images if i.os.is_os()])
 
         # Run OS images.
-        self.git_clone(git, 'https://github.com/Alexhuszagh/cpp-helloworld.git')
+        shutil.copy(f'{HOME}/test/cpp-helloworld', f'{HOME}/test/buildtests')
         try:
             for target in os_images:
                 if has_started or self.start == target:
@@ -736,12 +733,12 @@ class TestImagesCommand(Command):
                 self.run_test(docker, 'ppc64-unknown-linux-gnu', 'os', cpu='power9')
                 self.run_test(docker, 'mips-unknown-linux-gnu', 'os', cpu='24Kf')
         finally:
-            shutil.rmtree(f'{HOME}/buildtests', ignore_errors=True)
+            shutil.rmtree(f'{HOME}/test/buildtests', ignore_errors=True)
         if has_stopped:
             return
 
         # Run metal images.
-        self.git_clone(git, 'https://github.com/Alexhuszagh/cpp-atoi.git')
+        shutil.copy(f'{HOME}/test/cpp-atoi', f'{HOME}/test/buildtests')
         try:
             for target in metal_images:
                 if has_started or self.start == target:
@@ -753,13 +750,15 @@ class TestImagesCommand(Command):
                     has_stopped = True
                     break
         finally:
-            shutil.rmtree(f'{HOME}/buildtests', ignore_errors=True)
+            shutil.rmtree(f'{HOME}/test/buildtests', ignore_errors=True)
         if has_stopped:
             return
 
         # Check the full system tests.
         if self.system:
-            self.run_test(docker, 'ppc-unknown-elf', 'metal', script='ppc-metal')
+            self.run_test(docker, 'arm-unknown-elf', 'metal', script='arm-hw')
+            self.run_test(docker, 'ppc-unknown-elf', 'metal', script='ppc-hw')
+            self.run_test(docker, 'riscv32-unknown-elf', 'metal', script='riscv32-hw')
 
 class TestAllCommand(TestImagesCommand):
     '''Run the Python and Docker test suites.'''
