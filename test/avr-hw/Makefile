@@ -7,13 +7,14 @@ OBJDUMP=objdump
 all : main.bin
 
 main.elf : main.c
-	$(CC) -g main.c -Wl,-u,vfprintf -Wl,--section-start,.data=0x801100,--defsym=__heap_end=0x80ffff -o $@
+	$(CC) -g $^ -Wl,-u,vfprintf -o $@ \
+	-Wl,--section-start,.data=0x801100,--defsym=__heap_end=0x80ffff
 
 main.bin : main.elf
-	 $(OBJCOPY) -O binary  $< $@
+	 $(OBJCOPY) -O binary $^ $@
 
 clean :
-	rm -f -v *.o *.elf *.bin *.lst
+	rm -f -v *.o *.elf *.bin
 
-run:
-	$(QEMU) -machine uno -nographic -kernel main.elf -serial mon:stdio
+run : main.elf
+	$(QEMU) -machine uno -nographic -kernel $^ -serial mon:stdio

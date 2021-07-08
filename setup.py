@@ -152,10 +152,10 @@ with open(f'{HOME}/README.md') as file:
 # COMMANDS
 # --------
 
-def parse_literal(value, valid_types=None):
+def parse_literal(value, default, valid_types=None):
     '''Parse literal user options.'''
 
-    if value is not None:
+    if value != default:
         value = ast.literal_eval(value)
     if valid_types is not None:
         assert isinstance(value, valid_types)
@@ -559,7 +559,7 @@ class PublishCommand(Command):
         self.test = None
 
     def finalize_options(self):
-        self.test = parse_literal(self.test, (type(None), bool, int))
+        self.test = parse_literal(self.test, None, (type(None), bool, int))
 
     def run(self):
         '''Run the unittest suite.'''
@@ -604,16 +604,30 @@ class TestImagesCommand(Command):
     user_options = [
         ('start=', None, 'Start point for test suite.'),
         ('stop=', None, 'Stop point for test suite.'),
-        ('system=', None, 'Do full system tests.'),
+        ('os=', None, 'Do operating system tests tests.'),
+        ('metal=', None, 'Do bare-metal tests.'),
+    ]
+    metal_tests = [
+        'arm',
+        'arm64',
+        'avr',
+        'ppc',
+        'mips',
+        'mipsel',
+        'riscv32',
+        'riscv64',
+        ('i686', 'x86'),
     ]
 
     def initialize_options(self):
         self.start = None
         self.stop = None
-        self.system = None
+        self.os = True
+        self.metal = None
 
     def finalize_options(self):
-        self.system = parse_literal(self.system, (type(None), bool, int))
+        self.os = parse_literal(self.os, True, (type(None), bool, int))
+        self.metal = parse_literal(self.metal, None, (type(None), bool, int))
 
     def git_clone(self, git, repository):
         '''Clone a given repository.'''
@@ -694,13 +708,8 @@ class TestImagesCommand(Command):
             TOOLCHAIN2_FLAGS='-s WASM=1',
         )
 
-    def run(self):
-        '''Run the docker test suite.'''
-
-        # Find our necessary commands.
-        docker = shutil.which('docker')
-        if not docker:
-            raise FileNotFoundError('Unable to find command docker.')
+    def run_os(self, docker):
+        '''Run the tests with an operating system.'''
 
         # Configure our test runner.
         has_started = True
@@ -754,15 +763,30 @@ class TestImagesCommand(Command):
         if has_stopped:
             return
 
-        # Check the full system tests.
-        if self.system:
-            self.run_test(docker, 'arm-unknown-elf', 'metal', script='arm-hw')
-            self.run_test(docker, 'arm64-unknown-elf', 'metal', script='arm64-hw')
-            self.run_test(docker, 'avr', 'metal', script='avr-hw')
-            self.run_test(docker, 'ppc-unknown-elf', 'metal', script='ppc-hw')
-            self.run_test(docker, 'riscv32-unknown-elf', 'metal', script='riscv32-hw')
-            self.run_test(docker, 'riscv64-unknown-elf', 'metal', script='riscv64-hw')
-            self.run_test(docker, 'i686-unknown-elf', 'metal', script='x86-hw')
+    def run_metal(self, docker):
+        '''Run the bare-metal tests.'''
+
+        for arch in self.metal_tests:
+            if isinstance(arch, tuple):
+                image = f'{arch[0]}-unknown-elf'
+                script = f'{arch[1]}-hw'
+            else:
+                image = f'{arch}-unknown-elf',
+                script = f'{arch}-hw'
+            self.run_test(docker, image, 'metal', script=script)
+
+    def run(self):
+        '''Run the docker test suite.'''
+
+        # Find our necessary commands.
+        docker = shutil.which('docker')
+        if not docker:
+            raise FileNotFoundError('Unable to find command docker.')
+
+        if self.os:
+            self.run_os(docker)
+        if self.metal:
+            self.run_metal(docker)
 
 class TestAllCommand(TestImagesCommand):
     '''Run the Python and Docker test suites.'''

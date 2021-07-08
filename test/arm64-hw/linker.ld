@@ -9,6 +9,7 @@ SECTIONS
     *(COMMON)
   }
   .bss : { *(.bss) }
+  . = ALIGN(8);
   heap_low = .;
   . = . + 0x1000000;
   heap_top = .;

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test a simple hello-world program for the ARM Versatile baseboard.
+# Test a simple hello-world program for a 32-bit MIPSEL system.
 #
 # This requires a C standard library, a system allocator,
 # stdio, and therefore tests reasonably well the hardware
@@ -7,9 +7,8 @@
 
 set -e
 
-cd /test/arm-hw
+cd /test/mipsel-hw
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/common/shared.sh"
-
-install arm
+install mips
 run

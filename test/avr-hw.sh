@@ -8,11 +8,7 @@
 set -e
 
 cd /test/avr-hw
-
-export DEBIAN_FRONTEND="noninteractive"
-apt-get update
-apt-get install --assume-yes qemu-system-avr
-
-# Run our bare-metal image.
-# Need to exit on a 0 status.
-timeout 0.1 make run || [[ $? -eq 124 ]]
+scriptdir=`realpath $(dirname "$BASH_SOURCE")`
+source "$scriptdir/common/shared.sh"
+install avr
+run

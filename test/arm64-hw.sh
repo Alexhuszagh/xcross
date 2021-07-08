@@ -10,6 +10,5 @@ set -e
 cd /test/arm-hw
 scriptdir=`realpath $(dirname "$BASH_SOURCE")`
 source "$scriptdir/common/shared.sh"
-
-install arm
+install aarch64
 run
