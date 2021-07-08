@@ -1,6 +1,6 @@
 # xcross
 
-Compact docker [images](https://hub.docker.com/r/ahuszagh/cross) and high-level scripts for plug-and-play C/C++ cross-compiling, inspired by [rust-embedded/cross](https://github.com/rust-embedded/cross). xcross supports both bare-metal and OS-based compilation, with a wide variety of architectures and C-runtimes supported. xcross is ideal for:
+"Zero setup" cross-compilation for a wide variety of architectures. xcross includes compact docker [images](https://hub.docker.com/r/ahuszagh/cross) and a build utility for minimal setup C/C++ cross-compiling, inspired by [rust-embedded/cross](https://github.com/rust-embedded/cross). xcross provides toolchains for a wide variety of architectures and C libraries, and targets both bare-metal and Linux-based systems, making it ideal for:
 
 - Testing cross-platform support in CI pipelines.
 - Building and deploying cross-compiled programs.
@@ -25,8 +25,8 @@ Note that this project is similar to [dockcross](https://github.com/dockcross/do
   - [run](#run)
   - [Docker](#docker)
 - [Travis CI Example](#travis-ci-example)
+- [Sandboxing](#sandboxing)
 - [Using xcross](#using-xcross)
-- [Sharing Binaries To Host](#sharing-binaries-to-host)
 - [Other Utilities](#other-utilities)
 - [Building/Running Dockerfiles](#building-running-dockerfiles)
 - [Images](#images)
@@ -45,17 +45,17 @@ At the same time, modern software design builds upon a body of open source work.
 
 Normally, cross compilers are limited by long compile times (to build the cross-compiler) and non-portable toolchain files, since the toolchain cannot be added to the path.
 
-Using Docker images simplifies this, since the cross-compilers are pre-packaged in a compact image, enabling building, testing, and deploying cross-compiled code in seconds, rather than hours. Each image comes with a toolchain installed on-path, making it work with standard build tools without any configuration. And, [xcross](xcross) allows you to cross-compile code with zero setup required.
+Pre-built Docker images simplifies this, since the cross-compilers are packaged in a compact image isolated from the host, enabling building, testing, and deploying cross-compiled code in seconds, rather than hours. Each image comes with a toolchain installed on-path, making it work with standard build tools without any configuration. And, [xcross](xcross) allows you to cross-compile code with zero setup required.
 
 It just works.
 
 # Getting Started
 
-This shows a simple example of building and running a C++ project on PowerPC64, a big-endian system.
+This shows a simple example of building and running a C++ project on DEC Alpha, a 64-bit little-endian system.
 
 ## Installing
 
-xcross may be installed via PyPi via:
+xcross may be installed via [PyPi](https://pypi.org/project/xcross/):
 
 ```bash
 pip install xcross --user
@@ -66,57 +66,38 @@ Or xcross may be installed via git:
 ```bash
 git clone https://github.com/Alexhuszagh/xcross
 cd xcross
-python setup.py install --user
+pip install . --user
 ```
 
 ## xcross
 
-xcross is a Python script to automate building transparently for custom targets, similar to Rust's [cross](https://github.com/rust-embedded/cross).
+xcross is a Python script to automate building cross-compiling, similar to Rust's [cross](https://github.com/rust-embedded/cross). To use it, merely add `xcross` before any command along with a valid target. To configure, build, and make our project, we can do:
 
 ```bash
-# Clone our project locally.
-git clone https://github.com/Alexhuszagh/cpp-helloworld.git
-cd cpp-helloworld
-
-# Add xcross to any command, and it just works.
-xcross make --target=alpha-unknown-linux-gnu
-file helloworld
-# helloworld: ELF 64-bit LSB executable, Alpha (unofficial)
-
-# We can also use environment variables for the target and dir.
 export CROSS_TARGET=alpha-unknown-linux-gnu
-
-# Let's try CMake. Here, we have to tell Docker where to 
-# mount the directory, since we need to share the parent's files.
-# Here we configure the project, build and run the executable.
-mkdir build-alpha && cd build-alpha
 xcross cmake ..
-xcross make run
-# Hello world!
-
-# Let's try a raw C++ compiler. Here we build it using g++,
-# and then run it using Qemu. It just works.
-cd ..
-xcross g++ helloworld.cc -o hello
-xcross run hello
-
-# We also support environment variable passthrough.
-# Please note that if you use `$CXX`, it will evaluate
-# on the host, so we must escape it.
-xcross -E CXX=g++ '$CXX' helloworld.cc -o hello
+xcross make -j 5
 ```
+
+In addition, the images include emulators to run the produced binaries:
 
 ## run
 
-`run` is a command inside the docker image that invokes Qemu with the correct arguments to execute the binary, whether statically or dynamically-linked. `run hello` is analogous to running `./hello` as a native binary.
+xcross includes a `run` command for most images, which uses Qemu to run the cross-compiled binaries.
+
+```rust
+xcross run path/to/file
+```
+
+`run` works for both statically and dynamically-linked binaries, ensuring the dynamically-linked libraries are in Qemu's search path.
 
 ## Docker
 
-For more fine-tuned control, you can also run an interactive session within a container:
+For more fine-tuned control, you can also run an interactive session within a container. An extended example is:
 
 ```bash
 # Pull the Docker image, and run it interactively, entering the container.
-xcross bash --target alpha-unknown-linux-gnu
+xcross --target alpha-unknown-linux-gnu
 
 # Clone the repository, build and run the code in the container using CMake.
 git clone https://github.com/Alexhuszagh/cpp-helloworld.git
@@ -219,13 +200,17 @@ script:
     $build run tests/test
 ```
 
+# Sandboxing
+
+By default, xcross shares your root directory with the image, running with the same permissions as the current user. However, you can limit the shared directories with the `--dir` option, allowing you to limit the build system to only the project files. This is useful for compiling code with an untrusted build system, providing an extra layer of security relative to running it on the host computer.
+
 # Using xcross
 
 Most of the magic happens via xcross, which allows you to transparently execute commands in a Docker container. Although xcross provides simple, easy-to-use defaults, it has more configuration options for extensible cross-platform builds. Most of these command-line arguments may be provided as environment variables.
 
 > **WARNING** By default, the root directory is shared with the Docker container, for maximum compatibility. In order to mitigate any security vulnerabilities, we run any build commands as a non-root user, and escape input in an attempt to avoid any script injections. If you are worried about a malicious build system, you may further restrict this using the `--dir` option.
 
-### Arguments
+## Arguments
 
 **Fallthrough**
 
@@ -287,7 +272,7 @@ xcross --target=alpha-unknown-linux-gnu ...
 CROSS_TARGET=alpha-unknown-linux-gnu xcross ...
 ```
 
-- `--dir`, `CROSS_DIR`: The target architecture to compile to.
+- `--dir`, `CROSS_DIR`: The directory to share to the container as a volume.
 
 ```bash
 # These two are identical, and share only from the 
@@ -428,40 +413,6 @@ xcross --verbose ...
 CROSS_VERBOSE=1 xcross ...
 ```
 
-# Sharing Binaries To Host
-
-In order to build projects and share data back to the host machine, you can use Docker's `--volume` to bind a volume from the host to client. This allows us to share a build directory between the client and host, allowing us to build binaries with inside the container and test/deploy on the host.
-
-```bash
-# On a Linux distro with SELinux, you may need to turn it
-# to permissive, to enable file sharing:
-#   `setenforce 0`
-
-# Run docker image, and share current directory.
-git clone https://github.com/Alexhuszagh/cpp-helloworld.git
-cd cpp-helloworld
-xcross --target alpha-unknown-linux-gnu
-
-# Enter the repository, and make a platform-specific build.
-cd hello
-mkdir build-alpha && cd build-alpha
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/toolchains/static.cmake \
-    -DCMAKE_BUILD_TYPE=Release
-make
-
-# Exit, and check we have our proper image.
-exit
-file build-alpha/hello
-# build-alpha/hello: ELF 64-bit LSB executable, 
-# Alpha (unofficial), version 1 (GNU/Linux), statically linked, 
-# BuildID[sha1]=252707718fb090ed987a9eb9ab3a8c3f6ae93482, for 
-# GNU/Linux 3.2.0, not stripped
-
-# Please note the generated images will be owned by `root`.
-ls -lh build-alpha/hello
-# -rwxr-xr-x. 1 root root 2.4M May 30 20:50 build-alpha/hello
-```
-
 # Other Utilities
 
 Each image also contains a few custom utilities to probe image configurations:
@@ -477,7 +428,7 @@ export CROSS_TARGET=ppc-unknown-linux-gnu
 
 # Building/Running Dockerfiles
 
-To build all Docker images, run `python3 setup.py build_images`. Note that ca it take over 4 days to build all images. To build and run a single docker image, use:
+To build all Docker images, run `python3 setup.py build_images`. Note that ca it take up to a week to build all images. To build and run a single docker image, use:
 
 ```bash
 image=ppcle-unknown-linux-gnu
