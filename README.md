@@ -13,7 +13,7 @@ Each Docker image comes pre-installed with:
 - CMake
 - Ninja
 
-Note that this project is similar to [dockercross](https://github.com/dockcross/dockcross), however, xcross supports many more CPU architectures than dockcross. If you need Docker images of common architectures, dockcross should have better support.
+Note that this project is similar to [dockcross](https://github.com/dockcross/dockcross), however, xcross supports many more CPU architectures than dockcross. If you need Docker images of common architectures, dockcross should have better support.
 
 **Table of Contents**
 
