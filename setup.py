@@ -883,6 +883,11 @@ triple_string = {
     OperatingSystem.Linux: 'linux',
     OperatingSystem.Windows: 'w64',
 }
+meson_string = {
+    **triple_string,
+    OperatingSystem.BareMetal: 'unknown',
+    OperatingSystem.Windows: 'windows',
+}
 cmake_os = {v: k for k, v in cmake_string.items()}
 triple_os = {v: k for k, v in triple_string.items()}
 
@@ -1614,13 +1619,21 @@ class ConfigureCommand(VersionCommand):
         contents = self.replace(contents, replacements)
         self.write_file(outfile, contents, False)
 
-    def configure_package_dockerfile(self, image, compiler=None, compiler_version=None):
+    def configure_package_dockerfile(
+        self,
+        image,
+        compiler=None,
+        compiler_version=None,
+        system=None,
+    ):
         '''Configure a Dockerfile with package managers enabled.'''
 
         if compiler is None:
             compiler = 'gcc'
         if compiler_version is None:
             compiler_version = gcc_major
+        if system is None:
+            system = image.os.to_vcpkg()
         template = f'{HOME}/docker/Dockerfile.package.in'
         outfile = f'{HOME}/docker/pkgimages/Dockerfile.{image.target}'
         self.configure(template, outfile, False, [
@@ -1630,7 +1643,7 @@ class ConfigureCommand(VersionCommand):
             ('LINKAGE', image.linkage),
             ('PROCESSOR', image.processor),
             ('REPOSITORY', config['metadata']['repository']),
-            ('SYSTEM', image.os.to_vcpkg()),
+            ('SYSTEM', system),
             ('TARGET', image.target),
             ('TRIPLE', image.triple),
             ('USERNAME', config['metadata']['username']),
@@ -1891,6 +1904,10 @@ class ConfigureCommand(VersionCommand):
         # Configure the symlinks.
         symlink_template = f'{HOME}/symlink/{image.target}.sh.in'
         self.configure_symlinks(image, symlink_template, [])
+
+        ## Build derived images with package managers enabled.
+        #compiler_version = config['android']['clang_version']
+        #self.configure_package_dockerfile(image, 'clang', compiler_version)
 
     def run(self):
         '''Modify configuration files.'''

@@ -16,8 +16,13 @@ if [ "$SYSTEM" = "" ]; then
     exit 1
 fi
 
+# Note: Don't use the system default for meson.
+# It's outdated, and doesn't support flags we need.
 apt-get update
-apt-get install --assume-yes --no-install-recommends meson
+apt-get install --assume-yes --no-install-recommends \
+    python3 \
+    python3-pip
+pip install meson
 
 # Detect a few target features.
 endian=$(target-specs | jq -r '."target-endian"')
@@ -39,9 +44,8 @@ endian = '$endian'
 needs_exe_wrapper = true
 
 [binaries]
-exe_wrapper = 'run'
-c = ['ccache', 'gcc']
-cpp = ['ccache', 'g++']
+c = ['ccache', 'cc']
+cpp = ['ccache', 'c++']
 ar = 'ar'
 strip = 'strip'
 " > /toolchains/cross.meson
@@ -55,6 +59,7 @@ fi
 echo '#!/bin/bash
 # Wrapper script for Meson to automatically add a cross-compile toolchain.
 
+source /env/find
 meson=^MESON^
 arguments=("$@")
 if ! find --cross-file "${arguments[@]}"; then

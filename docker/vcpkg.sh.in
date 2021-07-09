@@ -81,6 +81,12 @@ set(VCPKG_CRT_LINKAGE dynamic)
 set(VCPKG_LIBRARY_LINKAGE $LINKAGE)
 set(VCPKG_CMAKE_SYSTEM_NAME $SYSTEM)
 
+\# The toolchain file can be included multiple times, which can
+\# cause linkage errors with installing libraries with dependencies.
+if(NOT DEFINED VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
+    set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE /toolchains/toolchain.cmake)
+endif()
+
 if(NOT CMAKE_HOST_SYSTEM_PROCESSOR)
     execute_process(COMMAND \"uname\" \"-m\" OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()"
@@ -92,15 +98,10 @@ set(VCPKG_ENV_PASSTHROUGH PATH)"
         triplet="$triplet
 set(VCPKG_POLICY_DLLS_WITHOUT_LIBS enabled)"
     fi
+elif [ "$SYSTEM" = "Emscripten" ]; then
+    triplet="$triplet
+set(VCPKG_ENV_PASSTHROUGH EMSDK PATH)"
 fi
-# Need to add our custom toolchain information from our CMakeLists.
-# Need to make sure we add an `-xcross` to avoid overwriting existing
-# toolchains.
-toolchain=$(cat /toolchains/toolchain.cmake)
-toolchain=$(echo "$toolchain" | sed '/^CMAKE_MINIMUM_REQUIRED.*$/d')
-toolchain=$(echo "$toolchain" | sed '/^SET(CMAKE_SYSTEM_NAME.*$/d')
-triplet="$triplet
-$toolchain"
 echo "$triplet" > ^SYSROOT^/vcpkg/triplets/community/"$TRIPLE"-xcross.cmake
 
 # Change our permissions, since we need to be able to write as a user.

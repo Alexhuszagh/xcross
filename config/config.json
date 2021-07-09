@@ -37,7 +37,7 @@
             "major": "0",
             "minor": "1",
             "patch": "0",
-            "build": "2021-06-27"
+            "build": "2021-07-09"
         }
     },
     // Ubuntu version for Docker images.

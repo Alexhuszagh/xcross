@@ -11,12 +11,14 @@
         "type": "android",
         "target": "armv7a-unknown-linux-androideabi",
         "abi": "armeabi-v7a",
-        "prefix": "arm"
+        "prefix": "arm",
+        "family": "arm"
     },
     {
         "type": "android",
         "target": "i686-unknown-linux-android",
-        "abi": "x86"
+        "abi": "x86",
+        "family": "x86"
     },
     {
         "type": "android",
@@ -36,19 +38,22 @@
     //    "type": "buildroot",
     //    "target": "arceb-unknown-linux-gnu",
     //    "triple": "arceb-buildroot-linux-gnu",
-    //    "processor": "arceb"
+    //    "processor": "arceb",
+    //    "family": "arc"
     //},
     {
         "type": "buildroot",
         "target": "archs38-unknown-linux-gnu",
         "triple": "arc-buildroot-linux-gnu",
-        "processor": "archs38"
+        "processor": "archs38",
+        "family": "arc"
     },
     {
         "type": "buildroot",
         "target": "arcebhs38-unknown-linux-gnu",
         "triple": "arceb-buildroot-linux-gnu",
-        "processor": "arcebhs38"
+        "processor": "arcebhs38",
+        "family": "arc"
     },
     // FAILS DURING BUILDING GDB:
     //      gdb/location.c:527:19: error: ISO C++ forbids comparison
@@ -79,6 +84,7 @@
         "target": "microblazeel-unknown-linux-uclibc",
         "triple": "microblazeel-buildroot-linux-uclibc",
         "processor": "microblazeel",
+        "family": "microblaze",
         "qemu": true
     },
     {
@@ -98,13 +104,15 @@
         "type": "buildroot",
         "target": "mips64el-unknown-linux-uclibcn32",
         "triple": "mips64el-buildroot-linux-uclibc",
-        "processor": "mips64el"
+        "processor": "mips64el",
+        "family": "mips64"
     },
     {
         "type": "buildroot",
         "target": "mips64el-unknown-linux-uclibcn64",
         "triple": "mips64el-buildroot-linux-uclibc",
         "processor": "mips64el",
+        "family": "mips64",
         "qemu": true
     },
     // FAILS DURING COMPILING WITH:
@@ -114,6 +122,7 @@
     //    "target": "nds32",
     //    "triple": "nds32le-linux",
     //    "processor": "nds32le",
+    //    "family": "nds32",
     //    "system": "nds32",
     //    "use_32": true
     //},
@@ -261,6 +270,7 @@
         "target": "xtensaeb-unknown-linux-uclibc",
         "triple": "xtensa-buildroot-linux-uclibc",
         "processor": "xtensaeb",
+        "family": "xtensa",
         "qemu": true
     },
 
@@ -341,7 +351,8 @@
     //},
     //{
     //    "type": "crosstool",
-    //    "target": "arcbe-unknown-linux-gnu"
+    //    "target": "arcbe-unknown-linux-gnu",
+    //    "family": "arc"
     //},
     {
         "type": "crosstool",
@@ -351,12 +362,14 @@
     {
         "type": "crosstool",
         "target": "arcbe-unknown-elf",
-        "triple": "arceb-unknown-elf"
+        "triple": "arceb-unknown-elf",
+        "family": "arc"
     },
     {
         "type": "crosstool",
         "target": "arcbe-unknown-linux-uclibc",
-        "triple": "arceb-unknown-linux-uclibc"
+        "triple": "arceb-unknown-linux-uclibc",
+        "family": "arc"
     },
     {
         "type": "crosstool",
@@ -389,24 +402,28 @@
         "type": "crosstool",
         "target": "arm64eb-unknown-elf",
         "triple": "aarch64_be-unknown-elf",
+        "family": "aarch64",
         "optional_flags": "--specs=nosys.specs"
     },
     {
         "type": "crosstool",
         "target": "arm64eb-unknown-linux-gnu",
         "triple": "aarch64_be-unknown-linux-gnu",
+        "family": "aarch64",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "arm64eb-unknown-linux-musl",
         "triple": "aarch64_be-unknown-linux-musl",
+        "family": "aarch64",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "arm64eb-unknown-linux-uclibc",
         "triple": "aarch64_be-unknown-linux-uclibc",
+        "family": "aarch64",
         "qemu": true
     },
     {
@@ -422,21 +439,25 @@
     {
         "type": "crosstool",
         "target": "armeb-unknown-elf",
-        "triple": "armeb-unknown-eabi"
+        "triple": "armeb-unknown-eabi",
+        "family": "arm"
     },
     {
         "type": "crosstool",
         "target": "armeb-unknown-linux-gnueabi",
+        "family": "arm",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "armeb-unknown-linux-musleabi",
+        "family": "arm",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "armeb-unknown-linux-uclibceabi",
+        "family": "arm",
         "qemu": true
     },
     // FAILS IN COMPILATION:
@@ -452,6 +473,7 @@
     //        "armv6-setjmp-make"
     //    ],
     //    "processor": "armeb",
+    //    "family": "arm",
     //    "flags": "-march=armv6",
     //    "qemu": true
     //},
@@ -459,6 +481,7 @@
     //    "type": "crosstool",
     //    "target": "armebv6-unknown-linux-musleabi",
     //    "processor": "armeb",
+    //    "family": "arm",
     //    "flags": "-march=armv6",
     //    "qemu": true
     //},
@@ -466,6 +489,7 @@
     //    "type": "crosstool",
     //    "target": "armebv6-unknown-linux-uclibceabi",
     //    "processor": "armeb",
+    //    "family": "arm",
     //    "flags": "-march=armv6",
     //    "qemu": true
     //},
@@ -502,7 +526,8 @@
     },
     {
         "type": "crosstool",
-        "target": "i386-unknown-elf"
+        "target": "i386-unknown-elf",
+        "family": "x86"
     },
     {
         "type": "crosstool",
@@ -510,17 +535,20 @@
         "triple": "x86_64-w64-mingw32",
         "config": "x86_64-w64-mingw32",
         "flags": "-m32",
-        "processor": "i386"
+        "processor": "i386",
+        "family": "x86"
     },
     {
         "type": "crosstool",
         "target": "i486-unknown-elf",
-        "processor": "i386"
+        "processor": "i386",
+        "family": "x86"
     },
     {
         "type": "crosstool",
         "target": "i586-unknown-elf",
-        "processor": "i386"
+        "processor": "i386",
+        "family": "x86"
     },
     {
         "type": "crosstool",
@@ -529,12 +557,14 @@
         "config": "x86_64-multilib-linux-musl",
         "flags": "-m32",
         "processor": "i386",
+        "family": "x86",
         "qemu": true
     },
     {
         "type": "crosstool",
         "target": "i686-unknown-elf",
-        "processor": "i386"
+        "processor": "i386",
+        "family": "x86"
     },
     // FAILS WITH:
     //      fatal error: pthread.h: No such file or directory
@@ -542,6 +572,7 @@
     //    "type": "crosstool",
     //    "target": "i686-unknown-linux-uclibc",
     //    "processor": "i386",
+    //    "family": "x86",
     //    "qemu": true
     //},
     {
@@ -556,6 +587,7 @@
     {
         "type": "crosstool",
         "target": "microblazeel-xilinx-linux-gnu",
+        "family": "microblaze",
         "qemu": true
     },
     // FAILS DURING COMPILING DUE TO:
@@ -568,7 +600,8 @@
     //},
     //{
     //    "type": "crosstool",
-    //    "target": "microblazeel-xilinx-elf"
+    //    "target": "microblazeel-xilinx-elf",
+    //    "family": "microblaze"
     //},
     // NOTE:
     //      For some reason, libc isn't automatically linked in.
@@ -593,12 +626,14 @@
     //    "type": "crosstool",
     //    "target": "mips64el-unknown-n64",
     //    "triple": "mips64el-unknown-elf",
+    //    "family": "mips64",
     //    "flags": "-lc"
     //},
     {
         "type": "crosstool",
         "target": "mipsel-unknown-o32",
         "triple": "mipsel-unknown-elf",
+        "family": "mips",
         "flags": "-lc"
     },
     // FAILS DURING CONFIGURING GCC PASS 2 DUE TO:
@@ -611,7 +646,8 @@
     //{
     //    "type": "crosstool",
     //    "target": "mips64el-unknown-n32",
-    //    "triple": "mips64el-unknown-elf"
+    //    "triple": "mips64el-unknown-elf",
+    //    "family": "mips64"
     //},
     {
         "type": "crosstool",
@@ -644,7 +680,7 @@
     //{
     //    "type": "crosstool",
     //    "target": "moxieeb-none-moxiebox",
-    //    "target": "moxie-none-moxiebox"
+    //    "triple": "moxie-none-moxiebox"
     //},
     {
         "type": "crosstool",
@@ -688,7 +724,8 @@
         "type": "crosstool",
         "target": "ppcle-unknown-elf",
         "triple": "powerpcle-unknown-elf",
-        "processor": "ppcle"
+        "processor": "ppcle",
+        "family": "ppc"
     },
     // GCC DOES NOT SUPPORT PPC64 AND PPC64LE WITH ELF:
     //      Configuration powerpc64-unknown-elf not supported
@@ -698,7 +735,8 @@
     //},
     //{
     //    "type": "crosstool",
-    //    "target": "ppc64le-unknown-elf"
+    //    "target": "ppc64le-unknown-elf",
+    //    "family": "ppc64"
     //},
     // FAILS DURING COMPILING DUE TO:
     //      undefined reference to `__init'
@@ -713,7 +751,8 @@
     //    "type": "crosstool",
     //    "target": "ppcle-unknown-eabi",
     //    "triple": "powerpcle-unknown-elf",
-    //    "processor": "ppcle"
+    //    "processor": "ppcle",
+    //    "family": "ppc"
     //},
     // BINUTILS DOES NOT SUPPORT PPC64 AND PPC64LE WITH EABI:
     //      BFD does not support target powerpc64-unknown-eabi.
@@ -725,7 +764,8 @@
     //{
     //    "type": "crosstool",
     //    "target": "ppc64le-unknown-eabi",
-    //    "triple": "ppc64le-unknown-elf"
+    //    "triple": "ppc64le-unknown-elf",
+    //    "family": "ppc64"
     //},
     // GCC DOES NOT SUPPORT SPEELF:
     //      Configuration powerpc-unknown-elfspe not supported
@@ -739,7 +779,8 @@
     //    "type": "crosstool",
     //    "target": "ppcle-unknown-spe",
     //    "triple": "powerpcle-unknown-elf",
-    //    "processor": "ppcle"
+    //    "processor": "ppcle",
+    //    "family": "ppc"
     //},
     //{
     //    "type": "crosstool",
@@ -749,19 +790,22 @@
     //{
     //    "type": "crosstool",
     //    "target": "ppc64le-unknown-spe",
-    //    "triple": "ppc64le-unknown-elf"
+    //    "triple": "ppc64le-unknown-elf",
+    //    "family": "ppc64"
     //},
     {
         "type": "crosstool",
         "target": "ppcle-unknown-linux-gnu",
         "triple": "powerpcle-unknown-linux-gnu",
-        "processor": "ppcle"
+        "processor": "ppcle",
+        "family": "ppc"
     },
     {
         "type": "crosstool",
         "target": "ppcle-unknown-linux-musl",
         "triple": "powerpcle-unknown-linux-musl",
-        "processor": "ppcle"
+        "processor": "ppcle",
+        "family": "ppc"
     },
     // FAILS DURING LIBC BUILD PASS 2:
     //      compiled for a little endian system and target is big endian
@@ -769,7 +813,8 @@
     //    "type": "crosstool",
     //    "target": "ppcle-unknown-linux-uclibc",
     //    "triple": "powerpcle-unknown-linux-uclibc",
-    //    "processor": "ppcle"
+    //    "processor": "ppcle",
+    //    "family": "ppc"
     //},
     // FAILS DURING LIBC BUILD PASS 1:
     //      error: unsupported powerpc64 ABI for MUSL
@@ -801,6 +846,7 @@
     //    "target": "ppc64le-unknown-linux-musl",
     //    "triple": "powerpc64le-unknown-linux-musl",
     //    "processor": "ppc64le",
+    //    "family": "ppc64",
     //    "qemu": true
     //},
     // FAILS DURING LIBC BUILD PASS 2:
@@ -811,6 +857,7 @@
     //    "target": "ppc64le-unknown-linux-uclibc",
     //    "triple": "powerpc64le-unknown-linux-uclibc",
     //    "processor": "ppc64le",
+    //    "family": "ppc64",
     //    "qemu": true
     //},
     // FAILS WITH CUSTOM BUILD OF STOCK GCC:
@@ -843,7 +890,8 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m1",
-        "processor": "sh1"
+        "processor": "sh1",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -851,7 +899,8 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m2",
-        "processor": "sh2"
+        "processor": "sh2",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -859,7 +908,8 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m2e",
-        "processor": "sh2e"
+        "processor": "sh2e",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -867,16 +917,19 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m3",
-        "processor": "sh3"
+        "processor": "sh3",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
-        "target": "sh3-unknown-linux-gnu"
+        "target": "sh3-unknown-linux-gnu",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
         "target": "sh3be-unknown-linux-gnu",
-        "triple": "sh3eb-unknown-linux-gnu"
+        "triple": "sh3eb-unknown-linux-gnu",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -884,13 +937,15 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m3e",
-        "processor": "sh3e"
+        "processor": "sh3e",
+        "family": "sh4"
     },
     // # FAILS DUE TO:
     //      undefined reference to `__fpscr_values`.
     //{
     //    "type": "crosstool",
-    //    "target": "sh3e-unknown-linux-gnu"
+    //    "target": "sh3e-unknown-linux-gnu",
+    //    "family": "sh4"
     //},
     {
         "type": "crosstool",
@@ -898,7 +953,8 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m4-100",
-        "processor": "sh4-100"
+        "processor": "sh4-100",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -906,7 +962,8 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m4-200",
-        "processor": "sh4-200"
+        "processor": "sh4-200",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -914,7 +971,8 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m4-300",
-        "processor": "sh4-300"
+        "processor": "sh4-300",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -922,7 +980,8 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m4-340",
-        "processor": "sh4-340"
+        "processor": "sh4-340",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -930,7 +989,8 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m4-500",
-        "processor": "sh4-500"
+        "processor": "sh4-500",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
@@ -946,12 +1006,14 @@
         "triple": "sh-unknown-elf",
         "config": "sh-unknown-elf",
         "flags": "-m4a",
-        "processor": "sh4a"
+        "processor": "sh4a",
+        "family": "sh4"
     },
     {
         "type": "crosstool",
         "target": "sh4be-unknown-linux-gnu",
         "triple": "sh4eb-unknown-linux-gnu",
+        "family": "sh4",
         "cc_cpulist": "run",
         "run_cpulist": "keep-first",
         "qemu": true
@@ -964,7 +1026,8 @@
     //    "triple": "shbe-unknown-elf",
     //    "config": "shbe-unknown-elf",
     //    "flags": "-m*be*",
-    //    "processor": "sh*be*"
+    //    "processor": "sh*be*",
+    //    "family": "sh4"
     //},
     // NOTE:
     //      For some reason, libc isn't automatically linked in.
@@ -1009,7 +1072,8 @@
         "target": "thumbeb-unknown-elf",
         "triple": "armeb-unknown-eabi",
         "config": "armeb-unknown-elf",
-        "flags": "-mthumb"
+        "flags": "-mthumb",
+        "family": "arm"
     },
     {
         "type": "crosstool",
@@ -1017,6 +1081,7 @@
         "triple": "armeb-unknown-linux-gnueabi",
         "config": "armeb-unknown-linux-gnueabi",
         "flags": "-mthumb",
+        "family": "arm",
         "qemu": true
     },
     {
@@ -1048,7 +1113,8 @@
     //    "type": "crosstool",
     //    "target": "xtensabe-unknown-elf",
     //    "triple": "xtensa-unknown-elf",
-    //    "processor": "xtensaeb"
+    //    "processor": "xtensaeb",
+    //    "family": "xtensa"
     //},
     // FAILS IN LIBC BUILD PASS 2:
     //      little endian output does not match Xtensa configuration
@@ -1067,6 +1133,7 @@
     //    "target": "xtensabe-unknown-linux-uclibc",
     //    "triple": "xtensa-unknown-linux-uclibc",
     //    "processor": "xtensaeb",
+    //    "family": "xtensa",
     //    "qemu": true
     //},
 
@@ -1105,7 +1172,8 @@
         "cxx": "g++-{version}-i686-linux-gnu",
         "libc": "libc6-i386-cross",
         "prefix": "i686",
-        "processor": "i386"
+        "processor": "i386",
+        "family": "x86"
     },
     {
         "type": "debian",
@@ -1123,7 +1191,8 @@
     {
         "type": "debian",
         "target": "mips64el-unknown-linux-gnu",
-        "system": "gnuabi64"
+        "system": "gnuabi64",
+        "family": "mips64"
     },
     {
         "type": "debian",
@@ -1139,11 +1208,13 @@
         "cxx": "g++-{version}-mipsisa64r6el-linux-gnuabi64",
         "prefix": "mipsisa64r6el",
         "processor": "mips64el",
+        "family": "mips64",
         "system": "gnuabi64"
     },
     {
         "type": "debian",
-        "target": "mipsel-unknown-linux-gnu"
+        "target": "mipsel-unknown-linux-gnu",
+        "family": "mips"
     },
     {
         "type": "debian",
@@ -1157,7 +1228,8 @@
         "target": "mipsr6el-unknown-linux-gnu",
         "cxx": "g++-{version}-mipsisa32r6el-linux-gnu",
         "prefix": "mipsisa32r6el",
-        "processor": "mipsel"
+        "processor": "mipsel",
+        "family": "mips"
     },
     {
         "type": "debian",
@@ -1178,7 +1250,8 @@
         "target": "ppc64le-unknown-linux-gnu",
         "cxx": "g++-{version}-powerpc64le-linux-gnu",
         "libc": "libc6-ppc64el-cross",
-        "prefix": "powerpc64le"
+        "prefix": "powerpc64le",
+        "family": "ppc64"
     },
     {
         "type": "debian",
@@ -1230,6 +1303,7 @@
         "target": "i386-unknown-linux-musl",
         "config": "i386-linux-musl",
         "processor": "i386",
+        "family": "x86",
         "qemu": true
     },
     {
@@ -1237,6 +1311,7 @@
         "target": "i486-unknown-linux-musl",
         "config": "i486-linux-musl",
         "processor": "i386",
+        "family": "x86",
         "qemu": true
     },
     {
@@ -1244,6 +1319,7 @@
         "target": "i586-unknown-linux-musl",
         "config": "i586-linux-musl",
         "processor": "i386",
+        "family": "x86",
         "qemu": true
     },
     {
@@ -1258,6 +1334,7 @@
         "target": "microblazeel-unknown-linux-musl",
         "config": "microblazeel-linux-musl",
         "processor": "microblazeel",
+        "family": "microblaze",
         "qemu": true
     },
     {
@@ -1272,6 +1349,7 @@
         "target": "mipsel-unknown-linux-musl",
         "config": "mipsel-linux-musl",
         "processor": "mipsel",
+        "family": "mips",
         "qemu": true
     },
     {
@@ -1279,6 +1357,7 @@
         "target": "mipsel-unknown-linux-muslsf",
         "config": "mipsel-linux-muslsf",
         "processor": "mipsel",
+        "family": "mips",
         "qemu": true
     },
     {
@@ -1312,19 +1391,22 @@
         "target": "mips64el-unknown-linux-musl",
         "config": "mips64el-linux-musl",
         "processor": "mips64el",
+        "family": "mips64",
         "qemu": true
     },
     {
         "type": "musl-cross",
         "target": "mips64el-unknown-linux-musln32",
         "config": "mips64el-linux-musln32",
-        "processor": "mipsel"
+        "processor": "mipsel",
+        "family": "mips"
     },
     {
         "type": "musl-cross",
         "target": "mips64el-unknown-linux-muslsf",
         "config": "mips64el-linux-muslsf",
         "processor": "mips64el",
+        "family": "mips",
         "qemu": true
     },
     {
@@ -1352,6 +1434,7 @@
         "target": "ppc64le-unknown-linux-musl",
         "config": "powerpc64le-linux-musl",
         "processor": "ppc64le",
+        "family": "ppc64",
         "qemu": true
     },
     {
@@ -1379,12 +1462,14 @@
     {
         "type": "musl-cross",
         "target": "sh2-unknown-linux-musl",
-        "config": "sh2-linux-musl"
+        "config": "sh2-linux-musl",
+        "family": "sh4"
     },
     {
         "type": "musl-cross",
         "target": "sh3-unknown-linux-musl",
-        "config": "sh3-linux-musl"
+        "config": "sh3-linux-musl",
+        "family": "sh4"
     },
     {
         "type": "musl-cross",
@@ -1399,19 +1484,22 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh1-unknown-linux-muslfdpic",
-    //    "config": "sh1-linux-muslfdpic"
+    //    "config": "sh1-linux-muslfdpic",
+    //    "family": "sh4"
     //},
     // FAILS DURING BUILDING LIBSTDC++:
     //      unwind-pe.h:270:18: error: '_Unwind_gnu_Find_got' was not declared in this scope
     //{
     //    "type": "musl-cross",
     //    "target": "sh2-unknown-linux-muslfdpic",
-    //    "config": "sh2-linux-muslfdpic"
+    //    "config": "sh2-linux-muslfdpic",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
     //    "target": "sh3-unknown-linux-muslfdpic",
-    //    "config": "sh3-linux-muslfdpic"
+    //    "config": "sh3-linux-muslfdpic",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
@@ -1426,19 +1514,22 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh1-unknown-linux-muslsf",
-    //    "config": "sh1-linux-muslsf"
+    //    "config": "sh1-linux-muslsf",
+    //    "family": "sh4"
     //},
     // FAILS DURING CONFIGURE-GCC:
     //      This target does not support --with-float.
     //{
     //    "type": "musl-cross",
     //    "target": "sh2-unknown-linux-muslsf",
-    //    "config": "sh2-linux-muslsf"
+    //    "config": "sh2-linux-muslsf",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
     //    "target": "sh3-unknown-linux-muslsf",
-    //    "config": "sh3-linux-muslsf"
+    //    "config": "sh3-linux-muslsf",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
@@ -1453,7 +1544,8 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh1-unknown-linux-muslfdpicsf",
-    //    "config": "sh1-linux-muslfdpicsf"
+    //    "config": "sh1-linux-muslfdpicsf",
+    //    "family": "sh4"
     //},
     // FAILS DURING CONFIGURE-GCC:
     //      This target does not support --with-float.
@@ -1461,12 +1553,14 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh2-unknown-linux-muslfdpicsf",
-    //    "config": "sh2-linux-muslfdpicsf"
+    //    "config": "sh2-linux-muslfdpicsf",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
     //    "target": "sh3-unknown-linux-muslfdpicsf",
-    //    "config": "sh3-linux-muslfdpicsf"
+    //    "config": "sh3-linux-muslfdpicsf",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
@@ -1481,22 +1575,26 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh1eb-unknown-linux-musl",
-    //    "config": "sh1eb-linux-musl"
+    //    "config": "sh1eb-linux-musl",
+    //    "family": "sh4"
     //},
     {
         "type": "musl-cross",
         "target": "sh2eb-unknown-linux-musl",
-        "config": "sh2eb-linux-musl"
+        "config": "sh2eb-linux-musl",
+        "family": "sh4"
     },
     {
         "type": "musl-cross",
         "target": "sh3eb-unknown-linux-musl",
-        "config": "sh3eb-linux-musl"
+        "config": "sh3eb-linux-musl",
+        "family": "sh4"
     },
     {
         "type": "musl-cross",
         "target": "sh4eb-unknown-linux-musl",
         "config": "sh4eb-linux-musl",
+        "family": "sh4",
         "cc_cpulist": "run",
         "run_cpulist": "keep-first",
         "qemu": true
@@ -1506,7 +1604,8 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh1eb-unknown-linux-muslfdpic",
-    //    "config": "sh1eb-linux-muslfdpic"
+    //    "config": "sh1eb-linux-muslfdpic",
+    //    "family": "sh4",
     //},
     // FAILS DURING BUILDING LIBSTDC++:
     //      unwind-pe.h:270:18: error: '_Unwind_gnu_Find_got' was not declared in this scope
@@ -1515,6 +1614,7 @@
     //    "type": "musl-cross",
     //    "target": "sh2eb-unknown-linux-muslfdpic",
     //    "config": "sh2eb-linux-muslfdpic",
+    //    "family": "sh4",
     //    "gcc_config": "--with-cpu=mj2"
     //},
     //{
@@ -1526,6 +1626,7 @@
     //    "type": "musl-cross",
     //    "target": "sh4eb-unknown-linux-muslfdpic",
     //    "config": "sh4eb-linux-muslfdpic",
+    //    "family": "sh4",
     //    "cc_cpulist": "run",
     //    "run_cpulist": "keep-first",
     //    "qemu": true
@@ -1535,24 +1636,28 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh1eb-unknown-linux-muslsf",
-    //    "config": "sh1eb-linux-muslsf"
+    //    "config": "sh1eb-linux-muslsf",
+    //    "family": "sh4"
     //},
     // FAILS DURING CONFIGURE-GCC:
     //      This target does not support --with-float.
     //{
     //    "type": "musl-cross",
     //    "target": "sh2eb-unknown-linux-muslsf",
-    //    "config": "sh2eb-linux-muslsf"
+    //    "config": "sh2eb-linux-muslsf",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
     //    "target": "sh3eb-unknown-linux-muslsf",
-    //    "config": "sh3eb-linux-muslsf"
+    //    "config": "sh3eb-linux-muslsf",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
     //    "target": "sh4eb-unknown-linux-muslsf",
     //    "config": "sh4eb-linux-muslsf",
+    //    "family": "sh4",
     //    "cc_cpulist": "run",
     //    "run_cpulist": "keep-first",
     //    "qemu": true
@@ -1562,7 +1667,8 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh1eb-unknown-linux-muslfdpicsf",
-    //    "config": "sh1eb-linux-muslfdpicsf"
+    //    "config": "sh1eb-linux-muslfdpicsf",
+    //    "family": "sh4"
     //},
     // FAILS DURING CONFIGURE-GCC:
     //      This target does not support --with-float.
@@ -1570,17 +1676,20 @@
     //{
     //    "type": "musl-cross",
     //    "target": "sh2eb-unknown-linux-muslfdpicsf",
-    //    "config": "sh2eb-linux-muslfdpicsf"
+    //    "config": "sh2eb-linux-muslfdpicsf",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
     //    "target": "sh3eb-unknown-linux-muslfdpicsf",
-    //    "config": "sh3eb-linux-muslfdpicsf"
+    //    "config": "sh3eb-linux-muslfdpicsf",
+    //    "family": "sh4"
     //},
     //{
     //    "type": "musl-cross",
     //    "target": "sh4eb-unknown-linux-muslfdpicsf",
     //    "config": "sh4eb-linux-muslfdpicsf",
+    //    "family": "sh4",
     //    "cc_cpulist": "run",
     //    "run_cpulist": "keep-first",
     //    "qemu": true
@@ -1614,6 +1723,7 @@
         "type": "riscv",
         "target": "riscv32-multilib-linux-gnu",
         "triple": "riscv64-unknown-linux-gnu",
+        "family": "riscv32",
         "qemu": true,
         "extensions": "imac",
         "cc_cpulist": "run",
@@ -1623,6 +1733,7 @@
         "type": "riscv",
         "target": "riscv32-unknown-elf",
         "triple": "riscv64-unknown-elf",
+        "family": "riscv32",
         "qemu": false,
         "extensions": "imac",
         "abi": "ilp32"
@@ -1651,11 +1762,16 @@
         "os": "script",
         "system": "javascript",
         "target": "wasm",
+        "family": "wasm64",
+        // TODO(ahuszagh) Should probably add more things...
         "dockerfile": {
             "base": "emscripten",
             "toolchain": "wasm-toolchain",
             "wrapper": "wasm-wrapper",
             "spec": null
+        },
+        "package_dockerfile": {
+            "system": "Emscripten"
         }
     }
 ]
