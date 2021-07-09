@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# Install the conan package management system.
+
+# Check required environment variables.
+if [ "$TRIPLE" = "" ]; then
+    echo 'Must set the target triple via `$TRIPLE`, quitting.'
+    exit 1
+fi
+if [ "$COMPILER" = "" ]; then
+    echo 'Must set the compiler type via `$COMPILER`, quitting.'
+    exit 1
+fi
+if [ "$COMPILER_VERSION" = "" ]; then
+    echo 'Must set the compiler version via `$COMPILER_VERSION`, quitting.'
+    exit 1
+fi
+
+apt-get update
+apt-get install --assume-yes --no-install-recommends \
+    python3 \
+    python3-pip
+pip install conan
+
+# Need to create a default profile.
+# Don't set the target arch, for reasons.
+# Use mips for everything, since it doesn't add compiler flags.
+mkdir -p /home/^USERNAME^/.conan/profiles
+echo "[settings]
+os=$OS
+arch=mips
+build_type=Release
+compiler=$COMPILER
+compiler.version=$COMPILER_VERSION" > /home/^USERNAME^/.conan/profiles/default
+
+# Create an alias for the conan profile.
+echo '#!/bin/bash
+# Wrapper script for conan to install to a local, toolchain-specific.
+# We force a build, and ensure we install the dependencies
+# locally.
+
+conan=^CONAN^
+export CONAN_USER_HOME="$PWD"/.xcross-'"$TRIPLE"'-conan
+mkdir -p "$CONAN_USER_HOME"/.conan/profiles
+cp /home/^USERNAME^/.conan/profiles/default "$CONAN_USER_HOME"/.conan/profiles/default
+"$conan" "$@" --build' > ^BIN^/conan
+chmod +x ^BIN^/conan

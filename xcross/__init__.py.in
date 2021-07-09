@@ -77,19 +77,25 @@ parser.add_argument(
     '--username',
     help='''The username for the container image.
 This may also be supplied via the environment variable `CROSS_USERNAME`.
-Ex: `--username=ahuszagh`''',
+Ex: `--username=^USERNAME^`''',
 )
 parser.add_argument(
     '--repository',
     help='''The repository for the container image.
 This may also be supplied via the environment variable `CROSS_REPOSITORY`.
-Ex: `--repository=cross`''',
+Ex: `--repository=^REPOSITORY^`''',
 )
 parser.add_argument(
     '--image-version',
     help='''The version of the target image.
 This may also be supplied via the environment variable `CROSS_VERSION`.
 Ex: `--image-version=0.1`''',
+)
+parser.add_argument(
+    '--with-package-managers',
+    help='''Use container images with pre-installed Conan and vcpkg.
+This may also be supplied via the environment variable `CROSS_WITH_PACKAGE_MANAGERS`.''',
+    action='store_true'
 )
 parser.add_argument(
     '--engine',
@@ -156,11 +162,20 @@ def get_parent_dir(args):
     directory = args.dir or get_current_dir().root
     return pathlib.PurePath(os.path.realpath(directory))
 
+def is_relative_to(directory, parent):
+    '''Implement `Pathlib.is_relative_to` before 3.9.'''
+
+    try:
+        directory.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
 def validate_username(username):
     return re.match('^[A-Za-z0-9_-]*$', username)
 
 def validate_repository(repository):
-    return re.match('^[A-Za-z0-9_-]+$', repository)
+    return re.match('^[A-Za-z0-9_-]*$', repository)
 
 def validate_target(target):
     return re.match('^[A-Za-z0-9._-]+$', target)
@@ -168,10 +183,11 @@ def validate_target(target):
 def get_image(args):
     '''Format the image parameters to a string.'''
 
-    target = args.target
+    image = args.target
     if args.image_version:
-        target = f'{target}-{args.image_version}'
-    image = f'{args.repository}:{target}'
+        image = f'{image}-{args.image_version}'
+    if args.repository:
+        image = f'{args.repository}:{image}'
     if args.username:
         image = f'{args.username}/{image}'
     if args.server:
@@ -192,11 +208,8 @@ def escape_single_quote(string):
     escaped = string.replace("'", "'\\''")
     return f"'{escaped}'"
 
-def normpath(args):
-    '''Normalize our arguments for paths on Windows.'''
-
-    if os.name != 'nt':
-        return
+def _normpath(parent_dir, current_dir, command):
+    '''normpath without the platform check, expose for testing.'''
 
     # We want to be very... lenient here.
     # Backslash characters are **generally** not valid
@@ -206,19 +219,24 @@ def normpath(args):
     #   1. The path exists
     #   2. The path contains backslashes (IE, isn't a simple command).
     #   3. The path is relative to the parent dir shared to Docker.
-    parent_dir = get_parent_dir(args)
-    current_dir = get_current_dir()
-    for index in range(len(args.command)):
-        value = args.command[index]
+    for index in range(len(command)):
+        value = command[index]
         if '\\' in value and os.path.exists(value):
             path = pathlib.PureWindowsPath(os.path.realpath(value))
-            if path.is_relative_to(parent_dir):
+            if is_relative_to(path, parent_dir):
                 relative = os.path.relpath(path, start=current_dir)
                 posix = pathlib.PurePath(relative).as_posix()
                 # Quote the path, to avoid valid paths with variable
                 # substitution from occurring. `${a}bc` is a valid path
                 # on Windows, believe it or not.
-                args.command[index] = escape_single_quote(posix)
+                command[index] = escape_single_quote(posix)
+
+def normpath(args):
+    '''Normalize our arguments for paths on Windows.'''
+
+    if os.name != 'nt':
+        return
+    _normpath(get_parent_dir(args), get_current_dir(), args.command)
 
 def format_command(args):
     '''Format a list of commands normalized to be executed in the shell.'''
@@ -314,25 +332,34 @@ def engine_type(args):
 def validate_arguments(args):
     '''Validate the parsed arguments.'''
 
+    # These two helpers differ only in semantics: the firs
+    # will override any falsey value, while the second will
+    # only provide the value if it is not present.
+    def set_env_if_not(attr, envvar, default=None, cast=None):
+        fallback = os.environ.get(envvar, default)
+        if cast is not None:
+            fallback = cast(fallback)
+        if not getattr(args, attr):
+            setattr(args, attr, fallback)
+
+    def set_env_if_none(attr, envvar, default=None, cast=None):
+        fallback = os.environ.get(envvar, default)
+        if cast is not None:
+            fallback = cast(fallback)
+        if getattr(args, attr) is None:
+            setattr(args, attr, fallback)
+
     # Normalize our arguments.
-    args.target = args.target or os.environ.get('CROSS_TARGET')
-    args.dir = args.dir or get_current_dir().root
-    args.cpu = args.cpu or os.environ.get('CROSS_DIR')
-    args.cpu = args.cpu or os.environ.get('CROSS_CPU')
-    if args.server is None:
-        args.server = os.environ.get('CROSS_SERVER')
-    if args.server is None:
-        args.server = 'docker.io'
-    if args.username is None:
-        args.username = os.environ.get('CROSS_USERNAME')
-    if args.username is None:
-        args.username = 'ahuszagh'
-    args.repository = args.repository or os.environ.get('CROSS_REPOSITORY')
-    args.repository = args.repository or 'cross'
-    args.non_interactive = args.non_interactive or bool(os.environ.get('CROSS_NONINTERACTIVE', False))
-    args.update_image = args.update_image or bool(os.environ.get('CROSS_UPDATE_IMAGE', False))
-    args.quiet = args.quiet or bool(os.environ.get('CROSS_QUIET', False))
-    args.remove_image = args.remove_image or bool(os.environ.get('CROSS_REMOVE_IMAGE', False))
+    set_env_if_not('target', 'CROSS_TARGET')
+    set_env_if_not('dir', 'CROSS_DIR', get_current_dir().root)
+    set_env_if_not('cpu', 'CROSS_CPU')
+    set_env_if_not('with_package_managers', 'CROSS_WITH_PACKAGE_MANAGERS', False, bool)
+    set_env_if_not('non_interactive', 'CROSS_NONINTERACTIVE', False, bool)
+    set_env_if_not('update_image', 'CROSS_UPDATE_IMAGE', False, bool)
+    set_env_if_not('quiet', 'CROSS_QUIET', False, bool)
+    set_env_if_not('remove_image', 'CROSS_REMOVE_IMAGE', False, bool)
+    set_env_if_none('server', 'CROSS_SERVER', 'docker.io')
+    set_env_if_none('username', 'CROSS_USERNAME', 'ahuszagh')
     args.subprocess_devnull = {}
     if not args.verbose:
         args.subprocess_devnull['stdin'] = subprocess.DEVNULL
@@ -340,6 +367,10 @@ def validate_arguments(args):
         args.subprocess_devnull['stderr'] = subprocess.DEVNULL
 
     # Find dependent arguments.
+    default_repo = '^REPOSITORY^'
+    if arhs.with_package_managers:
+        default_repo = f'pkg{default_repo}'
+    set_env_if_none('repository', 'CROSS_REPOSITORY', default_repo)
     args.engine = args.engine or os.environ.get('CROSS_ENGINE')
     args.engine = args.engine or find_container_engine(args)
     args.engine_type = engine_type(args)
@@ -353,6 +384,10 @@ def validate_arguments(args):
         error('Must provide a valid Docker Hub username')
     if args.repository is None or not validate_repository(args.repository):
         error('Must provide a valid Docker Hub repository')
+    if args.repository and not args.username:
+        error('Must provide a username with a repository.')
+    if args.username and not args.server:
+        error('Must provide a username with a custom server.')
 
 def docker_command(args, parent_dir, relpath):
     '''Create the docker command to invoke.'''
@@ -372,7 +407,9 @@ def docker_command(args, parent_dir, relpath):
     # for the command, to ensure we avoid any malicious
     # escapes. This allows us to have internal `'` characters
     # in our commands, without actually providing a dangerous escape.
-    command = [args.engine, 'run', '--tty', '--name', args.image_name]
+    command = [args.engine, 'run', '--name', args.image_name]
+    if sys.stdin.isatty():
+        command.append('--tty')
     if not args.non_interactive:
         command.append('--interactive')
     for var in env:
@@ -421,7 +458,9 @@ def pull_image(args):
     if args.quiet:
         kwds = { 'stderr': devnull, 'stdout': devnull }
     code = subprocess.call([args.engine, 'pull', image], **kwds)
-    if code != 0:
+    if code != 0 and args.with_package_managers:
+        error('Unable to pull image: maybe try without enabling package managers?', code, show_help=False)
+    elif code != 0:
         error('Unable to pull image', code, show_help=False)
 
 def remove_stopped_container(args):
@@ -457,7 +496,7 @@ def main(argv=None):
     current_dir = get_current_dir()
     if not os.path.isdir(parent_dir):
         error('`dir` is not a directory')
-    if not current_dir.is_relative_to(parent_dir):
+    if not is_relative_to(current_dir, parent_dir):
         error('`dir` must be a parent of the current working directory')
     relpath = current_dir.relative_to(parent_dir).as_posix()
 

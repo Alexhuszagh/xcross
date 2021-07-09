@@ -13,6 +13,12 @@ Each Docker image comes pre-installed with:
 - CMake
 - Ninja
 
+In addition, each xcross provides [images]((https://hub.docker.com/r/ahuszagh/pkgcross)) pre-installed with popular C/C++ package managers and addition build tools:
+
+- Conan
+- vcpkg
+- Meson
+
 Note that this project is similar to [dockcross](https://github.com/dockcross/dockcross), however, xcross supports many more CPU architectures than dockcross. If you need Docker images of common architectures, dockcross should have better support.
 
 **Table of Contents**
@@ -359,6 +365,16 @@ xcross --image-version=0.1 ...
 CROSS_VERSION=cross xcross ...
 ```
 
+- `--with-package-managers`, `CROSS_WITH_PACKAGE_MANAGERS`: Use images pre-installed with package managers.
+
+By default, xcross uses minimal images, with a basic set of build tools and utilities. If `--with-package-managers` is provided, then xcross will instead use images with Conan and vcpkg pre-installed, at the cost of larger image sizes.
+
+```bash
+# These are all identical.
+xcross --with-package-managers ...
+CROSS_WITH_PACKAGE_MANAGERS=1 xcross ...
+```
+
 - `--engine`, `CROSS_ENGINE`: The command for the container engine executable.
 
 If not provided or empty, this searches for `docker` then `podman`.
@@ -371,7 +387,7 @@ CROSS_ENGINE=docker xcross ...
 
 - `--non-interactive`, `CROSS_NONINTERACTIVE`: Disable interactive shells.
 
-This defaults to using interactive shells if not `--non-interactive` is not provided and if `CROSS_NONINTERACTIVE` does not exist, or is set to an empty string.
+This defaults to using interactive shells if `--non-interactive` is not provided and if `CROSS_NONINTERACTIVE` does not exist, or is set to an empty string.
 
 ```bash
 # These are all identical.

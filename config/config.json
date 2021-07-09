@@ -27,8 +27,8 @@
         "version": {
             "major": "0",
             "minor": "1",
-            "patch": "5",
-            "build": "2021-06-26"
+            "patch": "6",
+            "build": "2021-07-09"
         }
     },
     // Version for Docker images.

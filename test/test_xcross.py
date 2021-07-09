@@ -44,6 +44,11 @@ def run_image_command(argv, expected):
     assert actual[1].startswith('cd /src')
     assert actual[2] == expected
 
+def run_image(args, exit_code=0):
+    with pytest.raises(SystemExit) as exit_error:
+        xcross.main(['--target', 'alpha-unknown-linux-gnu'] + args)
+    assert exit_error.value.code == exit_code
+
 def test_get_image():
     run_get_image(['--target', 'alpha-unknown-linux-gnu'], 'docker.io/ahuszagh/cross:alpha-unknown-linux-gnu')
     run_get_image([
@@ -114,3 +119,8 @@ def test_validate_arguments():
 
 def test_run_image_command():
     run_image_command(['make', '-j', '5'], 'make -j 5')
+
+def test_run_image():
+    run_image(['echo', 'helloworld'])
+    run_image(['c++', '--version'])
+    run_image(['cl'], exit_code=127)

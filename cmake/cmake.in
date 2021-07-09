@@ -27,6 +27,7 @@
 # Check to see if our first argument is a configure command.
 # If it is, add a default toolchain file.
 cmake=^CMAKE^
+source /env/find
 
 # Convert the arguments to an array, and add our toolchain file if
 # we are configuring.
@@ -55,18 +56,22 @@ if [ "${#arguments[@]}" -ne 0 ]; then
 
             # Don't provide a toolchain file if it's already provided.
             has_toolchain="$is_script"
-            if [ "$has_toolchain" = no ]; then
-                for argument in "${arguments[@]}"; do
-                    if [[ "$argument" = "-DCMAKE_TOOLCHAIN_FILE="* ]]; then
-                        has_toolchain=yes
-                        break
-                    fi
-                done
+            if [ "$is_script" = no ] && ! find -DCMAKE_TOOLCHAIN_FILE "${arguments[@]}"; then
+                has_toolchain=yes
             fi
 
             # Add our toolchain if required.
+            # We search first for vcpkg, if not, fallback to our default path.
             if [ "$has_toolchain" = no ]; then
-                arguments+=("-DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake")
+                vcpkg_toolchain=^SYSROOT^/vcpkg/scripts/buildsystems/vcpkg.cmake
+                if [ -f "$vcpkg_toolchain" ]; then
+                    arguments+=(
+                        "-DCMAKE_TOOLCHAIN_FILE=$vcpkg_toolchain"
+                        "-DVCPKG_TARGET_TRIPLET=$(cat /env/triplet)-xcross"
+                    )
+                else
+                    arguments+=("-DCMAKE_TOOLCHAIN_FILE=/toolchains/toolchain.cmake")
+                fi
             fi
             ;;
     esac

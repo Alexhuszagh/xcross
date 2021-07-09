@@ -36,11 +36,14 @@ import sys
 
 try:
     from setuptools import setup, Command
+    from setuptools.command.build_py import build_py
+    from setuptools.command.install import install
     has_setuptools = True
 except ImportError:
     from distutils.core import setup, Command
+    from distutils.command.build_py import build_py
+    from distutils.command.install import install
     has_setuptools = False
-from distutils.command.build_py import build_py
 try:
     import py2exe
 except ImportError:
@@ -190,11 +193,13 @@ def semver():
 
     return versions
 
-def image_from_target(target):
+def image_from_target(target, with_package_managers=False):
     '''Get the full image name from the target.'''
 
     username = config['metadata']['username']
     repository = config['metadata']['repository']
+    if with_package_managers:
+        repository = f'pkg{repository}'
     return f'{username}/{repository}:{target}'
 
 def sorted_image_targets():
@@ -216,11 +221,11 @@ def subslice_targets(start=None, stop=None):
         targets = targets[:targets.index(stop)+1]
     return targets
 
-def build_image(docker, target):
+def build_image(docker, target, with_package_managers=False):
     '''Call Docker to build a single target.'''
 
     return subprocess.call([
-        docker, 'build', '-t', image_from_target(target),
+        docker, 'build', '-t', image_from_target(target, with_package_managers),
         HOME, '--file', f'{HOME}/docker/images/Dockerfile.{target}'
     ])
 
@@ -268,6 +273,7 @@ class CleanCommand(Command):
         self.run_command('clean_dist')
         shutil.rmtree(f'{HOME}/cmake/toolchain', ignore_errors=True)
         shutil.rmtree(f'{HOME}/docker/images', ignore_errors=True)
+        shutil.rmtree(f'{HOME}/docker/pkgimages', ignore_errors=True)
         shutil.rmtree(f'{HOME}/musl/config', ignore_errors=True)
         shutil.rmtree(f'{HOME}/symlink/toolchain', ignore_errors=True)
 
@@ -328,6 +334,8 @@ class VersionCommand(Command):
         xcross = f'{HOME}/xcross/__init__.py'
         self.configure(f'{xcross}.in', xcross, True, [
             ('BIN', f'"{bin_directory}"'),
+            ('REPOSITORY', config['metadata']['repository']),
+            ('USERNAME', config['metadata']['username']),
             ('VERSION_MAJOR', f"'{major}'"),
             ('VERSION_MINOR', f"'{minor}'"),
             ('VERSION_PATCH', f"'{patch}'"),
@@ -501,11 +509,20 @@ class BuildAllCommand(BuildImagesCommand):
         self.run_command('bdist_wheel')
 
 class BuildCommand(build_py):
-    '''Override build.py to configure builds.'''
+    '''Override build command to configure builds.'''
 
     def run(self):
         self.run_command('version')
         build_py.run(self)
+
+class InstallCommand(install):
+    '''Override install command to configure builds.'''
+
+    def run(self):
+        # Note: this should already be run, and this is redundant.
+        # However, if `skip_build` is provided, this needs to be run.
+        self.run_command('version')
+        install.run(self)
 
 class PushCommand(Command):
     '''Push all Docker images to Docker hub.'''
@@ -831,6 +848,10 @@ class OperatingSystem(enum.Enum):
         '''Get the identifier for the CMake operating system name.'''
         return cmake_string[self]
 
+    def to_vcpkg(self):
+        '''Get the identifier for the vcpkg system name.'''
+        return vcpkg_string[self]
+
     @staticmethod
     def from_triple(string):
         '''Get the operating system from a triple string.'''
@@ -848,6 +869,12 @@ cmake_string = {
     OperatingSystem.Script: 'Script',
     OperatingSystem.Linux: 'Linux',
     OperatingSystem.Windows: 'Windows',
+}
+vcpkg_string = {
+    **cmake_string,
+    # Uses MinGW for to differentiate between legacy Windows apps, the
+    # Universal Windows Platform. Since we only support MinGW, use it.
+    OperatingSystem.Windows: 'MinGW',
 }
 triple_string = {
     OperatingSystem.Android: 'linux',
@@ -1019,12 +1046,28 @@ class Image:
         self._processor = value
 
     @property
+    def family(self):
+        return getattr(self, '_family', self.processor)
+
+    @family.setter
+    def family(self, value):
+        self._family = value
+
+    @property
     def qemu(self):
         return getattr(self, '_qemu', False)
 
     @qemu.setter
     def qemu(self, value):
         self._qemu = value
+
+    @property
+    def linkage(self):
+        return getattr(self, '_linkage', 'static')
+
+    @linkage.setter
+    def linkage(self, value):
+        self._linkage = value
 
 class AndroidImage(Image):
     '''Specialized properties for Android images.'''
@@ -1282,15 +1325,18 @@ class ConfigureCommand(VersionCommand):
         buildroot = f'{HOME}/docker/buildroot.sh'
         buildroot32 = f'{HOME}/docker/buildroot32.sh'
         cmake = f'{HOME}/docker/cmake.sh'
+        conan = f'{HOME}/docker/conan.sh'
         entrypoint = f'{HOME}/docker/entrypoint.sh'
         gcc = f'{HOME}/docker/gcc.sh'
         gcc_patch = f'{HOME}/docker/gcc-patch.sh'
+        meson = f'{HOME}/docker/meson.sh'
         musl = f'{HOME}/docker/musl.sh'
         qemu = f'{HOME}/docker/qemu.sh'
         qemu_apt = f'{HOME}/docker/qemu-apt.sh'
         riscv_gcc = f'{HOME}/docker/riscv-gcc.sh'
         shortcut = f'{HOME}/symlink/shortcut.sh'
         target_features = f'{HOME}/spec/target_features.py'
+        vcpkg = f'{HOME}/docker/vcpkg.sh'
         self.configure(f'{android}.in', android, True, [
             ('CLANG_VERSION', config['android']['clang_version']),
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
@@ -1300,6 +1346,11 @@ class ConfigureCommand(VersionCommand):
         ])
         self.configure(f'{cmake}.in', cmake, True, [
             ('UBUNTU_NAME', config['ubuntu']['version']['name']),
+        ])
+        self.configure(f'{conan}.in', conan, True, [
+            ('BIN', f'"{bin_directory}"'),
+            ('CONAN', f"'/usr/local/bin/conan'"),
+            ('USERNAME', config["options"]["username"]),
         ])
         self.configure(f'{buildroot}.in', buildroot, True, [
             ('BUILDROOT_VERSION', buildroot_version),
@@ -1327,6 +1378,10 @@ class ConfigureCommand(VersionCommand):
             ('SLEEP', config["options"]["sleep"]),
             ('TIMEOUT', config["options"]["timeout"]),
             ('USERNAME', config["options"]["username"]),
+        ])
+        self.configure(f'{meson}.in', meson, True, [
+            ('BIN', f'"{bin_directory}"'),
+            ('MESON', f"'/usr/bin/meson'"),
         ])
         self.configure(f'{musl}.in', musl, True, [
             ('BINUTILS_VERSION', binutils_version),
@@ -1373,6 +1428,10 @@ class ConfigureCommand(VersionCommand):
         ])
         self.configure(f'{target_features}.in', target_features, True, [
             ('BIN', f'"{bin_directory}"'),
+        ])
+        self.configure(f'{vcpkg}.in', vcpkg, True, [
+            ('BIN', f'"{bin_directory}"'),
+            ('SYSROOT', f'"{config["options"]["sysroot"]}"'),
         ])
 
     def configure_ctng_config(self):
@@ -1525,6 +1584,11 @@ class ConfigureCommand(VersionCommand):
             with open(f'{HOME}/docker/Dockerfile.{spec}.in', 'r') as file:
                 contents.append(file.read())
 
+        # Remove the user password and add sudo.
+        # Allows users to install packages without rebuilding an image.
+        with open(f'{HOME}/docker/Dockerfile.root.in', 'r') as file:
+            contents.append(file.read())
+
         # Add the mandatory entrypoint.
         with open(f'{HOME}/docker/Dockerfile.entrypoint.in', 'r') as file:
             contents.append(file.read())
@@ -1549,6 +1613,34 @@ class ConfigureCommand(VersionCommand):
         outfile = f'{HOME}/docker/images/Dockerfile.{image.target}'
         contents = self.replace(contents, replacements)
         self.write_file(outfile, contents, False)
+
+    def configure_package_dockerfile(self, image, compiler=None, compiler_version=None):
+        '''Configure a Dockerfile with package managers enabled.'''
+
+        if compiler is None:
+            compiler = 'gcc'
+        if compiler_version is None:
+            compiler_version = gcc_major
+        template = f'{HOME}/docker/Dockerfile.package.in'
+        outfile = f'{HOME}/docker/pkgimages/Dockerfile.{image.target}'
+        self.configure(template, outfile, False, [
+            ('COMPILER', compiler),
+            ('COMPILER_VERSION', f'"{compiler_version}"'),
+            ('CPU_FAMILY', image.family),
+            ('LINKAGE', image.linkage),
+            ('PROCESSOR', image.processor),
+            ('REPOSITORY', config['metadata']['repository']),
+            ('SYSTEM', image.os.to_vcpkg()),
+            ('TARGET', image.target),
+            ('TRIPLE', image.triple),
+            ('USERNAME', config['metadata']['username']),
+        ])
+        # TODO(ahuszagh) Hmmm
+        # TODO(ahuszagh) Need:
+        #   CPU_FAMILY
+        #   COMPILER
+        #   COMPILER_VERSION
+        #import pdb; pdb.set_trace()
 
     def configure_cmake(self, image, template, replacements):
         '''Configure a CMake template.'''
@@ -1604,6 +1696,10 @@ class ConfigureCommand(VersionCommand):
             ('SDK_VERSION', config['android']['sdk_version']),
             ('TOOLCHAIN', image.toolchain),
         ])
+
+        # Build derived images with package managers enabled.
+        compiler_version = config['android']['clang_version']
+        self.configure_package_dockerfile(image, 'clang', compiler_version)
 
     def configure_buildroot(self, image):
         '''Configure a buildroot image.'''
@@ -1804,6 +1900,7 @@ class ConfigureCommand(VersionCommand):
         # Make the required subdirectories.
         os.makedirs(f'{HOME}/cmake/toolchain', exist_ok=True)
         os.makedirs(f'{HOME}/docker/images', exist_ok=True)
+        os.makedirs(f'{HOME}/docker/pkgimages', exist_ok=True)
         os.makedirs(f'{HOME}/musl/config', exist_ok=True)
         os.makedirs(f'{HOME}/symlink/toolchain', exist_ok=True)
 
@@ -1814,6 +1911,7 @@ class ConfigureCommand(VersionCommand):
         self.configure(f'{cmake}.in', cmake, True, [
             ('CMAKE', f"'/usr/bin/cmake'"),
             ('WRAPPER', ''),
+            ('SYSROOT', f'"{config["options"]["sysroot"]}"'),
         ])
         self.configure(make, emmake, True, [
             ('MAKE', f"'/usr/bin/make'"),
@@ -1906,6 +2004,7 @@ setuptools.setup(
         'clean': CleanCommand,
         'clean_dist': CleanDistCommand,
         'configure': ConfigureCommand,
+        'install': InstallCommand,
         'publish': PublishCommand,
         'push': PushCommand,
         'tag': TagCommand,

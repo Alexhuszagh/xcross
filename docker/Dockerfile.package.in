@@ -1,0 +1,10 @@
+# Build image with package managers pre-installed.
+FROM ^USERNAME^/^REPOSITORY^:^TARGET^
+
+COPY ["docker/conan.sh", "/"]
+COPY ["docker/meson.sh", "/"]
+COPY ["docker/vcpkg.sh", "/"]
+RUN COMPILER=^COMPILER^ COMPILER_VERSION=^COMPILER_VERSION^ TRIPLE=^TRIPLE^ /conan.sh
+RUN CPU_FAMILY=^CPU_FAMILY^ PROCESSOR=^PROCESSOR^ SYSTEM=^SYSTEM^ /meson.sh
+RUN LINKAGE=^LINKAGE^ PROCESSOR=^PROCESSOR^ SYSTEM=^SYSTEM^ TRIPLE=^TRIPLE^ /vcpkg.sh
+RUN rm /conan.sh /meson.sh /vcpkg.sh

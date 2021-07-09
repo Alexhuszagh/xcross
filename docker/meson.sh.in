@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Install the Meson build system.
+
+# Check required environment variables.
+if [ "$PROCESSOR" = "" ]; then
+    echo 'Must set the target processor via `$PROCESSOR`, quitting.'
+    exit 1
+fi
+if [ "$CPU_FAMILY" = "" ]; then
+    echo 'Must set the target CPU family via `$CPU_FAMILY`, quitting.'
+    exit 1
+fi
+if [ "$SYSTEM" = "" ]; then
+    echo 'Must set the target operating system via `$SYSTEM`, quitting.'
+    exit 1
+fi
+
+apt-get update
+apt-get install --assume-yes --no-install-recommends meson
+
+# Detect a few target features.
+endian=$(target-specs | jq -r '."target-endian"')
+
+# Need to create a cross file, for the meson build system.
+echo "[host_machine]
+system = 'linux'
+cpu_family = 'x86'
+cpu = 'x86_64'
+endian = 'little'
+
+[build_machine]
+system = '$SYSTEM'
+cpu_family = '$CPU_FAMILY'
+cpu = '$PROCESSOR'
+endian = '$endian'
+
+[properties]
+needs_exe_wrapper = true
+
+[binaries]
+exe_wrapper = 'run'
+c = ['ccache', 'gcc']
+cpp = ['ccache', 'g++']
+ar = 'ar'
+strip = 'strip'
+" > /toolchains/cross.meson
+
+if [ -f ^BIN^/run ]; then
+    echo "exe_wrapper = 'run'" >> /toolchains/cross.meson
+fi
+
+# Create a wrapper for the Meson too to automatically inject
+# the cross-compiler toolchain.
+echo '#!/bin/bash
+# Wrapper script for Meson to automatically add a cross-compile toolchain.
+
+meson=^MESON^
+arguments=("$@")
+if ! find --cross-file "${arguments[@]}"; then
+    arguments+=(--cross-file /toolchains/cross.meson)
+fi
+
+# Call our command.
+if [ "$VERBOSE" != "" ]; then
+    echo "$meson" "${arguments[@]}"
+fi
+"$meson" "${arguments[@]}"
+' > ^BIN^/meson
+chmod +x ^BIN^/meson
