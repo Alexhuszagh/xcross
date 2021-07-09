@@ -25,7 +25,7 @@ apt-get install --assume-yes --no-install-recommends \
 pip install meson
 
 # Detect a few target features.
-endian=$(target-specs | jq -r '."target-endian"')
+endian=$(^BIN^/target-specs | jq -r '."target-endian"')
 
 # Need to create a cross file, for the meson build system.
 echo "[host_machine]
