@@ -19,6 +19,7 @@ cmake/cmake
 cmake/toolchain/
 ct-ng/patch.sh
 docker/android.sh
+docker/bash.bashrc
 docker/buildroot.sh
 docker/buildroot32.sh
 docker/cmake.sh

@@ -1361,6 +1361,7 @@ class ConfigureCommand(VersionCommand):
         '''Configure the build scripts.'''
 
         android = f'{HOME}/docker/android.sh'
+        bashrc = f'{HOME}/docker/bash.bashrc'
         buildroot = f'{HOME}/docker/buildroot.sh'
         buildroot32 = f'{HOME}/docker/buildroot32.sh'
         cmake = f'{HOME}/docker/cmake.sh'
@@ -1382,6 +1383,9 @@ class ConfigureCommand(VersionCommand):
             ('NDK_VERSION', config['android']['ndk_version']),
             ('PREFIXES', create_array([i.prefix for i in android_images])),
             ('TOOLCHAINS', create_array([i.toolchain for i in android_images]))
+        ])
+        self.configure(f'{bashrc}.in', bashrc, False, [
+            ('BIN', f'"{bin_directory}"'),
         ])
         self.configure(f'{cmake}.in', cmake, True, [
             ('UBUNTU_NAME', config['ubuntu']['version']['name']),

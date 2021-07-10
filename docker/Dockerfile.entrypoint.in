@@ -1,4 +1,8 @@
-# Ensure we source our environment files when entering the container.
+# Ensure we add a command to add warnings and add the path to the global profile.
+# Need to add it for both login and non-login shells.
 COPY ["docker/entrypoint.sh", ^BIN^]
 ENTRYPOINT [^ENTRYPOINT^]
 ENV PATH=^BIN^:"${PATH}"
+COPY ["docker/bash.bashrc", "/"]
+RUN cat "/bash.bashrc" >> /etc/bash.bashrc
+RUN rm /bash.bashrc

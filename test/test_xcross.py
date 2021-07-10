@@ -40,7 +40,7 @@ def run_format_command(argv, expected):
 def run_image_command(argv, expected):
     args = xcross.process_args(argv)
     actual = xcross.image_command(args, '.').splitlines()
-    assert actual[0].startswith('export PATH=')
+    assert actual[0].startswith('source /etc/profile')
     assert actual[1].startswith('cd /src')
     assert actual[2] == expected
 

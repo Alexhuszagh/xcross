@@ -1,0 +1,5 @@
+if [[ "$PATH" =~ (^|:)^BIN^(:|$) ]]; then
+    :
+else
+    PATH=^BIN^:"${PATH}"
+fi

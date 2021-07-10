@@ -290,12 +290,10 @@ def format_command(args):
 def image_command(args, relpath):
     '''Create the image command from the argument list.'''
 
-    # Need to change to the proper directory, then export
-    # any useful environment variables, etc. We first
-    # inject the binary dir to the path, then add
-    # any CPU model, if we're using it, and then
-    # go to the CWD and work from there.
-    command = ['export PATH=^BIN^:"$PATH"']
+    # We need to simulate a login shell, if it isn't provided.
+    # This allows the commands to work for both login and non-login
+    # commands, such as `su -c "echo $PATH"`.
+    command = ['source /etc/profile']
     if args.cpu:
         command.append(f'export CPU={escape_single_quote(args.cpu)}')
     command.append(f'cd /src/{escape_single_quote(relpath)}')

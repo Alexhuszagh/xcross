@@ -1,6 +1,11 @@
 # Build image with package managers pre-installed.
 FROM ^USERNAME^/^REPOSITORY^:^TARGET^
 
+# Change the path only for building images.
+# The ARG instruction doesn't override ENV, so set a temporary ARG
+# and then reset path later.
+ARG OLDPATH="${PATH}"
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 COPY ["docker/conan.sh", "/"]
 COPY ["docker/meson.sh", "/"]
 COPY ["docker/vcpkg.sh", "/"]
@@ -8,3 +13,6 @@ RUN COMPILER=^COMPILER^ COMPILER_VERSION=^COMPILER_VERSION^ SYSTEM=^CONAN_SYSTEM
 RUN CPU_FAMILY=^CPU_FAMILY^ PROCESSOR=^PROCESSOR^ SYSTEM=^MESON_SYSTEM^ /meson.sh
 RUN LINKAGE=^LINKAGE^ PROCESSOR=^PROCESSOR^ SYSTEM=^VCPKG_SYSTEM^ TRIPLE=^TRIPLE^ /vcpkg.sh
 RUN rm /conan.sh /meson.sh /vcpkg.sh
+
+# Reset the path
+ENV PATH="${OLDPATH}"
