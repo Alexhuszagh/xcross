@@ -1631,21 +1631,29 @@ class ConfigureCommand(VersionCommand):
         # Add the mandatory entrypoint.
         with open(f'{HOME}/docker/Dockerfile.entrypoint.in', 'r') as file:
             contents.append(file.read())
+
+        # Add image labels and metadata.
+        with open(f'{HOME}/docker/Dockerfile.metadata.in', 'r') as file:
+            contents.append(file.read())
         contents = '\n'.join(contents)
 
         # Add to the replacements all the shared values.
         if replacements is None:
             replacements = []
         replacements = replacements + [
+            ('AUTHORS', config['metadata']['authors']),
             ('EMSDK_VERSION', emsdk_version),
             ('BIN', f'"{bin_directory}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('FLAGS', f'"{image.flags}"'),
+            ('MAINTAINER', config['metadata']['maintainer']),
             ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
             ('OS', image.os.to_triple() or 'unknown'),
             ('TARGET', image.target),
             ('UBUNTU_VERSION', ubuntu_version),
+            ('URL', config['metadata']['url']),
             ('USERNAME', config['options']['username']),
+            ('VCS_URL', config['metadata']['vcs-url']),
         ]
 
         # Replace the contents and write the output to file.

@@ -123,6 +123,20 @@ This may also be supplied via the environment variable `CROSS_REMOVE_IMAGE`.''',
     action='store_true'
 )
 parser.add_argument(
+    '--detach',
+    help='''Run the container in detached mode.
+This allows multiple commands to be run prior to exiting.
+Note that the user is responsible for stopping the container,
+either via the `--stop` argument or via the container engine.
+This may also be supplied via the environment variable `CROSS_DETACH`.''',
+    action='store_true'
+)
+parser.add_argument(
+    '--stop',
+    help='''Stop an existing container. Stops a container started in `--detach` mode.''',
+    action='store_true'
+)
+parser.add_argument(
     '--quiet',
     help='''Silence any warnings when running the image.
 This may also be supplied via the environment variable `CROSS_QUIET`.''',
@@ -139,7 +153,8 @@ parser.add_argument(
     action='version',
     version=f'%(prog)s {__version__}',
 )
-base_script_name = '.__ahuszagh_xcross_uuid_'
+base_name = 'ahuszagh_xcross'
+base_script_name = '.__{base_name}'
 
 def error(message, code=126, show_help=True):
     '''Print message, help, and exit on error.'''
@@ -309,10 +324,9 @@ def engine_type(args):
 
     print_verbose('Finding container engine type...', args.verbose)
     try:
-        devnull = subprocess.DEVNULL
-        pipe = subprocess.PIPE
-        proc = subprocess.Popen([args.engine, '-v'], stdin=devnull, stdout=pipe, stderr=pipe)
-        stdout, stderr = proc.communicate()
+        with subprocess.Popen([args.engine, '-v'], **args.subprocess_pipe) as proc:
+            proc.wait()
+            stdout, stderr = proc.communicate()
         if stdout:
             print_verbose(stdout.decode("utf-8"), args.verbose)
         if stderr:
@@ -355,6 +369,7 @@ def validate_arguments(args):
     set_env_if_not('cpu', 'CROSS_CPU')
     set_env_if_not('with_package_managers', 'CROSS_WITH_PACKAGE_MANAGERS', False, bool)
     set_env_if_not('non_interactive', 'CROSS_NONINTERACTIVE', False, bool)
+    set_env_if_not('detach', 'CROSS_DETACH', False, bool)
     set_env_if_not('update_image', 'CROSS_UPDATE_IMAGE', False, bool)
     set_env_if_not('quiet', 'CROSS_QUIET', False, bool)
     set_env_if_not('remove_image', 'CROSS_REMOVE_IMAGE', False, bool)
@@ -365,6 +380,11 @@ def validate_arguments(args):
         args.subprocess_devnull['stdin'] = subprocess.DEVNULL
         args.subprocess_devnull['stdout'] = subprocess.DEVNULL
         args.subprocess_devnull['stderr'] = subprocess.DEVNULL
+    args.subprocess_pipe = {
+        'stdin': subprocess.DEVNULL,
+        'stdout': subprocess.PIPE,
+        'stderr': subprocess.PIPE,
+    }
 
     # Find dependent arguments.
     default_repo = '^REPOSITORY^'
@@ -384,6 +404,72 @@ def validate_arguments(args):
         error('Must provide a valid Docker Hub username')
     if args.repository is None or not validate_repository(args.repository):
         error('Must provide a valid Docker Hub repository')
+    if args.detach and args.non_interactive and not sys.stdin.isatty():
+        error('Cannot start a detached container without a valid TTY or interactive mode.')
+    if args.detach and args.remove_image:
+        error('Cannot remove an image for a container started in detach mode.')
+    if args.stop and args.command:
+        error('Cannot stop a container and execute a command in the image.')
+
+    # Use a randomized name, to avoid any naming conflicts.
+    uuidhex = uuid.uuid4().hex
+    args.script_name = f'{base_script_name}_uuid_{uuidhex}'
+    if args.detach or args.stop:
+        # Want a consistent name for our image
+        image = re.sub(r"[/:]", '-', get_image(args))
+        args.image_name = f'{base_name}_{image}'
+    else:
+        # Want a randomized name to minimize accidentally
+        # multiple images running with the same name.
+        args.image_name = f'{base_name}_uuid_{uuidhex}'
+
+def detached_is_running(args):
+    '''Check if a detached container is running.'''
+
+    command = [
+        args.engine, 'container', 'inspect',
+        '-f', "'{{.State.Status}}'", args.image_name
+    ]
+    print_verbose(f'Finding if container {args.image_name} is already running...', args.verbose)
+    with subprocess.Popen(command, **args.subprocess_pipe) as proc:
+        if proc.wait() != 0:
+            return False
+        stdout, _ = proc.communicate()
+    # Status code can be `running` or `exited`, among others.
+    return b'running' in stdout.lower()
+
+def detached_start(args, parent_dir):
+    '''Start a detached container.'''
+
+    # Build our command.
+    command = [args.engine, 'run', '--name', args.image_name]
+    command.append('--detach')
+    if sys.stdin.isatty():
+        command.append('--tty')
+    if not args.non_interactive:
+        command.append('--interactive')
+    command += ['--volume', f'{parent_dir}:/src']
+    command.append(get_image(args))
+    command += ['bash']
+
+    # Start the command.
+    print_verbose('Starting container in detached mode...', args.verbose)
+    subprocess.check_call(command, shell=False, **args.subprocess_devnull)
+
+def detached_stop(args):
+    '''Stop a detached container.'''
+
+    subprocess.check_call(
+        [args.engine, 'stop', args.image_name],
+        shell=False,
+        **args.subprocess_devnull
+    )
+    subprocess.check_call(
+        [args.engine, 'rm', args.image_name],
+        shell=False,
+        **args.subprocess_devnull
+    )
+    sys.exit(0)
 
 def docker_command(args, parent_dir, relpath):
     '''Create the docker command to invoke.'''
@@ -403,7 +489,11 @@ def docker_command(args, parent_dir, relpath):
     # for the command, to ensure we avoid any malicious
     # escapes. This allows us to have internal `'` characters
     # in our commands, without actually providing a dangerous escape.
-    command = [args.engine, 'run', '--name', args.image_name]
+    command = [args.engine]
+    if args.detach:
+        command.append('exec')
+    else:
+        command += ['run', '--name', args.image_name]
     if sys.stdin.isatty():
         command.append('--tty')
     if not args.non_interactive:
@@ -417,8 +507,11 @@ def docker_command(args, parent_dir, relpath):
     if args.engine_type == 'docker' and os.name == 'posix':
         euid = os.geteuid()
         command += ['--user', f'{euid}:{euid}']
-    command += ['--volume', f'{parent_dir}:/src']
-    command.append(get_image(args))
+    if args.detach:
+        command.append(args.image_name)
+    else:
+        command += ['--volume', f'{parent_dir}:/src']
+        command.append(get_image(args))
 
     # Now need to add the remaining arguments, the passed command over.
     script = f'/src/{relpath}/{args.script_name}'
@@ -431,14 +524,11 @@ def process_args(argv=None):
 
     args, unknown = parser.parse_known_args(argv)
     args.command = unknown
-    args.script_name = f'{base_script_name}{uuid.uuid4().hex}'
-    args.image_name = args.script_name[3:]
     return args
 
 def has_image(args):
     '''Check if a given image exists locally.'''
 
-    devnull = subprocess.DEVNULL
     image = get_image(args)
     print_verbose(f'Finding if image {image} exists locally...', args.verbose)
     code = subprocess.call([args.engine, 'image', 'inspect', image], **args.subprocess_devnull)
@@ -483,6 +573,10 @@ def main(argv=None):
     args = process_args(argv)
     validate_arguments(args)
 
+    # Stop the existing container and exit early if stop mode.
+    if args.stop:
+        detached_stop(args)
+
     # Update the image, if required.
     if args.update_image or not has_image(args):
         pull_image(args)
@@ -495,6 +589,11 @@ def main(argv=None):
     if not is_relative_to(current_dir, parent_dir):
         error('`dir` must be a parent of the current working directory')
     relpath = current_dir.relative_to(parent_dir).as_posix()
+
+    # Start our container if it's not running in detached mode.
+    if args.detach:
+        if not detached_is_running(args):
+            detached_start(args, parent_dir)
 
     # Try to write the command to a script,
     # Do not use `exists` or `isfile`, then open, since
@@ -529,7 +628,8 @@ def main(argv=None):
         print_verbose('Removing temporary files...', args.verbose)
         # Guarantee we cleanup the script afterwards.
         os.remove(args.script_name)
-        remove_stopped_container(args)
+        if not args.detach:
+            remove_stopped_container(args)
 
         # Update the image, if required.
         if args.remove_image:

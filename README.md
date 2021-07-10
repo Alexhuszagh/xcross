@@ -32,6 +32,7 @@ Note that this project is similar to [dockcross](https://github.com/dockcross/do
   - [Docker](#docker)
 - [Travis CI Example](#travis-ci-example)
 - [Sandboxing](#sandboxing)
+- [Package Managers](#package-managers)
 - [Using xcross](#using-xcross)
 - [Other Utilities](#other-utilities)
 - [Building/Running Dockerfiles](#building-running-dockerfiles)
@@ -209,6 +210,10 @@ script:
 # Sandboxing
 
 By default, xcross shares your root directory with the image, running with the same permissions as the current user. However, you can limit the shared directories with the `--dir` option, allowing you to limit the build system to only the project files. This is useful for compiling code with an untrusted build system, providing an extra layer of security relative to running it on the host computer.
+
+# Package Managers
+
+When using xcross with the `--with-package-managers` option, xcross will run images that come pre-installed with vcpkg and Conan. However, due to how Docker containers work, 
 
 # Using xcross
 

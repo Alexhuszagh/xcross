@@ -1,3 +1,4 @@
 # Ensure we source our environment files when entering the container.
 COPY ["docker/entrypoint.sh", ^BIN^]
 ENTRYPOINT [^ENTRYPOINT^]
+ENV PATH=^BIN^:"${PATH}"

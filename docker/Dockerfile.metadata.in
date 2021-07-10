@@ -1,0 +1,7 @@
+# Add metadata to the image.
+LABEL authors=^AUTHORS^
+LABEL maintainer=^MAINTAINER^
+LABEL org.label-schema.name=xcross 
+LABEL org.label-schema.description=Images container cross-compilers as part of the xcross project. 
+LABEL org.label-schema.url=^URL^
+LABEL org.label-schema.vcs-url=^VCS_URL^

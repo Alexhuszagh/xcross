@@ -20,7 +20,11 @@
     // Metadata associated with xcross.
     "metadata": {
         "username": "ahuszagh",
-        "repository": "cross"
+        "repository": "cross",
+        "authors": "ahuszagh@gmail.com",
+        "maintainer": "ahuszagh@gmail.com",
+        "url": "https://github.com/Alexhuszagh/xcross",
+        "vcs-url": "https://github.com/Alexhuszagh/xcross"
     },
     // Version for xcross.
     "xcross": {

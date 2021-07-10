@@ -124,3 +124,7 @@ def test_run_image():
     run_image(['echo', 'helloworld'])
     run_image(['c++', '--version'])
     run_image(['cl'], exit_code=127)
+    # Test detached mode
+    run_image(['--detach', 'echo', 'hellworld'])
+    run_image(['--detach', 'echo', 'next'])
+    run_image(['--stop'])

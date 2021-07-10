@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export PATH=^BIN^:"$PATH"
-
 # Issue a warning for a Qemu executable.
 warn_qemu() {
     if [ "$1" == "true" ]; then
@@ -44,7 +42,7 @@ if [ -f "$warnings" ] && [ "$QUIET" = "" ] && command -v jq --version >/dev/null
     fi
 fi
 
-source env/base
+source /env/base
 if [ $# -eq 0 ]; then
     exec bash
 else
