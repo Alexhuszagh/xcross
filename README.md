@@ -244,6 +244,8 @@ xcross --detach cmake --build .
 xcross --stop
 ```
 
+**Conan Issue:** Note that Conan with CMake must be used with conan_define_targets()` and `target_link_libraries(<TARGET> CONAN_PKG::<PKG-NAME>)`. With global defines, Conan fails to link the desired libraries. With target defines, it fails to find the include directories. Therefore, both must be used in conjunction.
+
 # Using xcross
 
 Most of the magic happens via xcross, which allows you to transparently execute commands in a Docker container. Although xcross provides simple, easy-to-use defaults, it has more configuration options for extensible cross-platform builds. Most of these command-line arguments may be provided as environment variables.

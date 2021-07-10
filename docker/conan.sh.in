@@ -37,7 +37,10 @@ if [ "$TRIPLE" = "wasm" ]; then
     #   4. If you try to then use the CMake build system,
     #       it then has a linker error being unable to find
     #       any installed libraries., such as:
-    #           `wasm-ld: error: unable to find library -lz`
+    #           `wasm-ld: error: unable to find library -lz`.
+    #
+    #   This last issue is solvable (it's due to Conan's `${CONAN_LIBS}`)
+    #   just provides a library name.
     #
     # Since vcpkg works out-of-the-box, this isn't really a big issue.
     exit 0
@@ -77,7 +80,7 @@ conan=^CONAN^
 source /env/find
 
 # Copy over our configuration settings.
-if [ "$DETACH" != "" ]; then
+if [ "$DETACHED" != "" ]; then
     # Not in detached mode, change the Conan home so it persists
     # after the image quits.
     export CONAN_USER_HOME="$PWD"/.xcross-'"$TRIPLE"'-conan

@@ -6,7 +6,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
     # Using conan
     include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
     conan_basic_setup()
-    target_link_libraries(zlibexec ${CONAN_LIBS})
+    conan_define_targets()
+    target_link_libraries(zlibexec CONAN_PKG::zlib)
 elseif(DEFINED VCPKG_VERBOSE)
     # Using vcpkg
     find_package(ZLIB REQUIRED)
