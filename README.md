@@ -227,7 +227,7 @@ An example of using xcross with vcpkg is:
 ```bash
 export CROSS_TARGET=alpha-unknown-linux-gnu
 export CROSS_WITH_PACKAGE_MANAGERS=1
-xcross --detach vcpkg install zlib
+xcross --detach vcpkg install
 xcross --detach cmake ..
 xcross --detach cmake --build .
 xcross --stop

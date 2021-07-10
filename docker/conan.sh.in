@@ -170,5 +170,5 @@ fi
 if [ "$VERBOSE" != "" ]; then
     echo "$conan" "${arguments[@]}"
 fi
-^WRAPPER^"$conan" "${arguments[@]}"' > ^BIN^/conan
+"$conan" "${arguments[@]}"' > ^BIN^/conan
 chmod +x ^BIN^/conan

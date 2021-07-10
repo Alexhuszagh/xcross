@@ -154,7 +154,7 @@ parser.add_argument(
     version=f'%(prog)s {__version__}',
 )
 base_name = 'ahuszagh_xcross'
-base_script_name = '.__{base_name}'
+base_script_name = f'.__{base_name}'
 
 def error(message, code=126, show_help=True):
     '''Print message, help, and exit on error.'''
