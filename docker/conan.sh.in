@@ -73,10 +73,17 @@ conan=^CONAN^
 source /env/find
 
 # Copy over our configuration settings.
-export CONAN_USER_HOME="$PWD"/.xcross-'"$TRIPLE"'-conan
-mkdir -p "$CONAN_USER_HOME"/.conan/profiles
-if [ ! -f "$CONAN_USER_HOME"/.conan/profiles/default ]; then
-    cp /home/^USERNAME^/.conan/profiles/default "$CONAN_USER_HOME"/.conan/profiles/default
+if [ "$DETACH" != "" ]; then
+    # Not in detached mode, change the Conan home so it persists
+    # after the image quits.
+    export CONAN_USER_HOME="$PWD"/.xcross-'"$TRIPLE"'-conan
+    mkdir -p "$CONAN_USER_HOME"/.conan/profiles
+    if [ ! -f "$CONAN_USER_HOME"/.conan/profiles/default ]; then
+        cp /home/^USERNAME^/.conan/profiles/default "$CONAN_USER_HOME"/.conan/profiles/default
+    fi
+else
+    # Can use an install relative to the user home.
+    export CONAN_USER_HOME=/home/^USERNAME^/.conan
 fi
 
 # Check if we need to add the `--build` argument.

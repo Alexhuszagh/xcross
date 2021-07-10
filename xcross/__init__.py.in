@@ -500,6 +500,8 @@ def docker_command(args, parent_dir, relpath):
         command += ['--env', var]
     if args.quiet:
         command += ['--env', 'QUIET=1']
+    if args.detach:
+        command += ['--env', 'DETACHED=1']
     # Docker by default uses root as the main user.
     # We therefore want to map to the current user.
     if args.engine_type == 'docker' and os.name == 'posix':

@@ -213,7 +213,34 @@ By default, xcross shares your root directory with the image, running with the s
 
 # Package Managers
 
-When using xcross with the `--with-package-managers` option, xcross will run images that come pre-installed with vcpkg and Conan. However, due to how Docker containers work, 
+When using xcross with the `--with-package-managers` option, xcross will run images that come pre-installed with vcpkg and Conan. 
+
+If run in detached mode (via `--detach`), no limitations exist. Otherwise, the following limitations exist:
+
+- `conan install` installs packages relative to the CWD if not run in detached mode. Changing the CWD will lead to missing dependencies.
+- `vcpkg install` only works with manifests, not with global installs.
+
+See [test/zlib](https://github.com/Alexhuszagh/xcross/tree/main/test/zlib) for an example project for the following code samples:
+
+An example of using xcross with vcpkg is:
+
+```bash
+export CROSS_TARGET=alpha-unknown-linux-gnu
+xcross --detach vcpkg install zlib
+xcross --detach cmake ..
+xcross --detach cmake --build .
+xcross --stop
+```
+
+An example of using xcross with conan is:
+
+```bash
+export CROSS_TARGET=alpha-unknown-linux-gnu
+xcross --detach  conan install ..
+xcross --detach cmake ..
+xcross --detach cmake --build .
+xcross --stop
+```
 
 # Using xcross
 
@@ -398,6 +425,22 @@ This defaults to using interactive shells if `--non-interactive` is not provided
 # These are all identical.
 xcross --non-interactive ...
 CROSS_NONINTERACTIVE=1 xcross ...
+```
+
+- `--detach`, `CROSS_DETACH`: Start an image in detached mode and run command in image.
+
+This allows multiple commands to be run without losing any non-local changes after command. After running all commands, you can stop the image via `--stop`.
+
+```bash
+# These are all identical.
+xcross --detach ...
+CROSS_DETACH=1 xcross ...
+```
+
+- `--stop`: Stop an image started in detached mode.
+
+```bash
+xcross --stop --target=alpha-unknown-linux-gnu
 ```
 
 - `--update-image`, `CROSS_UPDATE_IMAGE`: Update the container image before running.
