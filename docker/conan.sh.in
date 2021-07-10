@@ -83,7 +83,7 @@ if [ "$DETACH" != "" ]; then
     fi
 else
     # Can use an install relative to the user home.
-    export CONAN_USER_HOME=/home/^USERNAME^/.conan
+    export CONAN_USER_HOME=/home/^USERNAME^
 fi
 
 # Check if we need to add the `--build` argument.
