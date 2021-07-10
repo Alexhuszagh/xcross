@@ -4,3 +4,7 @@
 # The entire build process takes a long time,
 # so modifications can cause week-long rebuilds.
 FROM emscripten/emsdk:^EMSDK_VERSION^
+
+# Need to change the user permissions prior to adding any users.
+# This way, `^USERNAME^`, the new user, can have the correct permissions.
+RUN usermod -u 1005 emscripten

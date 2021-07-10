@@ -397,7 +397,7 @@ class BuildImageCommand(Command):
     description = 'build a single docker image'
     user_options = [
         ('target=', None, 'Target name'),
-        ('with_package_managers=', None, 'Build an image with package managers.'),
+        ('with-package-managers=', None, 'Build an image with package managers.'),
     ]
 
     def initialize_options(self):
