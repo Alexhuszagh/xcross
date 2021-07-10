@@ -66,6 +66,7 @@ release=$(curl "$url" --silent | jq -r '.zipball_url')
 wget "$release" -O vcpkg.zip
 mkdir -p ^SYSROOT^/vcpkg/
 unzip vcpkg.zip -d ^SYSROOT^/vcpkg/
+rm -f vcpkg.zip
 subdir=$(ls ^SYSROOT^/vcpkg)
 shopt -s dotglob
 mv ^SYSROOT^/vcpkg/"$subdir"/* ^SYSROOT^/vcpkg
