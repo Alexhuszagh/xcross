@@ -546,14 +546,16 @@ class PushCommand(Command):
     user_options = [
         ('start=', None, 'Start point for images to push.'),
         ('stop=', None, 'Stop point for images to push.'),
+        ('with-package-managers=', None, 'Build package manager images.'),
     ]
 
     def initialize_options(self):
         self.start = None
         self.stop = None
+        self.with_package_managers = None
 
     def finalize_options(self):
-        pass
+        self.with_package_managers = parse_literal(self.with_package_managers, None, (type(None), bool, int))
 
     def push_image(self, docker, target, with_package_managers=False):
         '''Push an image to Docker Hub.'''
@@ -586,6 +588,8 @@ class PushCommand(Command):
         # Push all our Docker images.
         for target in subslice_targets(self.start, self.stop):
             self.push_target(docker, target)
+            if not self.with_package_managers:
+                continue
             if os.path.exists(f'{HOME}/docker/pkgimages/Dockerfile.{target}'):
                 self.push_target(docker, target, with_package_managers=True)
 
