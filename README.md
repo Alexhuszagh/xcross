@@ -217,7 +217,7 @@ When using xcross with the `--with-package-managers` option, xcross will run ima
 
 If run in detached mode (via `--detach`), no limitations exist. Otherwise, the following limitations exist:
 
-- `conan install` installs packages relative to the CWD if not run in detached mode. Changing the CWD will lead to missing dependencies.
+- `conan install` installs packages relative to the CWD. Changing the CWD will lead to missing dependencies.
 - `vcpkg install` only works with manifests, not with global installs.
 
 See [test/zlib](https://github.com/Alexhuszagh/xcross/tree/main/test/zlib) for an example project for the following code samples:
@@ -226,6 +226,7 @@ An example of using xcross with vcpkg is:
 
 ```bash
 export CROSS_TARGET=alpha-unknown-linux-gnu
+export CROSS_WITH_PACKAGE_MANAGERS=1
 xcross --detach vcpkg install zlib
 xcross --detach cmake ..
 xcross --detach cmake --build .
@@ -236,7 +237,8 @@ An example of using xcross with conan is:
 
 ```bash
 export CROSS_TARGET=alpha-unknown-linux-gnu
-xcross --detach  conan install ..
+export CROSS_WITH_PACKAGE_MANAGERS=1
+xcross --detach conan install ..
 xcross --detach cmake ..
 xcross --detach cmake --build .
 xcross --stop
