@@ -430,14 +430,16 @@ class BuildImagesCommand(Command):
     user_options = [
         ('start=', None, 'Start point for images to build.'),
         ('stop=', None, 'Stop point for images to build.'),
+        ('with-package-managers=', None, 'Build package manager images.'),
     ]
 
     def initialize_options(self):
         self.start = None
         self.stop = None
+        self.with_package_managers = None
 
     def finalize_options(self):
-        pass
+        self.with_package_managers = parse_literal(self.with_package_managers, None, (type(None), bool, int))
 
     def build_image(self, docker, target, with_package_managers=False):
         '''Build a Docker image.'''
@@ -485,6 +487,8 @@ class BuildImagesCommand(Command):
             # Only build if the previous image succeeded, and if
             # the image with a package manager exists.
             if self.failures and self.failures[-1] == target:
+                continue
+            elif not self.with_package_managers:
                 continue
             if os.path.exists(f'{HOME}/docker/pkgimages/Dockerfile.{target}'):
                 self.build_versions(docker, target, with_package_managers=True)
