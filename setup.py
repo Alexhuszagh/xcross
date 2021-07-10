@@ -224,10 +224,12 @@ def subslice_targets(start=None, stop=None):
 def build_image(docker, target, with_package_managers=False):
     '''Call Docker to build a single target.'''
 
-    return subprocess.call([
-        docker, 'build', '-t', image_from_target(target, with_package_managers),
-        HOME, '--file', f'{HOME}/docker/images/Dockerfile.{target}'
-    ])
+    image = image_from_target(target, with_package_managers)
+    image_dir = 'images'
+    if with_package_managers:
+        image_dir = f'pkg{image_dir}'
+    path = f'{HOME}/docker/{image_dir}/Dockerfile.{target}'
+    return subprocess.call([docker, 'build', '-t', image, HOME, '--file', path])
 
 class CleanDistCommand(Command):
     '''A custom command to clean Python dist artifacts.'''
