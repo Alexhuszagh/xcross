@@ -61,6 +61,10 @@ arch=mips
 build_type=Release
 compiler=$COMPILER
 compiler.version=$COMPILER_VERSION" > /home/^USERNAME^/.conan/profiles/default
+if [[ $TRIPLE != *"android"* ]]; then
+    # Add the libcxx version for any non-android version.
+    echo "compiler.libcxx=libstdc++11" >> /home/^USERNAME^/.conan/profiles/default
+fi
 chown ^USERNAME^:^USERNAME^ /home/^USERNAME^/.conan/profiles/default
 
 # Create an alias for the conan profile.
