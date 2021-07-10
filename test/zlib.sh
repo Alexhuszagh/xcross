@@ -16,19 +16,19 @@ if which conan 2&> /dev/null; then
     conan install .. --build
     meson ..
     conan build ..
+    cd ..
 
     # Test CMake with Conan
-    cd ..
     rm -rf build
     mkdir -p build
     cd build
     conan install .. --build
     cmake ..
     cmake --build .
+    cd ..
 fi
 
 # Test CMake with vcpkg
-cd ..
 rm -rf build
 mkdir -p build
 cd build

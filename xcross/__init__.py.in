@@ -368,7 +368,7 @@ def validate_arguments(args):
 
     # Find dependent arguments.
     default_repo = '^REPOSITORY^'
-    if arhs.with_package_managers:
+    if args.with_package_managers:
         default_repo = f'pkg{default_repo}'
     set_env_if_none('repository', 'CROSS_REPOSITORY', default_repo)
     args.engine = args.engine or os.environ.get('CROSS_ENGINE')
@@ -384,10 +384,6 @@ def validate_arguments(args):
         error('Must provide a valid Docker Hub username')
     if args.repository is None or not validate_repository(args.repository):
         error('Must provide a valid Docker Hub repository')
-    if args.repository and not args.username:
-        error('Must provide a username with a repository.')
-    if args.username and not args.server:
-        error('Must provide a username with a custom server.')
 
 def docker_command(args, parent_dir, relpath):
     '''Create the docker command to invoke.'''
