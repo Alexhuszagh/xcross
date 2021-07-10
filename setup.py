@@ -395,18 +395,21 @@ class BuildImageCommand(Command):
     description = 'build a single docker image'
     user_options = [
         ('target=', None, 'Target name'),
+        ('with_package_managers=', None, 'Build an image with package managers.'),
     ]
 
     def initialize_options(self):
         self.target = None
+        self.with_package_managers = None
 
     def finalize_options(self):
         assert self.target is not None
+        self.with_package_managers = parse_literal(self.with_package_managers, None, (type(None), bool, int))
 
     def build_image(self, docker):
         '''Build a Docker image.'''
 
-        if build_image(docker, self.target) != 0:
+        if build_image(docker, self.target, self.with_package_managers) != 0:
             print(f'Error: failed to build target {self.target}', file=sys.stderr)
             sys.exit(1)
 
@@ -434,37 +437,37 @@ class BuildImagesCommand(Command):
     def finalize_options(self):
         pass
 
-    def build_image(self, docker, target):
+    def build_image(self, docker, target, with_package_managers=False):
         '''Build a Docker image.'''
 
-        if build_image(docker, target) != 0:
+        if build_image(docker, target, with_package_managers) != 0:
             self.failures.append(target)
             return False
         return True
 
-    def tag_image(self, docker, target, tag_name):
+    def tag_image(self, docker, target, tag_name, with_package_managers=False):
         '''Tag an image.'''
 
-        image = image_from_target(target)
-        tag = image_from_target(tag_name)
+        image = image_from_target(target, with_package_managers)
+        tag = image_from_target(tag_name, with_package_managers)
         check_call(subprocess.call([docker, 'tag', image, tag]))
 
-    def build_versions(self, docker, target):
+    def build_versions(self, docker, target, with_package_managers=False):
         '''Build all versions of a given target.'''
 
-        if not self.build_image(docker, target):
+        if not self.build_image(docker, target, with_package_managers):
             return
         for version in semver():
-            self.tag_image(docker, target, f'{target}-{version}')
+            self.tag_image(docker, target, f'{target}-{version}', with_package_managers)
         if target.endswith('-unknown-linux-gnu'):
             self.tag_versions(docker, target, target[:-len('-unknown-linux-gnu')])
 
-    def tag_versions(self, docker, target, tag_name):
+    def tag_versions(self, docker, target, tag_name, with_package_managers=False):
         '''Build all versions of a given target.'''
 
-        self.tag_image(docker, target, tag_name)
+        self.tag_image(docker, target, tag_name, with_package_managers)
         for version in semver():
-            self.tag_image(docker, target, f'{tag_name}-{version}')
+            self.tag_image(docker, target, f'{tag_name}-{version}', with_package_managers)
 
     def run(self):
         '''Build all Docker images.'''
@@ -473,10 +476,16 @@ class BuildImagesCommand(Command):
         if not docker:
             raise FileNotFoundError('Unable to find command docker.')
 
-        # Push all our Docker images.
+        # Build all our Docker images.
         self.failures = []
         for target in subslice_targets(self.start, self.stop):
             self.build_versions(docker, target)
+            # Only build if the previous image succeeded, and if
+            # the image with a package manager exists.
+            if self.failures and self.failures[-1] == target:
+                continue
+            if os.path.exists(f'{HOME}/docker/pkgimages/Dockerfile.{target}'):
+                self.build_versions(docker, target, with_package_managers=True)
 
         # Print any failures.
         if self.failures:
@@ -540,16 +549,26 @@ class PushCommand(Command):
     def finalize_options(self):
         pass
 
-    def push_image(self, docker, target):
+    def push_image(self, docker, target, with_package_managers=False):
         '''Push an image to Docker Hub.'''
-        check_call(subprocess.call([docker, 'push', image_from_target(target)]))
 
-    def push_versions(self, docker, target):
+        image = image_from_target(target, with_package_managers)
+        check_call(subprocess.call([docker, 'push', image]))
+
+    def push_versions(self, docker, target, with_package_managers=False):
         '''Push all versions of a given target.'''
 
-        self.push_image(docker, target)
+        self.push_image(docker, target, with_package_managers)
         for version in semver():
-            self.push_image(docker, f'{target}-{version}')
+            self.push_image(docker, f'{target}-{version}', with_package_managers)
+
+    def push_target(self, docker, target, with_package_managers=False):
+        '''Push all images for a given target.'''
+
+        self.push_versions(docker, target, with_package_managers)
+        if target.endswith('-unknown-linux-gnu'):
+            base = target[:-len('-unknown-linux-gnu')]
+            self.push_versions(docker, base, with_package_managers)
 
     def run(self):
         '''Push all Docker images to Docker hub.'''
@@ -560,9 +579,9 @@ class PushCommand(Command):
 
         # Push all our Docker images.
         for target in subslice_targets(self.start, self.stop):
-            self.push_versions(docker, target)
-            if target.endswith('-unknown-linux-gnu'):
-                self.push_versions(docker, target[:-len('-unknown-linux-gnu')])
+            self.push_target(docker, target)
+            if os.path.exists(f'{HOME}/docker/pkgimages/Dockerfile.{target}'):
+                self.push_target(docker, target, with_package_managers=True)
 
 class PublishCommand(Command):
     '''Publish a Python version.'''
@@ -1765,6 +1784,10 @@ class ConfigureCommand(VersionCommand):
             ('TRIPLE', image.triple),
         ])
 
+        # Build derived images with package managers enabled.
+        if image.os == OperatingSystem.Linux or image.os == OperatingSystem.Windows:
+            self.configure_package_dockerfile(image)
+
     def configure_crosstool(self, image):
         '''Configure a crosstool-NG image.'''
 
@@ -1807,6 +1830,10 @@ class ConfigureCommand(VersionCommand):
             ('TRIPLE', image.triple),
         ])
 
+        # Build derived images with package managers enabled.
+        if image.os == OperatingSystem.Linux or image.os == OperatingSystem.Windows:
+            self.configure_package_dockerfile(image)
+
     def configure_debian(self, image):
         '''Configure a debian-based docker file.'''
 
@@ -1841,6 +1868,9 @@ class ConfigureCommand(VersionCommand):
             ('SYSTEM', image.system),
         ])
 
+        # Build derived images with package managers enabled.
+        self.configure_package_dockerfile(image)
+
     def configure_musl(self, image):
         '''Configure a musl-cross-based image.'''
 
@@ -1870,6 +1900,9 @@ class ConfigureCommand(VersionCommand):
             ('ARCH', image.processor),
             ('TRIPLE', image.config),
         ])
+
+        # Build derived images with package managers enabled.
+        self.configure_package_dockerfile(image)
 
     def configure_riscv(self, image):
         '''Configure a RISC-V-based image.'''
@@ -1902,6 +1935,10 @@ class ConfigureCommand(VersionCommand):
             ('TRIPLE', image.triple),
         ])
 
+        # Build derived images with package managers enabled.
+        if image.os == OperatingSystem.Linux:
+            self.configure_package_dockerfile(image)
+
     def configure_other(self, image):
         '''Configure a miscellaneous image.'''
 
@@ -1922,9 +1959,9 @@ class ConfigureCommand(VersionCommand):
         symlink_template = f'{HOME}/symlink/{image.target}.sh.in'
         self.configure_symlinks(image, symlink_template, [])
 
-        ## Build derived images with package managers enabled.
-        #compiler_version = config['android']['clang_version']
-        #self.configure_package_dockerfile(image, 'clang', compiler_version)
+        # Build derived images with package managers enabled.
+        if hasattr(image, 'package_dockerfile'):
+            self.configure_package_dockerfile(image, **image.package_dockerfile)
 
     def run(self):
         '''Modify configuration files.'''
