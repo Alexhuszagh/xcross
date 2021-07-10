@@ -25,7 +25,12 @@ apt-get install --assume-yes --no-install-recommends \
 pip install meson
 
 # Detect a few target features.
-endian=$(^BIN^/target-specs | jq -r '."target-endian"')
+if [ -f ^BIN^/target-specs ]; then
+    endian=$(^BIN^/target-specs | jq -r '."target-endian"')
+else
+    # All scripting languages so far only support little-endian.
+    endian=little
+fi
 
 # Need to create a cross file, for the meson build system.
 echo "[build_machine]
@@ -50,8 +55,7 @@ ar = 'ar'
 strip = 'strip'
 pkgconfig = 'pkg-config'
 cmake = 'cmake'
-python = 'python3'
-" > /toolchains/cross.meson
+python = 'python3'" > /toolchains/cross.meson
 
 if [ -f ^BIN^/run ]; then
     echo "exe_wrapper = 'run'" >> /toolchains/cross.meson
@@ -65,15 +69,55 @@ echo '#!/bin/bash
 source /env/find
 meson=^MESON^
 arguments=("$@")
-if ! find --cross-file "${arguments[@]}"; then
-    arguments+=(--cross-file /toolchains/cross.meson)
+
+# Check if we need to add the `--cross-file` argument.
+if [ "${#arguments[@]}" -ne 0 ]; then
+    case "${arguments[0]}" in
+        configure)
+            ;;
+        dist)
+            ;;
+        install)
+            ;;
+        introspect)
+            ;;
+        init)
+            ;;
+        test)
+            ;;
+        wrap)
+            ;;
+        subprojects)
+            ;;
+        help)
+            ;;
+        rewrite)
+            ;;
+        compile)
+            ;;
+        devenv)
+            ;;
+        --help)
+            ;;
+        --version)
+            ;;
+        *)
+            # Commands that work include:
+            #   setup
+            #
+            # If no command is provided, defaults to setup.
+
+            if ! find --cross-file "${arguments[@]}"; then
+                arguments+=(--cross-file /toolchains/cross.meson)
+            fi
+            ;;
+    esac
 fi
 
 # Call our command.
 if [ "$VERBOSE" != "" ]; then
-    echo "$meson" "${arguments[@]}"
+    echo PKG_CONFIG_PATH="$PWD:$PKG_CONFIG_PATH" "$meson" "${arguments[@]}"
 fi
 # Update our pkg-config path, so it can find locally installed files.
-PKG_CONFIG_PATH="$PWD:$PKG_CONFIG_PATH" "$meson" "${arguments[@]}"
-' > ^BIN^/meson
+PKG_CONFIG_PATH="$PWD:$PKG_CONFIG_PATH" "$meson" "${arguments[@]}"' > ^BIN^/meson
 chmod +x ^BIN^/meson

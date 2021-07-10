@@ -20,6 +20,29 @@ if [ "$COMPILER_VERSION" = "" ]; then
     exit 1
 fi
 
+# Exit without error if the target doesn't support Conan well.
+if [ "$TRIPLE" = "wasm" ]; then
+    # There's numerous issues with wasm and Conan:
+    #   1. It assumes the toolchain versions is 13.0,
+    #       when it only supports up to 12.0. This requires
+    #       shipping a custom `settings.yml` file, which
+    #       is not fun
+    #   2. Can't easily change configuration settings via
+    #       `conan config set compiler.clang.version=ANY`.
+    #       This means distributing a `settings.yml` file.
+    #   3. Even if you do get the compiler version correct,
+    #       building with a Meson build system produces a warning
+    #       in wasm-ld, stating it's ignoring an unrecognized
+    #       option `-rpath`.
+    #   4. If you try to then use the CMake build system,
+    #       it then has a linker error being unable to find
+    #       any installed libraries., such as:
+    #           `wasm-ld: error: unable to find library -lz`
+    #
+    # Since vcpkg works out-of-the-box, this isn't really a big issue.
+    exit 0
+fi
+
 apt-get update
 apt-get install --assume-yes --no-install-recommends \
     pkg-config \
@@ -31,6 +54,7 @@ pip install conan
 # Don't set the target arch, for reasons.
 # Use mips for everything, since it doesn't add compiler flags.
 mkdir -p /home/^USERNAME^/.conan/profiles
+chown -R ^USERNAME^:^USERNAME^ /home/^USERNAME^/.conan
 echo "[settings]
 os=$SYSTEM
 arch=mips
@@ -46,8 +70,98 @@ echo '#!/bin/bash
 # locally.
 
 conan=^CONAN^
+source /env/find
+
+# Copy over our configuration settings.
 export CONAN_USER_HOME="$PWD"/.xcross-'"$TRIPLE"'-conan
 mkdir -p "$CONAN_USER_HOME"/.conan/profiles
-cp /home/^USERNAME^/.conan/profiles/default "$CONAN_USER_HOME"/.conan/profiles/default
-"$conan" "$@" --build' > ^BIN^/conan
+if [ ! -f "$CONAN_USER_HOME"/.conan/profiles/default ]; then
+    cp /home/^USERNAME^/.conan/profiles/default "$CONAN_USER_HOME"/.conan/profiles/default
+fi
+
+# Check if we need to add the `--build` argument.
+arguments=("$@")
+if [ "${#arguments[@]}" -ne 0 ]; then
+    case "${arguments[0]}" in
+        # Consumer commands
+        config)
+            ;;
+        get)
+            ;;
+        info)
+            # Note: info works with `--build`, but it changes the behavior
+            # in undesired ways.
+            ;;
+        search)
+            ;;
+        # Creator commands
+        new)
+            ;;
+        upload)
+            ;;
+        export)
+            ;;
+        export-pkg)
+            ;;
+        # Package development commands
+        source)
+            ;;
+        package)
+            ;;
+        editable)
+            ;;
+        workspace)
+            # Note: workspace works, but it has no effect.
+            ;;
+        # Misc commands
+        profile)
+            ;;
+        remote)
+            ;;
+        user)
+            ;;
+        imports)
+            ;;
+        copy)
+            ;;
+        remove)
+            # Note: remove works, but it has no effect.
+            ;;
+        alias)
+            ;;
+        download)
+            ;;
+        inspect)
+            ;;
+        help)
+            ;;
+        lock)
+            ;;
+        frogarian)
+            ;;
+        # Command Utilities
+        --help)
+            ;;
+        --version)
+            ;;
+        *)
+            # Commands that work include:
+            #   build
+            #   install
+            #   create
+            #   test
+
+            # Do not provide `--build` if it is already provided.
+            if ! find --build "${arguments[@]}"; then
+                arguments+=("--build")
+            fi
+            ;;
+    esac
+fi
+
+# Call our command.
+if [ "$VERBOSE" != "" ]; then
+    echo "$conan" "${arguments[@]}"
+fi
+^WRAPPER^"$conan" "${arguments[@]}"' > ^BIN^/conan
 chmod +x ^BIN^/conan

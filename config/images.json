@@ -1773,7 +1773,7 @@
             // Fake the compiler identification, since emcc
             // is similar to Clang anyway.
             "compiler": "clang",
-            "compiler_version": "11",
+            "compiler_version": "13",
             "conan_system": "Emscripten",
             "meson_system": "unknown",
             "vcpkg_system": "Emscripten"

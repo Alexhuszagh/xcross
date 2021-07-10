@@ -110,6 +110,9 @@ chown -R cross:cross ^SYSROOT^/vcpkg
 
 # Create an alias for vcpkg.
 echo '#!/bin/bash
+# Wrapper script for vcpkg to ensure we use the correct triplet.
+# Note that the triplet can always be provided: vcpkg does not care.
+
 ^SYSROOT^/vcpkg/vcpkg "$@" --triplet $(cat /env/triplet)-xcross' > ^BIN^/vcpkg
 chmod +x ^BIN^/vcpkg
 

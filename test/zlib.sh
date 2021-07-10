@@ -6,22 +6,26 @@ set -e
 
 cd /test/zlib
 
-# Test Meson with Conan
-rm -rf build
-mkdir -p build
-cd build
-conan install .. --build
-meson ..
-conan build ..
+# Only test conan if it's installed, which some build systems
+# have issues with.
+if which conan 2&> /dev/null; then
+    # Test Meson with Conan
+    rm -rf build
+    mkdir -p build
+    cd build
+    conan install .. --build
+    meson ..
+    conan build ..
 
-# Test CMake with Conan
-cd ..
-rm -rf build
-mkdir -p build
-cd build
-conan install .. --build
-cmake ..
-cmake --build .
+    # Test CMake with Conan
+    cd ..
+    rm -rf build
+    mkdir -p build
+    cd build
+    conan install .. --build
+    cmake ..
+    cmake --build .
+fi
 
 # Test CMake with vcpkg
 cd ..

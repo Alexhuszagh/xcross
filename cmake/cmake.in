@@ -35,7 +35,19 @@ arguments=("$@")
 if [ "${#arguments[@]}" -ne 0 ]; then
     # Check to see if the next argument is invalid.
     case "${arguments[0]}" in
-        --build | --install | --open | -E | --find-package | --help)
+        --build)
+            ;;
+        --install)
+            ;;
+        --open)
+            ;;
+        -E)
+            ;;
+        --find-package)
+            ;;
+        --help)
+            ;;
+        --version)
             ;;
         *)
             # Don't provide a toolchain file if we're using
