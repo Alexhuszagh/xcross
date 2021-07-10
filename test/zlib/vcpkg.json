@@ -1,0 +1,8 @@
+{
+  "name": "zlibexec",
+  "version-string": "0.1",
+  "description": "Example zlib test project.",
+  "dependencies": [
+    "zlib"
+  ]
+}

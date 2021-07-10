@@ -7,6 +7,10 @@ if [ "$TRIPLE" = "" ]; then
     echo 'Must set the target triple via `$TRIPLE`, quitting.'
     exit 1
 fi
+if [ "$SYSTEM" = "" ]; then
+    echo 'Must set the target operating system via `$SYSTEM`, quitting.'
+    exit 1
+fi
 if [ "$COMPILER" = "" ]; then
     echo 'Must set the compiler type via `$COMPILER`, quitting.'
     exit 1
@@ -28,11 +32,12 @@ pip install conan
 # Use mips for everything, since it doesn't add compiler flags.
 mkdir -p /home/^USERNAME^/.conan/profiles
 echo "[settings]
-os=$OS
+os=$SYSTEM
 arch=mips
 build_type=Release
 compiler=$COMPILER
 compiler.version=$COMPILER_VERSION" > /home/^USERNAME^/.conan/profiles/default
+chown ^USERNAME^:^USERNAME^ /home/^USERNAME^/.conan/profiles/default
 
 # Create an alias for the conan profile.
 echo '#!/bin/bash

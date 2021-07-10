@@ -840,13 +840,21 @@ class OperatingSystem(enum.Enum):
     def is_os(self):
         return not (self.is_baremetal() or self.is_script())
 
+    def to_cmake(self):
+        '''Get the identifier for the CMake system name.'''
+        return cmake_string[self]
+
+    def to_conan(self):
+        '''Get the identifier for the Conan system name.'''
+        return conan_string[self]
+
+    def to_meson(self):
+        '''Get the identifier for the Meson system name.'''
+        return meson_string[self]
+
     def to_triple(self):
         '''Get the identifier as a triple string.'''
         return triple_string[self]
-
-    def to_cmake(self):
-        '''Get the identifier for the CMake operating system name.'''
-        return cmake_string[self]
 
     def to_vcpkg(self):
         '''Get the identifier for the vcpkg system name.'''
@@ -857,11 +865,6 @@ class OperatingSystem(enum.Enum):
         '''Get the operating system from a triple string.'''
         return triple_os[string]
 
-    @staticmethod
-    def from_cmake(string):
-        '''Get the operating system from a CMake string.'''
-        return cmake_os[string]
-
 cmake_string = {
     OperatingSystem.Android: 'Android',
     OperatingSystem.BareMetal: 'Generic',
@@ -870,11 +873,21 @@ cmake_string = {
     OperatingSystem.Linux: 'Linux',
     OperatingSystem.Windows: 'Windows',
 }
-vcpkg_string = {
-    **cmake_string,
-    # Uses MinGW for to differentiate between legacy Windows apps, the
-    # Universal Windows Platform. Since we only support MinGW, use it.
-    OperatingSystem.Windows: 'MinGW',
+conan_string = {
+    # Conan uses CMake's feature detection for Android,
+    # which is famously broken. We have our custom toolchains
+    # to pass the proper build arguments. Just say Linux,
+    # and run with it.
+    OperatingSystem.Android: 'Linux',
+    OperatingSystem.Linux: 'Linux',
+    OperatingSystem.Windows: 'Windows',
+}
+meson_string = {
+    # The default use is just to use 'linux' for Android.
+    OperatingSystem.Android: 'linux',
+    OperatingSystem.BareMetal: 'unknown',
+    OperatingSystem.Linux: 'linux',
+    OperatingSystem.Windows: 'windows',
 }
 triple_string = {
     OperatingSystem.Android: 'linux',
@@ -883,12 +896,12 @@ triple_string = {
     OperatingSystem.Linux: 'linux',
     OperatingSystem.Windows: 'w64',
 }
-meson_string = {
-    **triple_string,
-    OperatingSystem.BareMetal: 'unknown',
-    OperatingSystem.Windows: 'windows',
+vcpkg_string = {
+    **cmake_string,
+    # Uses MinGW for to differentiate between legacy Windows apps, the
+    # Universal Windows Platform. Since we only support MinGW, use it.
+    OperatingSystem.Windows: 'MinGW',
 }
-cmake_os = {v: k for k, v in cmake_string.items()}
 triple_os = {v: k for k, v in triple_string.items()}
 
 oses = {
@@ -1386,7 +1399,7 @@ class ConfigureCommand(VersionCommand):
         ])
         self.configure(f'{meson}.in', meson, True, [
             ('BIN', f'"{bin_directory}"'),
-            ('MESON', f"'/usr/bin/meson'"),
+            ('MESON', f"'/usr/local/bin/meson'"),
         ])
         self.configure(f'{musl}.in', musl, True, [
             ('BINUTILS_VERSION', binutils_version),
@@ -1624,7 +1637,9 @@ class ConfigureCommand(VersionCommand):
         image,
         compiler=None,
         compiler_version=None,
-        system=None,
+        conan_system=None,
+        meson_system=None,
+        vcpkg_system=None,
     ):
         '''Configure a Dockerfile with package managers enabled.'''
 
@@ -1632,28 +1647,28 @@ class ConfigureCommand(VersionCommand):
             compiler = 'gcc'
         if compiler_version is None:
             compiler_version = gcc_major
-        if system is None:
-            system = image.os.to_vcpkg()
+        if conan_system is None:
+            conan_system = image.os.to_conan()
+        if meson_system is None:
+            meson_system = image.os.to_meson()
+        if vcpkg_system is None:
+            vcpkg_system = image.os.to_vcpkg()
         template = f'{HOME}/docker/Dockerfile.package.in'
         outfile = f'{HOME}/docker/pkgimages/Dockerfile.{image.target}'
         self.configure(template, outfile, False, [
             ('COMPILER', compiler),
             ('COMPILER_VERSION', f'"{compiler_version}"'),
+            ('CONAN_SYSTEM', conan_system),
             ('CPU_FAMILY', image.family),
             ('LINKAGE', image.linkage),
+            ('MESON_SYSTEM', meson_system),
             ('PROCESSOR', image.processor),
             ('REPOSITORY', config['metadata']['repository']),
-            ('SYSTEM', system),
+            ('VCPKG_SYSTEM', vcpkg_system),
             ('TARGET', image.target),
             ('TRIPLE', image.triple),
             ('USERNAME', config['metadata']['username']),
         ])
-        # TODO(ahuszagh) Hmmm
-        # TODO(ahuszagh) Need:
-        #   CPU_FAMILY
-        #   COMPILER
-        #   COMPILER_VERSION
-        #import pdb; pdb.set_trace()
 
     def configure_cmake(self, image, template, replacements):
         '''Configure a CMake template.'''
@@ -1711,8 +1726,10 @@ class ConfigureCommand(VersionCommand):
         ])
 
         # Build derived images with package managers enabled.
+        # Only want the major version, Conan fails othewise.
         compiler_version = config['android']['clang_version']
-        self.configure_package_dockerfile(image, 'clang', compiler_version)
+        major_version = re.match(r'^(\d+).*$', compiler_version).group(1)
+        self.configure_package_dockerfile(image, 'clang', major_version)
 
     def configure_buildroot(self, image):
         '''Configure a buildroot image.'''

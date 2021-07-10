@@ -28,13 +28,13 @@ pip install meson
 endian=$(^BIN^/target-specs | jq -r '."target-endian"')
 
 # Need to create a cross file, for the meson build system.
-echo "[host_machine]
+echo "[build_machine]
 system = 'linux'
 cpu_family = 'x86'
 cpu = 'x86_64'
 endian = 'little'
 
-[build_machine]
+[host_machine]
 system = '$SYSTEM'
 cpu_family = '$CPU_FAMILY'
 cpu = '$PROCESSOR'
@@ -44,10 +44,13 @@ endian = '$endian'
 needs_exe_wrapper = true
 
 [binaries]
-c = ['ccache', 'cc']
-cpp = ['ccache', 'c++']
+c = 'cc'
+cpp = 'c++'
 ar = 'ar'
 strip = 'strip'
+pkgconfig = 'pkg-config'
+cmake = 'cmake'
+python = 'python3'
 " > /toolchains/cross.meson
 
 if [ -f ^BIN^/run ]; then
@@ -70,6 +73,7 @@ fi
 if [ "$VERBOSE" != "" ]; then
     echo "$meson" "${arguments[@]}"
 fi
-"$meson" "${arguments[@]}"
+# Update our pkg-config path, so it can find locally installed files.
+PKG_CONFIG_PATH="$PWD:$PKG_CONFIG_PATH" "$meson" "${arguments[@]}"
 ' > ^BIN^/meson
 chmod +x ^BIN^/meson

@@ -56,7 +56,7 @@ if [ "${#arguments[@]}" -ne 0 ]; then
 
             # Don't provide a toolchain file if it's already provided.
             has_toolchain="$is_script"
-            if [ "$is_script" = no ] && ! find -DCMAKE_TOOLCHAIN_FILE "${arguments[@]}"; then
+            if find -DCMAKE_TOOLCHAIN_FILE "${arguments[@]}"; then
                 has_toolchain=yes
             fi
 

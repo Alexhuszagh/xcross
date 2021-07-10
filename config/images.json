@@ -1763,7 +1763,6 @@
         "system": "javascript",
         "target": "wasm",
         "family": "wasm64",
-        // TODO(ahuszagh) Should probably add more things...
         "dockerfile": {
             "base": "emscripten",
             "toolchain": "wasm-toolchain",
@@ -1771,7 +1770,13 @@
             "spec": null
         },
         "package_dockerfile": {
-            "system": "Emscripten"
+            // Fake the compiler identification, since emcc
+            // is similar to Clang anyway.
+            "compiler": "clang",
+            "compiler_version": "11",
+            "conan_system": "Emscripten",
+            "meson_system": "unknown",
+            "vcpkg_system": "Emscripten"
         }
     }
 ]

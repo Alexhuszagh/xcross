@@ -1,37 +1,32 @@
-zlib
-====
+#!/bin/bash
+# Test compiling a project with a zlib dependency installed via
+# a package manager.
 
-Test alternative build systems using Conan, Meson, and vcpkg.
+set -e
 
-**Meson with Conan**
+cd /test/zlib
 
-```bash
+# Test Meson with Conan
 rm -rf build
 mkdir -p build
 cd build
 conan install .. --build
 meson ..
 conan build ..
-```
 
-**CMake with Conan**
-
-```bash
+# Test CMake with Conan
+cd ..
 rm -rf build
 mkdir -p build
 cd build
 conan install .. --build
 cmake ..
 cmake --build .
-```
 
-**CMake with vcpkg**
-
-```bash
+# Test CMake with vcpkg
+cd ..
 rm -rf build
 mkdir -p build
 cd build
-# Automatically installed via vcpkg.json
 cmake ..
 cmake --build .
-```
