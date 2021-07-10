@@ -43,6 +43,10 @@ symlink/toolchain/
 xcross/__init__.py
 *.old
 
+# Package Managers
+.conan/
+vcpkg_installed/
+
 # Distribution / packaging
 .Python
 build/
