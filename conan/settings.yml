@@ -1,0 +1,100 @@
+# Minimal version of settings to avoid any version checking.
+# This helps us get around errors in Conan for our configurations,
+# and simplifies future-proofing.
+
+os_build: ANY
+arch_build: ANY
+os_target: ANY
+arch_target: ANY
+os:
+    Windows:
+        subsystem: [None, cygwin, msys, msys2, wsl]
+    WindowsStore:
+        version: ANY
+    WindowsCE:
+        platform: ANY
+        version: ANY
+    Linux:
+    Macos:
+        version: ANY
+        sdk: [None, "macosx"]
+        subsystem: [None, catalyst]
+    Android:
+        api_level: ANY
+    iOS:
+        version: ANY
+        sdk: [None, "iphoneos", "iphonesimulator"]
+    watchOS:
+        version: ANY
+        sdk: [None, "watchos", "watchsimulator"]
+    tvOS:
+        version: ANY
+        sdk: [None, "appletvos", "appletvsimulator"]
+    FreeBSD:
+    SunOS:
+    AIX:
+    Arduino:
+        board: ANY
+    Emscripten:
+    Neutrino:
+        version: ANY
+arch: ANY
+compiler:
+    sun-cc:
+        version: ANY
+        threads: [None, posix]
+        libcxx: [libCstd, libstdcxx, libstlport, libstdc++]
+    gcc: &gcc
+        version: ANY
+        libcxx: [libstdc++, libstdc++11]
+        threads: [None, posix, win32]
+        exception: [None, dwarf2, sjlj, seh]
+        cppstd: [None, 98, gnu98, 11, gnu11, 14, gnu14, 17, gnu17, 20, gnu20, 23, gnu23]
+    Visual Studio: &visual_studio
+        runtime: [MD, MT, MTd, MDd]
+        version: ANY
+        toolset: [None, v90, v100, v110, v110_xp, v120, v120_xp,
+                  v140, v140_xp, v140_clang_c2, LLVM-vs2012, LLVM-vs2012_xp,
+                  LLVM-vs2013, LLVM-vs2013_xp, LLVM-vs2014, LLVM-vs2014_xp,
+                  LLVM-vs2017, LLVM-vs2017_xp, v141, v141_xp, v141_clang_c2, v142,
+                  llvm, ClangCL]
+        cppstd: [None, 14, 17, 20]
+    msvc:
+        version: ANY
+        runtime: [static, dynamic]
+        runtime_type: [Debug, Release]
+        cppstd: [14, 17, 20]
+    clang:
+        version: ANY
+        libcxx: [None, libstdc++, libstdc++11, libc++, c++_shared, c++_static]
+        cppstd: [None, 98, gnu98, 11, gnu11, 14, gnu14, 17, gnu17, 20, gnu20, 23, gnu23]
+        runtime: [None, MD, MT, MTd, MDd]
+    apple-clang: &apple_clang
+        version: ANY
+        libcxx: [libstdc++, libc++]
+        cppstd: [None, 98, gnu98, 11, gnu11, 14, gnu14, 17, gnu17, 20, gnu20]
+    intel:
+        version: ANY
+        base:
+            gcc:
+                <<: *gcc
+                threads: [None]
+                exception: [None]
+            Visual Studio:
+                <<: *visual_studio
+            apple-clang:
+                <<: *apple_clang
+    qcc:
+        version: ANY
+        libcxx: [cxx, gpp, cpp, cpp-ne, accp, acpp-ne, ecpp, ecpp-ne]
+        cppstd: [None, 98, gnu98, 11, gnu11, 14, gnu14, 17, gnu17]
+    mcst-lcc:
+        version: ANY
+        base:
+            gcc:
+                <<: *gcc
+                threads: [None]
+                exceptions: [None]
+
+build_type: [None, Debug, Release, RelWithDebInfo, MinSizeRel]
+cppstd: [None, 98, gnu98, 11, gnu11, 14, gnu14, 17, gnu17, 20, gnu20, 23, gnu23]

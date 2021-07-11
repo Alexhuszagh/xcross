@@ -20,31 +20,31 @@ if [ "$COMPILER_VERSION" = "" ]; then
     exit 1
 fi
 
-# Exit without error if the target doesn't support Conan well.
-if [ "$TRIPLE" = "wasm" ]; then
-    # There's numerous issues with wasm and Conan:
-    #   1. It assumes the toolchain versions is 13.0,
-    #       when it only supports up to 12.0. This requires
-    #       shipping a custom `settings.yml` file, which
-    #       is not fun
-    #   2. Can't easily change configuration settings via
-    #       `conan config set compiler.clang.version=ANY`.
-    #       This means distributing a `settings.yml` file.
-    #   3. Even if you do get the compiler version correct,
-    #       building with a Meson build system produces a warning
-    #       in wasm-ld, stating it's ignoring an unrecognized
-    #       option `-rpath`.
-    #   4. If you try to then use the CMake build system,
-    #       it then has a linker error being unable to find
-    #       any installed libraries., such as:
-    #           `wasm-ld: error: unable to find library -lz`.
-    #
-    #   This last issue is solvable (it's due to Conan's `${CONAN_LIBS}`)
-    #   just provides a library name.
-    #
-    # Since vcpkg works out-of-the-box, this isn't really a big issue.
-    exit 0
-fi
+## Exit without error if the target doesn't support Conan well.
+#if [ "$TRIPLE" = "wasm" ]; then
+#    # There's numerous issues with wasm and Conan:
+#    #   1. It assumes the toolchain versions is 13.0,
+#    #       when it only supports up to 12.0. This requires
+#    #       shipping a custom `settings.yml` file, which
+#    #       is not fun
+#    #   2. Can't easily change configuration settings via
+#    #       `conan config set compiler.clang.version=ANY`.
+#    #       This means distributing a `settings.yml` file.
+#    #   3. Even if you do get the compiler version correct,
+#    #       building with a Meson build system produces a warning
+#    #       in wasm-ld, stating it's ignoring an unrecognized
+#    #       option `-rpath`.
+#    #   4. If you try to then use the CMake build system,
+#    #       it then has a linker error being unable to find
+#    #       any installed libraries., such as:
+#    #           `wasm-ld: error: unable to find library -lz`.
+#    #
+#    #   This last issue is solvable (it's due to Conan's `${CONAN_LIBS}`)
+#    #   just provides a library name.
+#    #
+#    # Since vcpkg works out-of-the-box, this isn't really a big issue.
+#    exit 0
+#fi
 
 apt-get update
 apt-get install --assume-yes --no-install-recommends \
@@ -53,6 +53,15 @@ apt-get install --assume-yes --no-install-recommends \
     python3-pip
 pip install conan
 
+# Set the correct arch.
+# For anything besides wasm, set to mips, since it doesn't add
+# any flags and allows us to build easily from source. For wasm,
+# we need to set arch=wasm.
+arch=mips
+if [ "$TRIPLE" = "wasm" ]; then
+    arch=wasm
+fi
+
 # Need to create a default profile.
 # Don't set the target arch, for reasons.
 # Use mips for everything, since it doesn't add compiler flags.
@@ -60,7 +69,7 @@ mkdir -p /home/^USERNAME^/.conan/profiles
 chown -R ^USERNAME^:^USERNAME^ /home/^USERNAME^/.conan
 echo "[settings]
 os=$SYSTEM
-arch=mips
+arch=$arch
 build_type=Release
 compiler=$COMPILER
 compiler.version=$COMPILER_VERSION" > /home/^USERNAME^/.conan/profiles/default
@@ -80,13 +89,16 @@ conan=^CONAN^
 source /env/find
 
 # Copy over our configuration settings.
-if [ "$DETACHED" != "" ]; then
+if [ "$DETACHED" == "" ]; then
     # Not in detached mode, change the Conan home so it persists
     # after the image quits.
     export CONAN_USER_HOME="$PWD"/.xcross-'"$TRIPLE"'-conan
     mkdir -p "$CONAN_USER_HOME"/.conan/profiles
     if [ ! -f "$CONAN_USER_HOME"/.conan/profiles/default ]; then
         cp /home/^USERNAME^/.conan/profiles/default "$CONAN_USER_HOME"/.conan/profiles/default
+    fi
+    if [ ! -f "$CONAN_USER_HOME"/.conan/settings.yml ]; then
+        cp /home/^USERNAME^/.conan/settings.yml "$CONAN_USER_HOME"/.conan/settings.yml
     fi
 else
     # Can use an install relative to the user home.

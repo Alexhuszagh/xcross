@@ -1775,7 +1775,7 @@
             "compiler": "clang",
             "compiler_version": "13",
             "conan_system": "Emscripten",
-            "meson_system": "unknown",
+            "meson_system": "emscripten",
             "vcpkg_system": "Emscripten"
         }
     }

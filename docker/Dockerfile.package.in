@@ -6,13 +6,17 @@ FROM ^USERNAME^/^REPOSITORY^:^TARGET^
 # and then reset path later.
 ARG OLDPATH="${PATH}"
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-COPY ["docker/conan.sh", "/"]
-COPY ["docker/meson.sh", "/"]
+# These are ordered from longest to shortest.
 COPY ["docker/vcpkg.sh", "/"]
-RUN COMPILER=^COMPILER^ COMPILER_VERSION=^COMPILER_VERSION^ SYSTEM=^CONAN_SYSTEM^ TRIPLE=^TRIPLE^ /conan.sh
-RUN CPU_FAMILY=^CPU_FAMILY^ PROCESSOR=^PROCESSOR^ SYSTEM=^MESON_SYSTEM^ /meson.sh
 RUN LINKAGE=^LINKAGE^ PROCESSOR=^PROCESSOR^ SYSTEM=^VCPKG_SYSTEM^ TRIPLE=^TRIPLE^ /vcpkg.sh
+COPY ["docker/meson.sh", "/"]
+RUN CPU_FAMILY=^CPU_FAMILY^ PROCESSOR=^PROCESSOR^ SYSTEM=^MESON_SYSTEM^ /meson.sh
+COPY ["docker/conan.sh", "/"]
+RUN COMPILER=^COMPILER^ COMPILER_VERSION=^COMPILER_VERSION^ SYSTEM=^CONAN_SYSTEM^ TRIPLE=^TRIPLE^ /conan.sh
 RUN rm /conan.sh /meson.sh /vcpkg.sh
+
+# Copy some extra configuration data.
+COPY ["conan/settings.yml", "/home/^IMAGE_USER^/.conan/"]
 
 # Reset the path
 ENV PATH="${OLDPATH}"

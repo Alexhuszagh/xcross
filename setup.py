@@ -914,7 +914,7 @@ conan_string = {
 meson_string = {
     # The default use is just to use 'linux' for Android.
     OperatingSystem.Android: 'linux',
-    OperatingSystem.BareMetal: 'unknown',
+    OperatingSystem.BareMetal: 'bare metal',
     OperatingSystem.Linux: 'linux',
     OperatingSystem.Windows: 'windows',
 }
@@ -1696,6 +1696,7 @@ class ConfigureCommand(VersionCommand):
             ('COMPILER_VERSION', f'"{compiler_version}"'),
             ('CONAN_SYSTEM', conan_system),
             ('CPU_FAMILY', image.family),
+            ('IMAGE_USER', config['options']['username']),
             ('LINKAGE', image.linkage),
             ('MESON_SYSTEM', meson_system),
             ('PROCESSOR', image.processor),
