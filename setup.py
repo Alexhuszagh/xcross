@@ -488,7 +488,7 @@ class BuildImagesCommand(Command):
         for version in semver():
             self.tag_image(docker, target, f'{target}-{version}', with_package_managers)
         if target.endswith('-unknown-linux-gnu'):
-            self.tag_versions(docker, target, target[:-len('-unknown-linux-gnu')])
+            self.tag_versions(docker, target, target[:-len('-unknown-linux-gnu')], with_package_managers)
 
     def tag_versions(self, docker, target, tag_name, with_package_managers=False):
         '''Build all versions of a given target.'''
