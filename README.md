@@ -211,6 +211,12 @@ script:
 
 By default, xcross shares your root directory with the image, running with the same permissions as the current user. However, you can limit the shared directories with the `--dir` option, allowing you to limit the build system to only the project files. This is useful for compiling code with an untrusted build system, providing an extra layer of security relative to running it on the host computer.
 
+For these reasons, commands running under xcross are not given root access. If you need to install build dependencies, there a few options:
+
+1. Get a non-root package manager such as [junest](https://github.com/fsquillace/junest) or [homebrew](https://docs.brew.sh/Homebrew-on-Linux).
+2. Install dependencies locally via `apt download` and `apt-rdepends`, to install to a local prefix with `dpkg -force-not-root --root=$HOME`.
+3. Extend the Docker image, using `FROM ahuszagh/cross:<TARGET>`.
+
 # Package Managers
 
 When using xcross with the `--with-package-managers` option, xcross will run images that come pre-installed with vcpkg and Conan. 

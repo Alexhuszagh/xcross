@@ -1635,11 +1635,6 @@ class ConfigureCommand(VersionCommand):
             with open(f'{HOME}/docker/Dockerfile.{spec}.in', 'r') as file:
                 contents.append(file.read())
 
-        # Remove the user password and add sudo.
-        # Allows users to install packages without rebuilding an image.
-        with open(f'{HOME}/docker/Dockerfile.root.in', 'r') as file:
-            contents.append(file.read())
-
         # Add the mandatory entrypoint.
         with open(f'{HOME}/docker/Dockerfile.entrypoint.in', 'r') as file:
             contents.append(file.read())

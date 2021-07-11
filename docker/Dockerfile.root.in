@@ -1,7 +1,0 @@
-# Remove the user password, and add them to sudoers to install packages.
-RUN passwd -d ^USERNAME^
-RUN apt-get update
-RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-recommends \
-    sudo
-RUN usermod -aG sudo ^USERNAME^
-RUN touch /home/^USERNAME^/.sudo_as_admin_successful

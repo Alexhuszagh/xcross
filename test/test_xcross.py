@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import pathlib
 import pytest
 import sys
 
@@ -128,3 +127,18 @@ def test_run_image():
     run_image(['--detach', 'echo', 'hellworld'])
     run_image(['--detach', 'echo', 'next'])
     run_image(['--stop'])
+
+def test_permissions():
+    # Make sure all files produced have the same permissions.
+    # This means we properly mapped the image.
+    euid = os.geteuid()
+    run_image(['touch', 'sample_xcross_file'])
+    st = os.stat('sample_xcross_file')
+    assert(st.st_uid == euid)
+    assert(st.st_gid == euid)
+
+    # Check sudo isn't enabled.
+    run_image(['which', 'sudo'], exit_code=1)
+
+    # Test with podman: ensure permissions don't fail.
+    run_image(['ls', '-la', '--engine', 'podman'])

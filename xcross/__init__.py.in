@@ -504,9 +504,18 @@ def docker_command(args, parent_dir, relpath):
         command += ['--env', 'DETACHED=1']
     # Docker by default uses root as the main user.
     # We therefore want to map to the current user.
+    # We want to map root to the current user, and
+    # then provide the user namespace to the current
+    # user. This prevents any modification of files
+    # above the current user's permissions.
     if args.engine_type == 'docker' and os.name == 'posix':
         euid = os.geteuid()
         command += ['--user', f'{euid}:{euid}']
+    elif args.engine_type == 'podman':
+        # Podman has issues with SELinux, so ensure we
+        # disable labels. This still does not allow
+        # users to modify files outside their permission.
+        command += ['--security-opt', 'label=disable']
     if args.detach:
         command.append(args.image_name)
     else:
