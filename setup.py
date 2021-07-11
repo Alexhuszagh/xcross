@@ -1656,11 +1656,11 @@ class ConfigureCommand(VersionCommand):
         if symlink is not None:
             with open(f'{HOME}/docker/Dockerfile.{symlink}.in', 'r') as file:
                 contents.append(file.read())
-        if toolchain is not None:
-            with open(f'{HOME}/docker/Dockerfile.{toolchain}.in', 'r') as file:
-                contents.append(file.read())
         if spec is not None:
             with open(f'{HOME}/docker/Dockerfile.{spec}.in', 'r') as file:
+                contents.append(file.read())
+        if toolchain is not None:
+            with open(f'{HOME}/docker/Dockerfile.{toolchain}.in', 'r') as file:
                 contents.append(file.read())
 
         # Add the mandatory entrypoint.
