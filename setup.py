@@ -1743,8 +1743,17 @@ class ConfigureCommand(VersionCommand):
             ('OS', image.os.to_cmake()),
             ('USERNAME', config["options"]["username"]),
         ]
+        contents = []
+        with open(template, 'r') as file:
+            contents.append(file.read())
+        with open(f'{HOME}/cmake/toolchain-include.cmake.in', 'r') as file:
+            contents.append(file.read())
+        contents = '\n'.join(contents)
+
+        # Replace the contents and write the output to file.
         cmake = f'{HOME}/cmake/toolchain/{image.target}.cmake'
-        self.configure(template, cmake, False, replacements)
+        contents = self.replace(contents, replacements)
+        self.write_file(cmake, contents, False)
 
     def configure_symlinks(self, image, template, replacements):
         '''Configure a symlink template.'''

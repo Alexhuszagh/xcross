@@ -7,4 +7,8 @@ IF(NOT ANDROID_PLATFORM)
     SET(ANDROID_PLATFORM ^SDK_VERSION^)
 ENDIF()
 
-INCLUDE("^NDK_DIRECTORY^/build/cmake/android.toolchain.cmake")
+# Only include the toolchain files once.
+IF(NOT DEFINED _CROSS_ANDROID_TOOLCHAIN_FILE)
+    INCLUDE("^NDK_DIRECTORY^/build/cmake/android.toolchain.cmake")
+    SET(_CROSS_ANDROID_TOOLCHAIN_FILE ON)
+ENDIF()

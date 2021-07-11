@@ -80,8 +80,10 @@ source /env/find
 # Copy over our configuration settings.
 if [ "$DETACHED" == "" ]; then
     # Not in detached mode, change the Conan home so it persists
-    # after the image quits.
-    export CONAN_USER_HOME="$PWD"/.xcross-'"$TRIPLE"'-conan
+    # after the image quits. Do not override any custom conan home.
+    if [ "$CONAN_USER_HOME" = "" ]; then
+        export CONAN_USER_HOME="$PWD"/.xcross-'"$TRIPLE"'-conan
+    fi
     mkdir -p "$CONAN_USER_HOME"/.conan/profiles
     if [ ! -f "$CONAN_USER_HOME"/.conan/profiles/default ]; then
         cp /home/^USERNAME^/.conan/profiles/default "$CONAN_USER_HOME"/.conan/profiles/default
@@ -90,8 +92,11 @@ if [ "$DETACHED" == "" ]; then
         cp /home/^USERNAME^/.conan/settings.yml "$CONAN_USER_HOME"/.conan/settings.yml
     fi
 else
-    # Can use an install relative to the user home.
-    export CONAN_USER_HOME=/home/^USERNAME^
+    # Can use an install relative to the user home.  Do not override any
+    # custom conan home.
+    if [ "$CONAN_USER_HOME" = "" ]; then
+        export CONAN_USER_HOME=/home/^USERNAME^
+    fi
 fi
 
 # Check if we need to add the `--build` argument.
