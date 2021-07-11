@@ -26,6 +26,12 @@ if [ "$LINKAGE" = "" ]; then
     exit 1
 fi
 
+# There's a minor, well-known issue with wasm and vcpkg.
+# vcpkg runs in script mode for the CMake files, meaning
+# the `CMAKE_EXECUTABLE_SUFFIX` is not set, so all binaries
+# will not have the `.js` suffix (although the wasm ones will).
+#   https://github.com/microsoft/vcpkg/blob/master/docs/maintainers/maintainer-guide.md#useful-implementation-notes
+
 export DEBIAN_FRONTEND="noninteractive"
 
 # Install dependencies we need after to use vcpkg.
@@ -118,7 +124,7 @@ echo '#!/bin/bash
 chmod +x ^BIN^/vcpkg
 
 # Create an environment variable containing the triplet.
-# We want to make
+# Allows us to call the correct triplet whenever we invoke vcpkg.
 echo "$TRIPLE" > /env/triplet
 
 # Cleanup
