@@ -19,7 +19,7 @@ In addition, each xcross provides [images]((https://hub.docker.com/r/ahuszagh/pk
 - vcpkg
 - Meson
 
-Note that this project is similar to [dockcross](https://github.com/dockcross/dockcross), however, xcross supports many more CPU architectures than dockcross. If you need Docker images of common architectures, dockcross should have better support.
+Note that this project is similar to [dockcross](https://github.com/dockcross/dockcross), however, xcross supports more targets and build tools than dockcross. If you need Docker images of common architectures, dockcross should have better support.
 
 **Table of Contents**
 
@@ -50,9 +50,7 @@ Unlike 10 years ago, we no longer live in an x86 world. ARM architectures are ne
 
 At the same time, modern software design builds upon a body of open source work. It is more important than ever to ensure that foundational libraries are portable, and can run on a wide variety of devices. However, few open source developers can afford a large selection of hardware to test code on, and most pre-packaged cross-compilers only support a few, common architectures.
 
-Normally, cross compilers are limited by long compile times (to build the cross-compiler) and non-portable toolchain files, since the toolchain cannot be added to the path.
-
-Pre-built Docker images simplifies this, since the cross-compilers are packaged in a compact image isolated from the host, enabling building, testing, and deploying cross-compiled code in seconds, rather than hours. Each image comes with a toolchain installed on-path, making it work with standard build tools without any configuration. And, [xcross](xcross) allows you to cross-compile code with zero setup required.
+Normally, cross compilers are limited by long compile times (to build the cross-compiler) and non-portable toolchain files, since the toolchain cannot be added to the path. Docker images pre-installed with cross-compiler toolchains solve this, by isolating the toolchain from the host, enabling building, testing, and deploying cross-compiled code in seconds, rather than hours. Each toolchain is installed on-path, and cross-compilation configurations are injected for each build system, enabling out-of-the-box cross-compilation for CMake, Autotools, Makefiles, and Meson. Finally, a Python script [xcross](https://pypi.org/project/xcross/) handles all Docker configurations to make cross-compiling as easy as compiling on the host machine.
 
 It just works.
 
@@ -78,15 +76,13 @@ pip install . --user
 
 ## xcross
 
-xcross is a Python script to automate building cross-compiling, similar to Rust's [cross](https://github.com/rust-embedded/cross). To use it, merely add `xcross` before any command along with a valid target. To configure, build, and make our project, we can do:
+xcross is a Python script to provide "zero-setup" cross-compiling, similar to Rust's [cross](https://github.com/rust-embedded/cross). To use it, merely add `xcross` before any command along with a valid target. To configure, build, and make a CMake project, run:
 
 ```bash
 export CROSS_TARGET=alpha-unknown-linux-gnu
 xcross cmake ..
 xcross make -j 5
 ```
-
-In addition, the images include emulators to run the produced binaries:
 
 ## run
 
@@ -96,7 +92,7 @@ xcross includes a `run` command for most images, which uses Qemu to run the cros
 xcross run path/to/file
 ```
 
-`run` works for both statically and dynamically-linked binaries, ensuring the dynamically-linked libraries are in Qemu's search path.
+`run` works for both statically and dynamically-linked binaries, ensuring linked libraries are in Qemu's search path.
 
 ## Docker
 
@@ -137,9 +133,9 @@ make
 make run
 run hello
 
-# Can also use Makefiles normally. Here we prefer shared linking,
-# which also adds position-independent code. These environment
-# only add the `-fPIC` or `-static` flags: nothing else is modified.
+# Can also use Makefiles normally. Here we prefer shared linking. 
+# This environment only adds or removes the `-static` flag when 
+# compiling: nothing else is modified.
 cd ..
 source /toolchains/shared
 make
@@ -151,7 +147,7 @@ make clean
 make
 run helloworld
 
-# Can also just raw `c++` and `cc` commands.
+# We can also invoke `c++` and `cc` commands directly.
 # It's really that simple.
 c++ helloworld.cc -fPIC
 run a.out
@@ -209,21 +205,21 @@ script:
 
 # Sandboxing
 
-By default, xcross shares your root directory with the image, running with the same permissions as the current user. However, you can limit the shared directories with the `--dir` option, allowing you to limit the build system to only the project files. This is useful for compiling code with an untrusted build system, providing an extra layer of security relative to running it on the host computer.
+By default, xcross shares your root directory with the image, running with the same permissions as the current user. However, you can limit the shared directories with the `--dir` option, allowing you to limit the build system to only the project files. This is useful for compiling untrusted code, providing an extra layer of security relative to running it on the host computer.
 
-For these reasons, commands running under xcross are not given root access. If you need to install build dependencies, there a few options:
+For these reasons, commands run via xcross are not given root access. If you need to install build dependencies, there a few options:
 
 1. Get a non-root package manager such as [junest](https://github.com/fsquillace/junest) or [homebrew](https://docs.brew.sh/Homebrew-on-Linux).
 2. Install dependencies locally via `apt download` and `apt-rdepends`, to install to a local prefix with `dpkg -force-not-root --root=$HOME`.
-3. Extend the Docker image, using `FROM ahuszagh/cross:<TARGET>`.
+3. Creating a new Docker image that uses an xcross toolchain as a base image, for example `FROM ahuszagh/cross:<TARGET>`.
 
 # Package Managers
 
 When using xcross with the `--with-package-managers` option, xcross will run images that come pre-installed with vcpkg and Conan. 
 
-If run in detached mode (via `--detach`), no limitations exist. Otherwise, the following limitations exist:
+If run in detached mode (via `--detach`), no limitations exist. Otherwise, a new Docker container is run for each command, losing any changes outside the shared volume, so the following caveats apply:
 
-- `conan install` installs packages relative to the CWD. Changing the CWD will lead to missing dependencies.
+- `conan install` installs packages relative to the CWD. Changing the CWD may lead to missing dependencies.
 - `vcpkg install` only works with manifests, not with global installs.
 
 See [test/zlib](https://github.com/Alexhuszagh/xcross/tree/main/test/zlib) for an example project for the following code samples:
@@ -233,9 +229,10 @@ An example of using xcross with vcpkg is:
 ```bash
 export CROSS_TARGET=alpha-unknown-linux-gnu
 export CROSS_WITH_PACKAGE_MANAGERS=1
-xcross --detach vcpkg install
-xcross --detach cmake ..
-xcross --detach cmake --build .
+export CROSS_DETACH=1
+xcross vcpkg install
+xcross cmake ..
+xcross cmake --build .
 xcross --stop
 ```
 
@@ -244,9 +241,10 @@ An example of using xcross with conan is:
 ```bash
 export CROSS_TARGET=alpha-unknown-linux-gnu
 export CROSS_WITH_PACKAGE_MANAGERS=1
-xcross --detach conan install ..
-xcross --detach cmake ..
-xcross --detach cmake --build .
+export CROSS_DETACH=1
+xcross conan install ..
+xcross cmake ..
+xcross cmake --build .
 xcross --stop
 ```
 
@@ -304,10 +302,10 @@ xcross c++ main.c -o test/basic
 
 # This won't work, since we use a Windows-style environment variable.
 # We don't know what this is used for, so we can't convert this.
-xcross -E VAR1=cpp ^%VAR1^% main.c -o main
+xcross -E VAR1=cpp "^%VAR1^% main.c -o main"
 
 # Works in Windows CMD, since $X doesn't expand.
-xcross -E VAR1=cpp $VAR1 main.c -o main
+xcross -E VAR1=cpp "$VAR1 main.c -o main"
 ```
 
 **xcross Arguments**
@@ -497,12 +495,24 @@ Each image also contains a few custom utilities to probe image configurations:
 - **target-specs-full**: Print extensive specifications about the target architecture.
 
 ```bash
-export CROSS_TARGET=ppc-unknown-linux-gnu
+$ export CROSS_TARGET=ppc-unknown-linux-gnu
+$ xcross target-specs
+{
+  "arch": "ppc",
+  "os": "linux",
+  "eh-frame-header": true,
+  "linker-is-gnu": true,
+  "target-endian": "big",
+  "pic": null,
+  "pie": null,
+  "char-is-signed": false,
+  "data-model": "ilp32"
+}
 ```
 
 # Building/Running Dockerfiles
 
-To build all Docker images, run `python3 setup.py build_images`. Note that ca it take up to a week to build all images. To build and run a single docker image, use:
+To build all Docker images, run `python3 setup.py build_imagesn--with-package-managers=1`. Note that can it take up to a week to build all images. To build and run a single docker image, use:
 
 ```bash
 image=ppcle-unknown-linux-gnu
@@ -516,11 +526,12 @@ xcross bash --target "$image"
 
 # Images
 
-For a list of pre-built images, see [DockerHub](https://hub.docker.com/r/ahuszagh/cross). To remove local, installed images from the pre-built, cross toolchains, run:
+For a list of pre-built images, see [ahuszagh/cross](https://hub.docker.com/r/ahuszagh/cross) and [ahuszagh/pkgcross](https://hub.docker.com/r/ahuszagh/pkgcross). To remove local, installed images from the pre-built, cross toolchains, run:
 
 ```bash
 # On a POSIX shell.
-images=$(docker images | grep 'ahuszagh/cross' | tr -s ' ' | cut -d ' ' -f 3)
+images=$(docker images | grep -E 'ahuszagh/(pkg)?cross')
+images=$(echo "$images" | tr -s ' ' | cut -d ' ' -f 1,2 | tr ' ' :)
 docker rmi $images
 ```
 
@@ -530,20 +541,21 @@ There are two types of images:
 - Images with an OS layer, such as `ppcle-unknown-linux-gnu`.
 - Bare metal images, such as `ppcle-unknown-elf`.
 
-The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems, and do not link to a memory allocator. Please note that not all bare-metal images provide complete startup routines (crt0), and therefore might need to be linked against standalone flags (`-nostartfiles`, `-nostdlib`, `-nodefaultlibs`, or `-ffreestanding`) with a custom `_start` or equivalent routine or a custom `crt0` must be provided.
+The bare metal images use the newlib C-runtime, and are useful for compiling for resource-constrained embedded systems. Please note that not all bare-metal images provide complete startup routines (crt0), and therefore might need to be linked against standalone flags (`-nostartfiles`, `-nostdlib`, `-nodefaultlibs`, or `-ffreestanding`) with a custom startup.
 
-The other images use a C-runtime that depends on a POSIX-like OS (such as Linux, FreeBSD, or MinGW for Windows), and can be used with:
+Other images use a C-runtime for POSIX-like build environment (such as Linux, FreeBSD, or MinGW for Windows), and include:
 
 - musl (`*-musl`)
 - glibc (`*-gnu`)
 - uClibc-ng (`*-uclibc`)
 - android (`*-android`, only available on some architectures)
+- mingw (`*-w64-mingw32`, only available on x86)
 
 If you would like to test if the code compiles (and optionally, runs) for a target architecture, you should generally use a `linux-gnu` image.
 
 **Triples**
 
-All images are named as `ahuszagh/cross:$triple`, where `$triple` is the target triple. The target triple consists of:
+All images are named as `ahuszagh/cross:$triple` or `ahuszagh/pkgcross:$triple`, where `$triple` is the target triple. The target triple consists of:
 
 - `arch`, the CPU architecture (mandatory).
 - `vendor`, the CPU vendor.
@@ -561,11 +573,7 @@ If an `$arch-unknown-linux-gnu` is available, then `$arch` is an alias for `$arc
 
 **OS/Architecture Support**
 
-In general, the focus of these images is to provide support for a wide variety of architectures, not operating systems. We will gladly accept Dockerfiles/scripts to support more operating systems, like FreeBSD.
-
-We do not support Darwin/iOS for licensing reasons, since reproduction of the macOS SDK is expressly forbidden. If you would like to build a Darwin cross-compiler, see [osxcross](https://github.com/tpoechtrager/osxcross).
-
-We also do not support certain cross-compilers for popular architectures, like Hexagon, due to proprietary linkers (which would be needed for LLVM support).
+In general, the focus of these images is to provide support for a wide variety of architectures, not operating systems. We will gladly accept Dockerfiles/scripts to support more operating systems, like FreeBSD. We do not support Darwin/iOS for licensing reasons, since reproduction of the macOS SDK is expressly forbidden. If you would like to build a Darwin cross-compiler, see [osxcross](https://github.com/tpoechtrager/osxcross). We also do not support certain cross-compilers for popular architectures, like Hexagon, due to proprietary linkers (which would be needed for LLVM support).
 
 **Versioning**
 
@@ -578,47 +586,51 @@ Pre-1.0, minor versions signify backwards-incompatible changes to toolchains. Pa
 
 # Dependencies
 
-In order to use `xcross`, you must have:
+In order to use `xcross` or build toolchains, you must have:
 
 - python (3.6+)
-
-In order to build the toolchains, you must have:
-
-- docker
-- bash
-
-In order to add new toolchains, you must have:
-
-- crosstool-NG
-- cut
+- docker or podman
 
 Everything else runs in the container.
 
 # Toolchain Files
+  
+These cross-compilation configurations are automatically injected if not provided. Manually overriding these defaults allows finer control over the build process.
 
-In order to simplify using the cross-compiler with CMake, we provide 3 CMake toolchain files:
+**CMake Toolchain Files**
 
 - `/toolchains/toolchain.cmake`, which contains the necessary configurations to cross-compile.
 - `/toolchains/shared.cmake`, for building dynamically-linked binaries.
 - `/toolchains/static.cmake`, for building statically-linked binaries.
+  
+To include an additional toolchain in addition to the default, pass `CROSS_CHAINLOAD_TOOLCHAIN_FILE` during configuration.
 
-Likewise, to simplify using the cross-compiler with Makefiles, we provide 2 Bash config files:
+**Bash Environment Files**
 
 - `/env/base`, base environment variables for cross-compiling.
 - `/env/shared`, for building dynamically-linked binaries.
 - `/env/static`, for building statically-linked binaries.
+  
+**Meson Cross Files**
+
+- `/toolchains/cross.meson`, which contains the necessary configurations to cross-compile.
+  
+**Conan Settings**
+  
+- `~/.conan/settings.yml`, default base settings for Conan.
+- `~/.conan/profiles/default`, default Conan profile.
 
 # Developing New Toolchains
 
-To add your own toolchain, the general workflow is as follows:
+To add your own toolchain, the general workflow (for crosstool-NG or buildroot) is as follows:
 
 1. List toolchain samples.
 2. Configure your toolchain.
-3. Move the config file to `ct-ng`.
+3. Move the config file to `ct-ng` or `buildroot`.
 4. Patch the config file.
 5. Add the image to `config/images.json`.
 
-After the toolchain is created, all the CMake toolchain files, symlinks, and Dockerfiles may be created with:
+After the toolchain is created, this shows a sample image configuration to auto-generate the relevant Dockerfile, CMake toolchains, and toolchain symlinks:
 
 **config/images.json**
 
@@ -707,11 +719,11 @@ After the toolchain is created, all the CMake toolchain files, symlinks, and Doc
 ]
 ```
 
-For a bare-metal example, see `ct-ng/ppcle-unknown-elf.config`. For a Linux example, see `ct-ng/ppcle-unknown-linux-gnu.config`. Be sure to add your new toolchain to `config/images.json`, and run the test suite with the new toolchain image.
+For an example bare-metal crosstool-NG config file, see `ct-ng/ppcle-unknown-elf.config`. For a Linux example, see `ct-ng/ppcle-unknown-linux-gnu.config`. Be sure to add your new toolchain to `config/images.json`, and run the test suite with the new toolchain image.
 
 # Platform Support
 
-For a complete list of targets, see [here](https://github.com/Alexhuszagh/xcross/blob/main/TARGETS.md). For a complete list of images, see the Docker Hub [repository](https://hub.docker.com/r/ahuszagh/cross).
+For a complete list of targets, see [here](https://github.com/Alexhuszagh/xcross/blob/main/TARGETS.md). For a complete list of images, see [ahuszagh/cross](https://hub.docker.com/r/ahuszagh/cross) and [ahuszagh/pkgcross](https://hub.docker.com/r/ahuszagh/pkgcross).
 
 Currently, we only create images that are supported by:
 
