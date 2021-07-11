@@ -15,11 +15,16 @@ import subprocess
 import sys
 import uuid
 
-version_info = collections.namedtuple('version_info', 'major minor patch build')
+# The version info follows loosely semantic versioning and more closely, PEP 440.
+# The release can be one of `alpha`, `beta`, `candidate`, `post`, or empty.
+# If the release is provided, the number must be provided and be non-empty.
+version_info = collections.namedtuple('version_info', 'major minor patch release number build')
 
 __version_major__ = ^VERSION_MAJOR^
 __version_minor__ = ^VERSION_MINOR^
 __version_patch__ = ^VERSION_PATCH^
+__version_release__ = ^VERSION_RELEASE^
+__version_number__ = ^VERSION_NUMBER^
 __version_build__ = ^VERSION_BUILD^
 __version_info__ = ^VERSION_INFO^
 __version__ = ^VERSION^

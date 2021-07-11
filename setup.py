@@ -33,6 +33,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import textwrap
 
 try:
     from setuptools import setup, Command
@@ -80,63 +81,75 @@ def get_version(key):
     major = data[f'major']
     minor = data[f'minor']
     patch = data.get(f'patch', '')
+    release = data.get(f'release', '')
+    number = data.get(f'number', '')
     build = data.get(f'build', '')
 
-    return (major, minor, patch, build)
+    return (major, minor, patch, release, number, build)
 
 # Read the xcross version information.
-major, minor, patch, build = get_version('xcross')
+major, minor, patch, release, number, build = get_version('xcross')
 version = f'{major}.{minor}'
 if patch != '0':
     version = f'{version}.{patch}'
+release_type = { 'alpha': 'a', 'beta': 'b', 'candidate': 'rc', 'post': '.post' }
+if release and not number:
+    raise ValueError('Must provide a release number with a non-final build.')
+elif release:
+    version = f'{version}{release_type[release]}{number}'
+# py2exe version is valid one of the following:
+#    [0-255].[0-255].[0-65535]
+#    [0-255].[0-255].[0-255].[0-255]
+# Therefore, we can never provide release candidate
+# values or omit the patch field.
 py2exe_version = f'{major}.{minor}.{patch}'
 
-docker_major, docker_minor, docker_patch, docker_build = get_version('docker')
+docker_major, docker_minor, docker_patch, docker_build, *_ = get_version('docker')
 docker_version = f'{docker_major}.{docker_minor}'
 if docker_patch != '0':
     docker_version = f'{docker_version}.{docker_patch}'
 
 # Read the dependency version information.
 # This is the GCC and other utilities version from crosstool-NG.
-ubuntu_major, ubuntu_minor, _, _ = get_version('ubuntu')
+ubuntu_major, ubuntu_minor, *_ = get_version('ubuntu')
 ubuntu_version = f'{ubuntu_major}.{ubuntu_minor}'
-emsdk_major, emsdk_minor, emsdk_patch, _ = get_version('emsdk')
+emsdk_major, emsdk_minor, emsdk_patch, *_ = get_version('emsdk')
 emsdk_version = f'{emsdk_major}.{emsdk_minor}.{emsdk_patch}'
-gcc_major, gcc_minor, gcc_patch, _ = get_version('gcc')
+gcc_major, gcc_minor, gcc_patch, *_ = get_version('gcc')
 gcc_version = f'{gcc_major}.{gcc_minor}.{gcc_patch}'
-binutils_major, binutils_minor, _, _ = get_version('binutils')
+binutils_major, binutils_minor, *_ = get_version('binutils')
 binutils_version = f'{binutils_major}.{binutils_minor}'
-mingw_major, mingw_minor, mingw_patch, _ = get_version('mingw')
+mingw_major, mingw_minor, mingw_patch, *_ = get_version('mingw')
 mingw_version = f'{mingw_major}.{mingw_minor}.{mingw_patch}'
-glibc_major, glibc_minor, _, _ = get_version('glibc')
+glibc_major, glibc_minor, *_ = get_version('glibc')
 glibc_version = f'{glibc_major}.{glibc_minor}'
-musl_major, musl_minor, musl_patch, _ = get_version('musl')
+musl_major, musl_minor, musl_patch, *_ = get_version('musl')
 musl_version = f'{musl_major}.{musl_minor}.{musl_patch}'
-musl_cross_major, musl_cross_minor, musl_cross_patch, _ = get_version('musl-cross')
+musl_cross_major, musl_cross_minor, musl_cross_patch, *_ = get_version('musl-cross')
 musl_cross_version = f'{musl_cross_major}.{musl_cross_minor}.{musl_cross_patch}'
-avr_major, avr_minor, avr_patch, _ = get_version('avr')
+avr_major, avr_minor, avr_patch, *_ = get_version('avr')
 avr_version = f'{avr_major}.{avr_minor}.{avr_patch}'
-uclibc_major, uclibc_minor, uclibc_patch, _ = get_version('uclibc')
+uclibc_major, uclibc_minor, uclibc_patch, *_ = get_version('uclibc')
 uclibc_version = f'{uclibc_major}.{uclibc_minor}.{uclibc_patch}'
-expat_major, expat_minor, expat_patch, _ = get_version('expat')
+expat_major, expat_minor, expat_patch, *_ = get_version('expat')
 expat_version = f'{expat_major}.{expat_minor}.{expat_patch}'
-isl_major, isl_minor, _, _ = get_version('isl')
+isl_major, isl_minor, *_ = get_version('isl')
 isl_version = f'{isl_major}.{isl_minor}'
-linux_major, linux_minor, linux_patch, _ = get_version('linux')
+linux_major, linux_minor, linux_patch, *_ = get_version('linux')
 linux_version = f'{linux_major}.{linux_minor}.{linux_patch}'
-linux_headers_major, linux_headers_minor, linux_headers_patch, _ = get_version('linux-headers')
+linux_headers_major, linux_headers_minor, linux_headers_patch, *_ = get_version('linux-headers')
 linux_headers_version = f'{linux_headers_major}.{linux_headers_minor}.{linux_headers_patch}'
-gmp_major, gmp_minor, gmp_patch, _ = get_version('gmp')
+gmp_major, gmp_minor, gmp_patch, *_ = get_version('gmp')
 gmp_version = f'{gmp_major}.{gmp_minor}.{gmp_patch}'
-mpc_major, mpc_minor, mpc_patch, _ = get_version('mpc')
+mpc_major, mpc_minor, mpc_patch, *_ = get_version('mpc')
 mpc_version = f'{mpc_major}.{mpc_minor}.{mpc_patch}'
-mpfr_major, mpfr_minor, mpfr_patch, _ = get_version('mpfr')
+mpfr_major, mpfr_minor, mpfr_patch, *_ = get_version('mpfr')
 mpfr_version = f'{mpfr_major}.{mpfr_minor}.{mpfr_patch}'
-buildroot_major, buildroot_minor, buildroot_patch, _ = get_version('buildroot')
+buildroot_major, buildroot_minor, buildroot_patch, *_ = get_version('buildroot')
 buildroot_version = f'{buildroot_major}.{buildroot_minor}.{buildroot_patch}'
-ct_major, ct_minor, ct_patch, _ = get_version('crosstool-ng')
+ct_major, ct_minor, ct_patch, *_ = get_version('crosstool-ng')
 ct_version = f'{ct_major}.{ct_minor}.{ct_patch}'
-qemu_major, qemu_minor, qemu_patch, _ = get_version('qemu')
+qemu_major, qemu_minor, qemu_patch, *_ = get_version('qemu')
 qemu_version = f'{qemu_major}.{qemu_minor}.{qemu_patch}'
 riscv_toolchain_version = config['riscv-gnu-toolchain']['riscv-version']
 riscv_binutils_version = config['riscv-gnu-toolchain']['binutils-version']
@@ -333,6 +346,15 @@ class VersionCommand(Command):
     def run(self):
         '''Modify the library version.'''
 
+        version_info = f"""
+        version_info(
+            major='{major}',
+            minor='{minor}',
+            patch='{patch}',
+            release='{release}',
+            number='{number}',
+            build='{build}'
+        )"""
         xcross = f'{HOME}/xcross/__init__.py'
         self.configure(f'{xcross}.in', xcross, True, [
             ('BIN', f'"{bin_directory}"'),
@@ -341,8 +363,10 @@ class VersionCommand(Command):
             ('VERSION_MAJOR', f"'{major}'"),
             ('VERSION_MINOR', f"'{minor}'"),
             ('VERSION_PATCH', f"'{patch}'"),
+            ('VERSION_RELEASE', f"'{release}'"),
+            ('VERSION_NUMBER', f"'{number}'"),
             ('VERSION_BUILD', f"'{build}'"),
-            ('VERSION_INFO', f"version_info(major='{major}', minor='{minor}', patch='{patch}', build='{build}')"),
+            ('VERSION_INFO', textwrap.dedent(version_info)[1:]),
             ('VERSION', f"'{version}'"),
         ])
 

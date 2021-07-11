@@ -165,4 +165,4 @@ Supports the extensions `g`, `imaf?d?c?`, and the ABIs `ilp32d?` and `lp64d?`.
 
 # Package Manager Support
 
-All images for Linux and MinGW come pre-installed with vcpkg and Conan. wasm comes pre-installed with vcpkg only.
+All images for Linux, MinGW, and Emscripten come pre-installed with vcpkg and Conan.

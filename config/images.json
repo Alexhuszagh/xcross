@@ -1774,7 +1774,10 @@
             // is similar to Clang anyway.
             "compiler": "clang",
             "compiler_version": "13",
-            "conan_system": "Emscripten",
+            // Lie about the system: using Emscripten causes the compiler
+            // to change libraries to be `libzlibstatic.a`, which causes
+            // linking issues.
+            "conan_system": "Linux",
             "meson_system": "emscripten",
             "vcpkg_system": "Emscripten"
         }
