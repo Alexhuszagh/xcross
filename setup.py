@@ -734,6 +734,7 @@ class TestImagesCommand(Command):
         docker_command = [
             docker,
             'run',
+            '--name', f'xcross-test-{target}',
             '-v', f'{HOME}/test:/test',
             '--env', f'IMAGE={target}',
             '--env', f'TYPE={os_type}',
@@ -743,6 +744,9 @@ class TestImagesCommand(Command):
         docker_command.append(image_from_target(target))
         docker_command += ['/bin/bash', '-c', command]
         subprocess.check_call(docker_command)
+
+        # Clean up our stoppd container.
+        subprocess.check_call([docker, 'rm', f'xcross-test-{target}'])
 
     def nostartfiles(self, target):
         '''Check if an image does not have startfiles.'''
@@ -790,7 +794,7 @@ class TestImagesCommand(Command):
         os_images = sorted([i.target for i in images if i.os.is_os()])
 
         # Run OS images.
-        shutil.copy(f'{HOME}/test/cpp-helloworld', f'{HOME}/test/buildtests')
+        shutil.copytree(f'{HOME}/test/cpp-helloworld', f'{HOME}/test/buildtests', dirs_exist_ok=True)
         try:
             for target in os_images:
                 if has_started or self.start == target:
@@ -817,7 +821,7 @@ class TestImagesCommand(Command):
             return
 
         # Run metal images.
-        shutil.copy(f'{HOME}/test/cpp-atoi', f'{HOME}/test/buildtests')
+        shutil.copytree(f'{HOME}/test/cpp-atoi', f'{HOME}/test/buildtests', dirs_exist_ok=True)
         try:
             for target in metal_images:
                 if has_started or self.start == target:

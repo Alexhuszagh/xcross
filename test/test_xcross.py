@@ -11,6 +11,7 @@ sys.path.insert(0, xcross_dir)
 import xcross
 
 os.environ['CROSS_TARGET'] = 'alpha-unknown-linux-gnu'
+os.environ['CROSS_WITH_PACKAGE_MANAGERS'] = ''
 
 def run_validate_arguments(argv):
     args = xcross.process_args(argv)
