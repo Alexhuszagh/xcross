@@ -219,10 +219,17 @@ def sorted_image_targets():
     '''Get a sorted list of image targets.'''
 
     # Need to write the total image list.
-    metal_images = sorted([i.target for i in images if i.os.is_baremetal()])
-    script_images = sorted([i.target for i in images if i.os.is_script()])
-    os_images = sorted([i.target for i in images if i.os.is_os()])
-    return os_images + metal_images + script_images
+    os_images = []
+    metal_images = []
+    other_images = []
+    for image in images:
+        if image.os.is_os():
+            os_images.append(image.target)
+        elif image.os.is_baremetal():
+            metal_images.append(image.target)
+        else:
+            other_images.append(image.target)
+    return os_images + metal_images + other_images
 
 def subslice_targets(start=None, stop=None):
     '''Extract a subslice of all targets.'''
@@ -885,17 +892,22 @@ class OperatingSystem(enum.Enum):
     Android = enum.auto()
     BareMetal = enum.auto()
     Linux = enum.auto()
-    Script = enum.auto()
+    Emscripten = enum.auto()
     Windows = enum.auto()
+    Unknown = enum.auto()
 
     def is_baremetal(self):
         return self == OperatingSystem.BareMetal
 
-    def is_script(self):
-        return self == OperatingSystem.Script
+    def is_emscripten(self):
+        return self == OperatingSystem.Emscripten
 
     def is_os(self):
-        return not (self.is_baremetal() or self.is_script())
+        return (
+            self == OperatingSystem.Android
+            or self == OperatingSystem.Linux
+            or self == OperatingSystem.Windows
+        )
 
     def to_cmake(self):
         '''Get the identifier for the CMake system name.'''
@@ -926,9 +938,10 @@ cmake_string = {
     OperatingSystem.Android: 'Android',
     OperatingSystem.BareMetal: 'Generic',
     # This gets ignored anyway.
-    OperatingSystem.Script: 'Script',
+    OperatingSystem.Emscripten: 'Emscripten',
     OperatingSystem.Linux: 'Linux',
     OperatingSystem.Windows: 'Windows',
+    OperatingSystem.Unknown: 'Generic',
 }
 conan_string = {
     # Conan uses CMake's feature detection for Android,
@@ -949,7 +962,7 @@ meson_string = {
 triple_string = {
     OperatingSystem.Android: 'linux',
     OperatingSystem.BareMetal: None,
-    OperatingSystem.Script: 'script',
+    OperatingSystem.Emscripten: 'emscripten',
     OperatingSystem.Linux: 'linux',
     OperatingSystem.Windows: 'w64',
 }
@@ -1618,6 +1631,9 @@ class ConfigureCommand(VersionCommand):
         symlink='symlink',
         toolchain='toolchain',
         wrapper='wrapper',
+        linker='',
+        cc='',
+        cxx='',
     ):
         '''Configure a Dockerfile from template.'''
 
@@ -1679,8 +1695,11 @@ class ConfigureCommand(VersionCommand):
             ('AUTHORS', config['metadata']['authors']),
             ('EMSDK_VERSION', emsdk_version),
             ('BIN', f'"{bin_directory}"'),
+            ('CC', f'"{cc}"'),
+            ('CXX', f'"{cxx}"'),
             ('ENTRYPOINT', f'"{bin_directory}/entrypoint.sh"'),
             ('FLAGS', f'"{image.flags}"'),
+            ('LINKER', f'"{linker}"'),
             ('MAINTAINER', config['metadata']['maintainer']),
             ('OPTIONAL_FLAGS', f'"{image.optional_flags}"'),
             ('OS', image.os.to_triple() or 'unknown'),

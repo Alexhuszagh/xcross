@@ -1759,15 +1759,14 @@
     // OTHER
     {
         "type": "other",
-        "os": "script",
+        "os": "emscripten",
         "system": "javascript",
-        "target": "wasm",
-        "family": "wasm64",
+        "target": "wasm32-unknown-emscripten",
+        "family": "wasm32",
         "dockerfile": {
-            "base": "emscripten",
             "toolchain": "wasm-toolchain",
             "wrapper": "wasm-wrapper",
-            "spec": null
+            "linker": "/emsdk/upstream/bin/wasm-ld"
         },
         "package_dockerfile": {
             // Fake the compiler identification, since emcc
@@ -1782,4 +1781,6 @@
             "vcpkg_system": "Emscripten"
         }
     }
+    // wasm64 is currently not supported.
+    // When support for wasm64 becomes better, enable this.
 ]

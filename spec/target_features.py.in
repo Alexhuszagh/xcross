@@ -15,41 +15,57 @@ import subprocess
 
 bin_dir = ^BIN^
 
-def find_executable(executables, name):
-    '''Find an executable if available.'''
+def find_executable(executable):
+    '''Find if an executable is available.'''
 
     devnull = subprocess.DEVNULL
-    for exe in executables:
-        if exe.startswith('/') and os.path.exists(exe):
-            return exe
-        elif subprocess.call(
-            ['which', exe],
-            stderr=devnull,
-            stdout=devnull,
-        ) == 0:
-            return exe
+    if executable.startswith('/') and os.path.exists(executable):
+        return True
+    elif subprocess.call(
+        ['which', executable],
+        stderr=devnull,
+        stdout=devnull,
+    ) == 0:
+        return True
+    return False
+
+def find_first_executable(executables, name):
+    '''Find the first executable that is available.'''
+
+    for executable in executables:
+        if find_executable(executable):
+            return executable
     raise ValueError(f'Unable to find {name}.')
 
 def find_linker():
     '''Get the executable for the linker.'''
 
+    env_linker = os.environ.get('LINKER')
+    if env_linker and find_executable(env_linker):
+        return env_linker
     linkers = ['ld', 'ld.bfd', 'ld.gold']
     linkers += [f'{bin_dir}/{i}' for i in linkers]
-    return find_executable(linkers, 'linker')
+    return find_first_executable(linkers, 'linker')
 
 def find_cc():
     '''Find the C compiler.'''
 
+    env_cc = os.environ.get('CC')
+    if env_cc and find_executable(env_cc):
+        return env_cc
     compilers = ['cc', 'gcc', 'clang']
     compilers += [f'{bin_dir}/{i}' for i in compilers]
-    return find_executable(compilers, 'cc')
+    return find_first_executable(compilers, 'cc')
 
 def find_cxx():
     '''Find the C++ compiler.'''
 
+    env_cxx = os.environ.get('CXX')
+    if env_cxx and find_executable(env_cxx):
+        return env_cxx
     compilers = ['c++', 'g++', 'clang++']
     compilers += [f'{bin_dir}/{i}' for i in compilers]
-    return find_executable(compilers, 'c++')
+    return find_first_executable(compilers, 'c++')
 
 def linker_is_gnu(linker):
     '''Determine if the linker flavor is GNU.'''
@@ -118,9 +134,14 @@ def alignof(c_type, cc):
     # We use the hack to get the alignment:
     #   char (*alignment)[alignof({type})] = 1;
     with open('main.c', 'w') as file:
+        # Note: `size_t` is not guaranteed to be in `stdint`.
+        #   Use `stddef` to guarantee it's there.
         file.write('#include <stdalign.h>\n')
+        file.write('#include <stddef.h>\n')
         file.write('#include <stdint.h>\n')
-        file.write(f'char (*alignment)[alignof({c_type})] = 1.0;\n')
+        # Note: alignof is C++11, _Alignof is C11.
+        #   alignof in C is a GNU extension.
+        file.write(f'char (*alignment)[_Alignof({c_type})] = 1.0;\n')
         file.write('int main() { return 0; }\n')
 
     with subprocess.Popen(

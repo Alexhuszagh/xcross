@@ -5,6 +5,6 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install --assume-yes --no-install-r
 
 COPY ["spec/target_features.py", "/"]
 COPY ["spec/target_features.sh", "/"]
-RUN ARCH=^ARCH^ OS=^OS^ FLAGS=^FLAGS^ OPTIONAL_FLAGS=^OPTIONAL_FLAGS^ /target_features.sh
+RUN ARCH=^ARCH^ OS=^OS^ FLAGS=^FLAGS^ OPTIONAL_FLAGS=^OPTIONAL_FLAGS^ CC=^CC^ CXX=^CXX^ LINKER=^LINKER^ /target_features.sh
 RUN rm /target_features.py
 RUN rm /target_features.sh
