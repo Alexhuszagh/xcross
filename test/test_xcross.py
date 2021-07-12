@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import errno
 import os
 import pytest
 import sys
@@ -136,15 +137,21 @@ def test_run_image():
     finally:
         run_image(['--stop'])
 
-def test_permissions():
+def windows_permissions():
+    # Check we don't have permissions to write if not admin.
+    # Note that Docker runs as a non-administrator on Windows,
+    # so just assume that it will fails.
+    command = ['touch', '/mnt/xcross/sample_xcross_file']
+    run_image(command, exit_code=errno.EPERM)
+
+def unix_permissions():
     # Make sure all files produced have the same permissions.
     # This means we properly mapped the image.
-    euid = os.geteuid()
     try:
         run_image(['touch', 'sample_xcross_file'])
         st = os.stat('sample_xcross_file')
-        assert(st.st_uid == euid)
-        assert(st.st_gid == euid)
+        assert(st.st_uid == os.getuid())
+        assert(st.st_gid == os.getgid())
     finally:
         os.unlink('sample_xcross_file')
 
@@ -153,3 +160,9 @@ def test_permissions():
 
     # Test with podman: ensure permissions don't fail.
     run_image(['ls', '-la', '--engine', 'podman'])
+
+def test_permissions():
+    if xcross.os_name() == 'nt':
+        windows_permissions()
+    else:
+        unix_permissions()

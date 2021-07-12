@@ -578,9 +578,14 @@ def docker_command(args, parent_dir, relpath):
     # have permission to anyway, this is fine. On all other
     # systems, Docker (except in rootless mode) has elevated
     # permissions, so we need to map it to the current user.
+    # Finally, uid/gid are only available on Unix. Don't
+    # use euid or egid since Docker runs as root, which
+    # could allow permission issues. On Windows, `id -u`
+    # and `id -g` aren't recognized as valid users, nor
+    # is %USERNAME%. In short, just let Docker do it's thing,
+    # which is the correct default anyway.
     if args.engine_type == 'docker' and os_name() != 'nt':
-        euid = os.geteuid()
-        command += ['--user', f'{euid}:{euid}']
+        command += ['--user', f'{os.getuid()}:{os.getgid()}']
     elif args.engine_type == 'podman':
         # Podman has issues with SELinux, so ensure we
         # disable labels. This still does not allow
