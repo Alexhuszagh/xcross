@@ -39,9 +39,10 @@ def run_format_command(argv, expected):
 
 def run_image_command(argv, expected):
     args = xcross.process_args(argv)
+    xcross.validate_arguments(args)
     actual = xcross.image_command(args, '.').splitlines()
     assert actual[0].startswith('source /etc/profile')
-    assert actual[1].startswith('cd /src')
+    assert actual[1].startswith('cd /mnt/xcross')
     assert actual[2] == expected
 
 def run_image(args, exit_code=0):
@@ -50,7 +51,9 @@ def run_image(args, exit_code=0):
     assert exit_error.value.code == exit_code
 
 def test_get_image():
-    run_get_image(['--target', 'alpha-unknown-linux-gnu'], 'docker.io/ahuszagh/cross:alpha-unknown-linux-gnu')
+    run_get_image([
+        '--target', 'alpha-unknown-linux-gnu'
+    ], 'docker.io/ahuszagh/cross:alpha-unknown-linux-gnu')
     run_get_image([
         '--target', 'alpha-unknown-linux-gnu',
         '--server', '',
@@ -81,7 +84,9 @@ def test_single_format_command():
 
 def test_hyphen_command():
     run_format_command(['make', '-j', '5'], 'make -j 5')
-    run_format_command(['cmake', '..', '-DBUILD_SHARED_LIBS=OFF'], 'cmake .. -DBUILD_SHARED_LIBS=OFF')
+    run_format_command([
+        'cmake', '..', '-DBUILD_SHARED_LIBS=OFF'
+    ], 'cmake .. -DBUILD_SHARED_LIBS=OFF')
 
 def test_normpath_windows():
     if os.name != 'nt':
@@ -124,10 +129,12 @@ def test_run_image():
     run_image(['echo', 'helloworld'])
     run_image(['c++', '--version'])
     run_image(['cl'], exit_code=127)
-    # Test detached mode
-    run_image(['--detach', 'echo', 'hellworld'])
-    run_image(['--detach', 'echo', 'next'])
-    run_image(['--stop'])
+    # Test detached mode. Ensure we clean up at the end.
+    try:
+        run_image(['--detach', 'echo', 'hellworld'])
+        run_image(['--detach', 'echo', 'next'])
+    finally:
+        run_image(['--stop'])
 
 def test_permissions():
     # Make sure all files produced have the same permissions.
