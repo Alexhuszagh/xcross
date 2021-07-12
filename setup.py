@@ -229,6 +229,9 @@ def sorted_image_targets():
             metal_images.append(image.target)
         else:
             other_images.append(image.target)
+    os_images.sort()
+    metal_images.sort()
+    other_images.sort()
     return os_images + metal_images + other_images
 
 def subslice_targets(start=None, stop=None):
