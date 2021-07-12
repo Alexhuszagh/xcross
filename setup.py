@@ -21,7 +21,6 @@
 # -------
 
 import ast
-import collections
 import enum
 import glob
 import itertools
@@ -78,12 +77,12 @@ def get_version(key):
     '''Get the version data from the JSON config.'''
 
     data = config[key]['version']
-    major = data[f'major']
-    minor = data[f'minor']
-    patch = data.get(f'patch', '')
-    release = data.get(f'release', '')
-    number = data.get(f'number', '')
-    build = data.get(f'build', '')
+    major = data['major']
+    minor = data['minor']
+    patch = data.get('patch', '')
+    release = data.get('release', '')
+    number = data.get('number', '')
+    build = data.get('build', '')
 
     return (major, minor, patch, release, number, build)
 
@@ -92,7 +91,7 @@ major, minor, patch, release, number, build = get_version('xcross')
 version = f'{major}.{minor}'
 if patch != '0':
     version = f'{version}.{patch}'
-release_type = { 'alpha': 'a', 'beta': 'b', 'candidate': 'rc', 'post': '.post' }
+release_type = {'alpha': 'a', 'beta': 'b', 'candidate': 'rc', 'post': '.post'}
 if release and not number:
     raise ValueError('Must provide a release number with a non-final build.')
 elif release:
@@ -168,14 +167,18 @@ with open(f'{HOME}/README.md') as file:
 # COMMANDS
 # --------
 
-def parse_literal(value, default, valid_types=None):
+# Literal boolean type for command arguments.
+bool_type = (type(None), bool, int)
+
+def parse_literal(inst, key, default, valid_types=None):
     '''Parse literal user options.'''
 
+    value = getattr(inst, key)
     if value != default:
         value = ast.literal_eval(value)
     if valid_types is not None:
         assert isinstance(value, valid_types)
-    return value
+    setattr(inst, key)
 
 def check_call(code):
     '''Wrap `subprocess.call` to exit on failure.'''
@@ -206,12 +209,12 @@ def semver():
 
     return versions
 
-def image_from_target(target, with_package_managers=False):
+def image_from_target(target, with_pkg=False):
     '''Get the full image name from the target.'''
 
     username = config['metadata']['username']
     repository = config['metadata']['repository']
-    if with_package_managers:
+    if with_pkg:
         repository = f'pkg{repository}'
     return f'{username}/{repository}:{target}'
 
@@ -241,15 +244,15 @@ def subslice_targets(start=None, stop=None):
     if start is not None:
         targets = targets[targets.index(start):]
     if stop is not None:
-        targets = targets[:targets.index(stop)+1]
+        targets = targets[:targets.index(stop) + 1]
     return targets
 
-def build_image(docker, target, with_package_managers=False):
+def build_image(docker, target, with_pkg=False):
     '''Call Docker to build a single target.'''
 
-    image = image_from_target(target, with_package_managers)
+    image = image_from_target(target, with_pkg)
     image_dir = 'images'
-    if with_package_managers:
+    if with_pkg:
         image_dir = f'pkg{image_dir}'
     path = f'{HOME}/docker/{image_dir}/Dockerfile.{target}'
     return subprocess.call([docker, 'build', '-t', image, HOME, '--file', path])
@@ -301,7 +304,6 @@ class CleanCommand(Command):
         shutil.rmtree(f'{HOME}/docker/pkgimages', ignore_errors=True)
         shutil.rmtree(f'{HOME}/musl/config', ignore_errors=True)
         shutil.rmtree(f'{HOME}/symlink/toolchain', ignore_errors=True)
-
 
 class VersionCommand(Command):
     '''A custom command to configure the library version.'''
@@ -440,7 +442,7 @@ class BuildImageCommand(Command):
 
     def finalize_options(self):
         assert self.target is not None
-        self.with_package_managers = parse_literal(self.with_package_managers, None, (type(None), bool, int))
+        parse_literal(self, 'with_package_managers', None, bool_type)
 
     def build_image(self, docker):
         '''Build a Docker image.'''
@@ -473,7 +475,7 @@ class BuildImagesCommand(Command):
         self.with_package_managers = None
 
     def finalize_options(self):
-        self.with_package_managers = parse_literal(self.with_package_managers, None, (type(None), bool, int))
+        parse_literal(self, 'with_package_managers', None, bool_type)
 
     def build_image(self, docker, target, with_package_managers=False):
         '''Build a Docker image.'''
@@ -490,22 +492,22 @@ class BuildImagesCommand(Command):
         tag = image_from_target(tag_name, with_package_managers)
         check_call(subprocess.call([docker, 'tag', image, tag]))
 
-    def build_versions(self, docker, target, with_package_managers=False):
+    def build_versions(self, docker, target, with_pkg=False):
         '''Build all versions of a given target.'''
 
-        if not self.build_image(docker, target, with_package_managers):
+        if not self.build_image(docker, target, with_pkg):
             return
         for version in semver():
-            self.tag_image(docker, target, f'{target}-{version}', with_package_managers)
+            self.tag_image(docker, target, f'{target}-{version}', with_pkg)
         if target.endswith('-unknown-linux-gnu'):
-            self.tag_versions(docker, target, target[:-len('-unknown-linux-gnu')], with_package_managers)
+            self.tag_versions(docker, target, target[:-len('-unknown-linux-gnu')], with_pkg)
 
-    def tag_versions(self, docker, target, tag_name, with_package_managers=False):
+    def tag_versions(self, docker, target, tag_name, with_pkg=False):
         '''Build all versions of a given target.'''
 
-        self.tag_image(docker, target, tag_name, with_package_managers)
+        self.tag_image(docker, target, tag_name, with_pkg)
         for version in semver():
-            self.tag_image(docker, target, f'{tag_name}-{version}', with_package_managers)
+            self.tag_image(docker, target, f'{tag_name}-{version}', with_pkg)
 
     def run(self):
         '''Build all Docker images.'''
@@ -517,7 +519,7 @@ class BuildImagesCommand(Command):
         # Need to build our base vcpkg for package files.
         if self.with_package_managers:
             if build_image(docker, 'vcpkg', True) != 0:
-                print(f'Error: failed to build target vcpkg', file=sys.stderr)
+                print('Error: failed to build target vcpkg', file=sys.stderr)
                 sys.exit(1)
 
         # Build all our Docker images.
@@ -531,7 +533,7 @@ class BuildImagesCommand(Command):
             elif not self.with_package_managers:
                 continue
             if os.path.exists(f'{HOME}/docker/pkgimages/Dockerfile.{target}'):
-                self.build_versions(docker, target, with_package_managers=True)
+                self.build_versions(docker, target, with_pkg=True)
 
         # Print any failures.
         if self.failures:
@@ -595,7 +597,7 @@ class PushCommand(Command):
         self.with_package_managers = None
 
     def finalize_options(self):
-        self.with_package_managers = parse_literal(self.with_package_managers, None, (type(None), bool, int))
+        parse_literal(self, 'with_package_managers', None, bool_type)
 
     def push_image(self, docker, target, with_package_managers=False):
         '''Push an image to Docker Hub.'''
@@ -645,7 +647,7 @@ class PublishCommand(Command):
         self.test = None
 
     def finalize_options(self):
-        self.test = parse_literal(self.test, None, (type(None), bool, int))
+        parse_literal(self, 'test', None, bool_type)
 
     def run(self):
         '''Run the unittest suite.'''
@@ -683,6 +685,26 @@ class TestCommand(Command):
             raise FileNotFoundError('Unable to find module tox.')
         check_call(subprocess.call(['tox', HOME]))
 
+class LintCommand(Command):
+    '''Lint python code.'''
+
+    description = 'lint python code'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Run the unittest suite.'''
+
+        if not has_module('flake8'):
+            raise FileNotFoundError('Unable to find module flake8.')
+        self.run_command('configure')
+        check_call(subprocess.call(['flake8', HOME]))
+
 class TestImagesCommand(Command):
     '''Run the Docker test suite.'''
 
@@ -712,8 +734,8 @@ class TestImagesCommand(Command):
         self.metal = None
 
     def finalize_options(self):
-        self.os = parse_literal(self.os, True, (type(None), bool, int))
-        self.metal = parse_literal(self.metal, None, (type(None), bool, int))
+        parse_literal(self, 'os', None, bool_type)
+        parse_literal(self, 'metal', None, bool_type)
 
     def git_clone(self, git, repository):
         '''Clone a given repository.'''
@@ -771,7 +793,12 @@ class TestImagesCommand(Command):
         # moxie cannot find `__bss_start__` and `__bss_end__`.
         # sparc cannot find `__stack`.
         # there is no crt0 for x86_64
-        regex = re.compile(r'^(?:(?:i[3-7]86-unknown-elf)|(?:moxie.*-none-elf)|(?:sparc-unknown-elf)|(?:x86_64-unknown-elf))$')
+        regex = re.compile(r'''^(?:
+            (?:i[3-7]86-unknown-elf)|
+            (?:moxie.*-none-elf)|
+            (?:sparc-unknown-elf)|
+            (?:x86_64-unknown-elf)
+        )$''', re.X)
         return regex.match(target)
 
     def skip(self, target):
@@ -810,7 +837,8 @@ class TestImagesCommand(Command):
         os_images = sorted([i.target for i in images if i.os.is_os()])
 
         # Run OS images.
-        shutil.copytree(f'{HOME}/test/cpp-helloworld', f'{HOME}/test/buildtests', dirs_exist_ok=True)
+        testdir = f'{HOME}/test/buildtests'
+        shutil.copytree(f'{HOME}/test/cpp-helloworld', testdir, dirs_exist_ok=True)
         try:
             for target in os_images:
                 if has_started or self.start == target:
@@ -832,12 +860,12 @@ class TestImagesCommand(Command):
                 self.run_test(docker, 'ppc64-unknown-linux-gnu', 'os', cpu='power9')
                 self.run_test(docker, 'mips-unknown-linux-gnu', 'os', cpu='24Kf')
         finally:
-            shutil.rmtree(f'{HOME}/test/buildtests', ignore_errors=True)
+            shutil.rmtree(testdir, ignore_errors=True)
         if has_stopped:
             return
 
         # Run metal images.
-        shutil.copytree(f'{HOME}/test/cpp-atoi', f'{HOME}/test/buildtests', dirs_exist_ok=True)
+        shutil.copytree(f'{HOME}/test/cpp-atoi', testdir, dirs_exist_ok=True)
         try:
             for target in metal_images:
                 if has_started or self.start == target:
@@ -849,7 +877,7 @@ class TestImagesCommand(Command):
                     has_stopped = True
                     break
         finally:
-            shutil.rmtree(f'{HOME}/test/buildtests', ignore_errors=True)
+            shutil.rmtree(testdir, ignore_errors=True)
         if has_stopped:
             return
 
@@ -1451,7 +1479,7 @@ class ConfigureCommand(VersionCommand):
         ])
         self.configure(f'{conan}.in', conan, True, [
             ('BIN', f'"{bin_directory}"'),
-            ('CONAN', f"'/usr/local/bin/conan'"),
+            ('CONAN', "'/usr/local/bin/conan'"),
             ('USERNAME', config["options"]["username"]),
         ])
         self.configure(f'{buildroot}.in', buildroot, True, [
@@ -1483,7 +1511,7 @@ class ConfigureCommand(VersionCommand):
         ])
         self.configure(f'{meson}.in', meson, True, [
             ('BIN', f'"{bin_directory}"'),
-            ('MESON', f"'/usr/local/bin/meson'"),
+            ('MESON', "'/usr/local/bin/meson'"),
         ])
         self.configure(f'{musl}.in', musl, True, [
             ('BINUTILS_VERSION', binutils_version),
@@ -1589,7 +1617,10 @@ class ConfigureCommand(VersionCommand):
         old_musl_minor = '1'
         old_musl_patch = '21'
         old_musl_version = '1.1.21'
-        replacements.append(('MUSL_V_OLD', f'CT_MUSL_V_{old_musl_major}_{old_musl_minor}_{old_musl_patch}=y'))
+        replacements.append((
+            'MUSL_V_OLD',
+            f'CT_MUSL_V_{old_musl_major}_{old_musl_minor}_{old_musl_patch}=y'
+        ))
         ct_musl = [
             f'CT_MUSL_V_{musl_major}_{musl_minor}_{musl_patch}=y',
             f'# CT_MUSL_V_{old_musl_major}_{old_musl_minor}_{old_musl_patch} is not set'
@@ -1982,7 +2013,6 @@ class ConfigureCommand(VersionCommand):
         '''Configure a musl-cross-based image.'''
 
         # Get the proper dependent parameters for our image.
-        os = image.os.to_cmake()
         if image.qemu:
             cmake_template = f'{HOME}/cmake/musl-qemu.cmake.in'
             symlink_template = f'{HOME}/symlink/musl-qemu.sh.in'
@@ -2087,12 +2117,12 @@ class ConfigureCommand(VersionCommand):
         emmake = f'{HOME}/symlink/emmake'
         make = f'{HOME}/symlink/make.in'
         self.configure(f'{cmake}.in', cmake, True, [
-            ('CMAKE', f"'/usr/bin/cmake'"),
+            ('CMAKE', "'/usr/bin/cmake'"),
             ('WRAPPER', ''),
             ('SYSROOT', f'"{config["options"]["sysroot"]}"'),
         ])
         self.configure(make, emmake, True, [
-            ('MAKE', f"'/usr/bin/make'"),
+            ('MAKE', "'/usr/bin/make'"),
             ('WRAPPER', 'emmake '),
         ])
 
@@ -2184,6 +2214,7 @@ setuptools.setup(
         'clean_dist': CleanDistCommand,
         'configure': ConfigureCommand,
         'install': InstallCommand,
+        'lint': LintCommand,
         'publish': PublishCommand,
         'push': PushCommand,
         'tag': TagCommand,

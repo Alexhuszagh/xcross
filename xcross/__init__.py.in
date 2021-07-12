@@ -7,12 +7,14 @@
 
 import argparse
 import collections
+import errno
 import os
 import pathlib
 import re
-import stat
 import subprocess
 import sys
+import tempfile
+import textwrap
 import uuid
 
 # The version info follows loosely semantic versioning and more closely, PEP 440.
@@ -160,6 +162,16 @@ parser.add_argument(
 )
 base_name = 'ahuszagh_xcross'
 base_script_name = f'.__{base_name}'
+# This was calculated one time via mktemp. We don't want to pollute
+# the user's temp directory. We use a custom directory
+# for the following reasons:
+#   1. Allows us only to share this directory with the container,
+#       so the build command can't get information inside the
+#       user's temp directory.
+#   2. Avoids us polluting the user's temp directory if
+#       for some reason the `finally` block fails to remove
+#       the script.
+tmpdir = pathlib.Path(tempfile.gettempdir()) / 'xcross_v4qh187a'
 
 def error(message, code=126, show_help=True):
     '''Print message, help, and exit on error.'''
@@ -183,13 +195,41 @@ def get_parent_dir(args):
     return pathlib.PurePath(os.path.realpath(directory))
 
 def is_relative_to(directory, parent):
-    '''Implement `Pathlib.is_relative_to` before 3.9.'''
+    '''Implement `pathlib.is_relative_to` before 3.9.'''
 
     try:
         directory.relative_to(parent)
         return True
     except ValueError:
         return False
+
+def os_name():
+    '''Portable way to get the OS name, even under Jython.'''
+
+    # On Jython, we don't want os.name to return `java`.
+    # So far, 3 names are registered:
+    #   - nt (Windows)
+    #   - posix
+    #   - java
+    # Currently, Jython doesn't support Python 3, so this
+    # is merely future-proofing: it doesn't exist yet.
+    if os.name != 'java':
+        return os.name
+
+    # We have Jython, use `java.lang` to get the os name.
+    import java.lang
+    name = java.lang.System.getProperty("os.name").lower()
+    if name.startswith('win'):
+        return 'nt'
+    return 'posix'
+
+def add_volumes(args, parent_dir):
+    '''Get our mount points for volumes.'''
+
+    return [
+        '--volume', f'{parent_dir}:/{args.mntdir}',
+        '--volume', f'{str(tmpdir)}:{args.tmpdir}'
+    ]
 
 def validate_username(username):
     return re.match('^[A-Za-z0-9_-]*$', username)
@@ -254,7 +294,7 @@ def _normpath(parent_dir, current_dir, command):
 def normpath(args):
     '''Normalize our arguments for paths on Windows.'''
 
-    if os.name != 'nt':
+    if os_name() != 'nt':
         return
     _normpath(get_parent_dir(args), get_current_dir(), args.command)
 
@@ -301,7 +341,7 @@ def image_command(args, relpath):
     command = ['source /etc/profile']
     if args.cpu:
         command.append(f'export CPU={escape_single_quote(args.cpu)}')
-    command.append(f'cd /src/{escape_single_quote(relpath)}')
+    command.append(f'cd {args.mntdir}/{escape_single_quote(relpath)}')
     command.append(format_command(args))
     return '\n'.join(command)
 
@@ -317,7 +357,7 @@ def find_container_engine(args):
                 print_verbose(f'Found engine {engine}.', args.verbose)
                 return engine
         except OSError as error:
-            if error.errno != os.errno.ENOENT:
+            if error.errno != errno.ENOENT:
                 raise
 
     error('Could not find docker or podman')
@@ -333,7 +373,10 @@ def engine_type(args):
         if stdout:
             print_verbose(stdout.decode("utf-8"), args.verbose)
         if stderr:
-            error(f'Got error when probing engine type of "{stderr.decode("utf-8")}"', show_help=False)
+            error(
+                f'Got error when probing engine type of "{stderr.decode("utf-8")}"',
+                show_help=False
+            )
         if b'docker' in stdout.lower():
             print_verbose('Found docker container engine type.', args.verbose)
             return 'docker'
@@ -415,8 +458,15 @@ def validate_arguments(args):
         error('Cannot stop a container and execute a command in the image.')
 
     # Use a randomized name, to avoid any naming conflicts.
-    uuidhex = uuid.uuid4().hex
-    args.script_name = f'{base_script_name}_uuid_{uuidhex}'
+    # We also write to a custom directory in `/tmp`, so
+    # we don't get permission errors. Make it rw for user
+    # and group, only readable others. We also want to mount
+    # in a standard location: should avoid any conflicts.
+    args.uuidhex = uuid.uuid4().hex
+    args.mntdir = '/mnt/xcross'
+    args.tmpdir = '/tmp/xcross'
+    args.script_name = f'{base_script_name}_uuid_{args.uuidhex}'
+    os.makedirs(tmpdir, mode=0o764, exist_ok=True)
     if args.detach or args.stop:
         # Want a consistent name for our image
         image = re.sub(r"[/:]", '-', get_image(args))
@@ -424,7 +474,7 @@ def validate_arguments(args):
     else:
         # Want a randomized name to minimize accidentally
         # multiple images running with the same name.
-        args.image_name = f'{base_name}_uuid_{uuidhex}'
+        args.image_name = f'{base_name}_uuid_{args.uuidhex}'
 
 def detached_is_running(args):
     '''Check if a detached container is running.'''
@@ -451,7 +501,7 @@ def detached_start(args, parent_dir):
         command.append('--tty')
     if not args.non_interactive:
         command.append('--interactive')
-    command += ['--volume', f'{parent_dir}:/src']
+    command += add_volumes(args, parent_dir)
     command.append(get_image(args))
     command += ['bash']
 
@@ -462,16 +512,24 @@ def detached_start(args, parent_dir):
 def detached_stop(args):
     '''Stop a detached container.'''
 
-    subprocess.check_call(
-        [args.engine, 'stop', args.image_name],
-        shell=False,
-        **args.subprocess_devnull
-    )
-    subprocess.check_call(
-        [args.engine, 'rm', args.image_name],
-        shell=False,
-        **args.subprocess_devnull
-    )
+    print_verbose('Stopping a container started in detached mode...', args.verbose)
+    try:
+        subprocess.check_call(
+            [args.engine, 'stop', args.image_name],
+            shell=False,
+            **args.subprocess_devnull
+        )
+        subprocess.check_call(
+            [args.engine, 'rm', args.image_name],
+            shell=False,
+            **args.subprocess_devnull
+        )
+    except subprocess.CalledProcessError as err:
+        error(
+            f'unable to stop detached container {get_image(args)}: did you start the container?',
+            code=err.returncode,
+            show_help=False
+        )
     sys.exit(0)
 
 def docker_command(args, parent_dir, relpath):
@@ -513,7 +571,14 @@ def docker_command(args, parent_dir, relpath):
     # then provide the user namespace to the current
     # user. This prevents any modification of files
     # above the current user's permissions.
-    if args.engine_type == 'docker' and os.name == 'posix':
+    #
+    # On Windows, root is mapped to the current user normally,
+    # and using the current user permissions leads to permission
+    # errors. Since the user can't modify files they don't
+    # have permission to anyway, this is fine. On all other
+    # systems, Docker (except in rootless mode) has elevated
+    # permissions, so we need to map it to the current user.
+    if args.engine_type == 'docker' and os_name() != 'nt':
         euid = os.geteuid()
         command += ['--user', f'{euid}:{euid}']
     elif args.engine_type == 'podman':
@@ -524,11 +589,11 @@ def docker_command(args, parent_dir, relpath):
     if args.detach:
         command.append(args.image_name)
     else:
-        command += ['--volume', f'{parent_dir}:/src']
+        command += add_volumes(args, parent_dir)
         command.append(get_image(args))
 
     # Now need to add the remaining arguments, the passed command over.
-    script = f'/src/{relpath}/{args.script_name}'
+    script = f'{args.tmpdir}/{args.script_name}'
     command += ['bash', script]
 
     return command
@@ -556,10 +621,14 @@ def pull_image(args):
     kwds = {}
     print_verbose(f'Pulling image {image}...', args.verbose)
     if args.quiet:
-        kwds = { 'stderr': devnull, 'stdout': devnull }
+        kwds = {'stderr': devnull, 'stdout': devnull}
     code = subprocess.call([args.engine, 'pull', image], **kwds)
     if code != 0 and args.with_package_managers:
-        error('Unable to pull image: maybe try without enabling package managers?', code, show_help=False)
+        error(
+            'Unable to pull image: maybe try without enabling package managers?',
+            code=code,
+            show_help=False
+        )
     elif code != 0:
         error('Unable to pull image', code, show_help=False)
 
@@ -567,13 +636,12 @@ def remove_stopped_container(args):
     '''Remove the stopped container.'''
 
     # Don't care if this fails.
-    print_verbose(f'Remove stopped container...', args.verbose)
+    print_verbose('Remove stopped container...', args.verbose)
     subprocess.call([args.engine, 'rm', args.image_name], **args.subprocess_devnull)
 
 def remove_image(args):
     '''Pull the latest version of the image'''
 
-    devnull = subprocess.DEVNULL
     image = get_image(args)
     print_verbose(f'Remove image {image} from local storage...', args.verbose)
     code = subprocess.call([args.engine, 'rmi', image], **args.subprocess_devnull)
@@ -617,14 +685,27 @@ def main(argv=None):
     # exist, in practice it's identical to mkstemp.
     print_verbose('Writing script to file...', args.verbose)
     open_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+    script_path = tmpdir / args.script_name
     try:
         command = image_command(args, relpath)
-        fd = os.open(args.script_name, open_flags)
+        fd = os.open(script_path, open_flags)
         with os.fdopen(fd, 'w', newline='\n') as file:
             file.write(command)
     except OSError as err:
         if err.errno == errno.EEXIST:
-            error(f'file {args.script_name} already exists. if you believe this is an error, delete {args.script_name}', show_help=False)
+            error(
+                textwrap.dedent(f'''
+                    file {str(script_path)} already exists.
+                    if you believe this is an error, delete {str(script_path)}
+                '''),
+                show_help=False
+            )
+        elif err.errno == errno.EPERM:
+            error(
+                'permission denied: cannot write the script to tempfile',
+                code=err.errno,
+                show_help=False
+            )
         else:
             # Unexpected error.
             raise
@@ -641,7 +722,7 @@ def main(argv=None):
     finally:
         print_verbose('Removing temporary files...', args.verbose)
         # Guarantee we cleanup the script afterwards.
-        os.remove(args.script_name)
+        os.remove(script_path)
         if not args.detach:
             remove_stopped_container(args)
 
