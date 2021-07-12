@@ -178,7 +178,7 @@ def parse_literal(inst, key, default, valid_types=None):
         value = ast.literal_eval(value)
     if valid_types is not None:
         assert isinstance(value, valid_types)
-    setattr(inst, key)
+    setattr(inst, key, value)
 
 def check_call(code):
     '''Wrap `subprocess.call` to exit on failure.'''
