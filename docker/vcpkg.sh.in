@@ -1,30 +1,8 @@
 #!/bin/bash
 #
 # Install vcpkg package management system.
-#
-# Includes wrappers to add the triplet and other
-# configurations out-of-the-box.
 
 set -ex
-
-# Check required environment variables.
-if [ "$PROCESSOR" = "" ]; then
-    echo 'Must set the target processor via `$PROCESSOR`, quitting.'
-    exit 1
-fi
-if [ "$SYSTEM" = "" ]; then
-    echo 'Must set the target operating system via `$SYSTEM`, quitting.'
-    exit 1
-fi
-if [ "$TRIPLE" = "" ]; then
-    echo 'Must set the target triplet via `$TRIPLE`, quitting.'
-    exit 1
-fi
-if [ "$LINKAGE" = "" ]; then
-    echo 'Must set the target triplet via `$LINKAGE`, quitting.'
-    echo 'Valid values are `static` and `dynamic`.'
-    exit 1
-fi
 
 # There's a minor, well-known issue with wasm and vcpkg.
 # vcpkg runs in script mode for the CMake files, meaning
@@ -34,25 +12,20 @@ fi
 
 export DEBIAN_FRONTEND="noninteractive"
 
-# Install dependencies we need after to use vcpkg.
-apt-get update
-apt-get install --assume-yes --no-install-recommends \
-    curl \
-    pkg-config \
-    tar \
-    unzip \
-    zip
-
 # Install dependencies. We store the installed
 # dependencies so we don't accidentally delete
 # necessary files, and we get rid of everything
 # that was only required for the build.
 before_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
+apt-get update
 apt-get install --assume-yes --no-install-recommends \
+    curl \
     g++ \
+    git \
     ca-certificates \
     jq \
-    wget
+    wget \
+    unzip
 after_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
 
 # Calculate the packages we need to remove later.
@@ -82,50 +55,11 @@ rmdir ^SYSROOT^/vcpkg/"$subdir"
 # Bootstrap the build, and remove unnecessary extras.
 ^SYSROOT^/vcpkg/bootstrap-vcpkg.sh
 
-# Create our custom triplet, as a drop-in replacement for a community one.
-triplet="set(VCPKG_TARGET_ARCHITECTURE $PROCESSOR)
-set(VCPKG_CRT_LINKAGE dynamic)
-set(VCPKG_LIBRARY_LINKAGE $LINKAGE)
-set(VCPKG_CMAKE_SYSTEM_NAME $SYSTEM)
-
-# The toolchain file can be included multiple times, which can
-# cause linkage errors with installing libraries with dependencies.
-if(NOT DEFINED VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
-    set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE /toolchains/toolchain.cmake)
-endif()
-
-if(NOT CMAKE_HOST_SYSTEM_PROCESSOR)
-    execute_process(COMMAND \"uname\" \"-m\" OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()"
-# Need to add items for MinGW and other systems.
-if [ "$SYSTEM" = "MinGW" ]; then
-    triplet="$triplet
-set(VCPKG_ENV_PASSTHROUGH PATH)"
-    if [ "$LINKAGE" = "dynamic" ]; then
-        triplet="$triplet
-set(VCPKG_POLICY_DLLS_WITHOUT_LIBS enabled)"
-    fi
-elif [ "$SYSTEM" = "Emscripten" ]; then
-    triplet="$triplet
-set(VCPKG_ENV_PASSTHROUGH EMSDK PATH)"
-fi
-echo "$triplet" > ^SYSROOT^/vcpkg/triplets/community/"$TRIPLE"-xcross.cmake
-
 # Change our permissions, since we need to be able to write as a user.
+# Use the user ID, not the actual username, since the user hasn't yet
+# been created.
 chmod -R +660 ^SYSROOT^/vcpkg
-chown -R cross:cross ^SYSROOT^/vcpkg
-
-# Create an alias for vcpkg.
-echo '#!/bin/bash
-# Wrapper script for vcpkg to ensure we use the correct triplet.
-# Note that the triplet can always be provided: vcpkg does not care.
-
-^SYSROOT^/vcpkg/vcpkg "$@" --triplet $(cat /env/triplet)-xcross' > ^BIN^/vcpkg
-chmod +x ^BIN^/vcpkg
-
-# Create an environment variable containing the triplet.
-# Allows us to call the correct triplet whenever we invoke vcpkg.
-echo "$TRIPLE" > /env/triplet
+chown -R 1000:1000 ^SYSROOT^/vcpkg
 
 # Cleanup
 # Even though we didn't install GCC, it doesn't get autoremoved,

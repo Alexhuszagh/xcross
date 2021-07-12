@@ -511,6 +511,12 @@ class BuildImagesCommand(Command):
         if not docker:
             raise FileNotFoundError('Unable to find command docker.')
 
+        # Need to build our base vcpkg for package files.
+        if self.with_package_managers:
+            if build_image(docker, 'vcpkg', True) != 0:
+                print(f'Error: failed to build target vcpkg', file=sys.stderr)
+                sys.exit(1)
+
         # Build all our Docker images.
         self.failures = []
         for target in subslice_targets(self.start, self.stop):
@@ -1426,6 +1432,7 @@ class ConfigureCommand(VersionCommand):
         shortcut = f'{HOME}/symlink/shortcut.sh'
         target_features = f'{HOME}/spec/target_features.py'
         vcpkg = f'{HOME}/docker/vcpkg.sh'
+        vcpkg_triplet = f'{HOME}/docker/vcpkg-triplet.sh'
         self.configure(f'{android}.in', android, True, [
             ('CLANG_VERSION', config['android']['clang_version']),
             ('NDK_DIRECTORY', config['android']['ndk_directory']),
@@ -1522,6 +1529,9 @@ class ConfigureCommand(VersionCommand):
             ('BIN', f'"{bin_directory}"'),
         ])
         self.configure(f'{vcpkg}.in', vcpkg, True, [
+            ('SYSROOT', f'"{config["options"]["sysroot"]}"'),
+        ])
+        self.configure(f'{vcpkg_triplet}.in', vcpkg_triplet, True, [
             ('BIN', f'"{bin_directory}"'),
             ('SYSROOT', f'"{config["options"]["sysroot"]}"'),
         ])
@@ -1715,6 +1725,25 @@ class ConfigureCommand(VersionCommand):
         contents = self.replace(contents, replacements)
         self.write_file(outfile, contents, False)
 
+    def configure_vcpkg_dockerfile(self, base='ubuntu'):
+        '''Configure only the vcpkg Dockefile.'''
+
+        # This is a base image shared by multiple builds.
+        contents = []
+        with open(f'{HOME}/docker/Dockerfile.{base}.in', 'r') as file:
+            contents.append(file.read())
+        with open(f'{HOME}/docker/Dockerfile.vcpkg.in', 'r') as file:
+            contents.append(file.read())
+        contents = '\n'.join(contents)
+
+        # Replace the contents and write the output to file.
+        replacements = [
+            ('UBUNTU_VERSION', ubuntu_version),
+        ]
+        outfile = f'{HOME}/docker/pkgimages/Dockerfile.vcpkg'
+        contents = self.replace(contents, replacements)
+        self.write_file(outfile, contents, False)
+
     def configure_package_dockerfile(
         self,
         image,
@@ -1748,10 +1777,11 @@ class ConfigureCommand(VersionCommand):
             ('MESON_SYSTEM', meson_system),
             ('PROCESSOR', image.processor),
             ('REPOSITORY', config['metadata']['repository']),
-            ('VCPKG_SYSTEM', vcpkg_system),
+            ('SYSROOT', f'"{config["options"]["sysroot"]}"'),
             ('TARGET', image.target),
             ('TRIPLE', image.triple),
             ('USERNAME', config['metadata']['username']),
+            ('VCPKG_SYSTEM', vcpkg_system),
         ])
 
     def configure_cmake(self, image, template, replacements):
@@ -2069,6 +2099,7 @@ class ConfigureCommand(VersionCommand):
         self.configure_musl_config()
 
         # Configure images.
+        self.configure_vcpkg_dockerfile()
         for image in android_images:
             self.configure_android(image)
         for image in buildroot_images:

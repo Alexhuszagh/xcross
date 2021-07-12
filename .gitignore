@@ -35,6 +35,7 @@ docker/qemu.sh
 docker/qemu-apt.sh
 docker/riscv-gcc.sh
 docker/vcpkg.sh
+docker/vcpkg-triplet.sh
 musl/config/
 spec/target_features.py
 symlink/emmake

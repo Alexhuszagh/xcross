@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# Create the vcpkg wrappers to add the triplet and other
+# configurations out-of-the-box.
+
+set -ex
+
+# Check required environment variables.
+if [ "$PROCESSOR" = "" ]; then
+    echo 'Must set the target processor via `$PROCESSOR`, quitting.'
+    exit 1
+fi
+if [ "$SYSTEM" = "" ]; then
+    echo 'Must set the target operating system via `$SYSTEM`, quitting.'
+    exit 1
+fi
+if [ "$TRIPLE" = "" ]; then
+    echo 'Must set the target triplet via `$TRIPLE`, quitting.'
+    exit 1
+fi
+if [ "$LINKAGE" = "" ]; then
+    echo 'Must set the target triplet via `$LINKAGE`, quitting.'
+    echo 'Valid values are `static` and `dynamic`.'
+    exit 1
+fi
+
+export DEBIAN_FRONTEND="noninteractive"
+
+# Install dependencies we need after to use vcpkg.
+apt-get update
+apt-get install --assume-yes --no-install-recommends \
+    curl \
+    pkg-config \
+    tar \
+    unzip \
+    zip
+
+# Create our custom triplet, as a drop-in replacement for a community one.
+triplet="set(VCPKG_TARGET_ARCHITECTURE $PROCESSOR)
+set(VCPKG_CRT_LINKAGE dynamic)
+set(VCPKG_LIBRARY_LINKAGE $LINKAGE)
+set(VCPKG_CMAKE_SYSTEM_NAME $SYSTEM)
+
+# The toolchain file can be included multiple times, which can
+# cause linkage errors with installing libraries with dependencies.
+if(NOT DEFINED VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
+    set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE /toolchains/toolchain.cmake)
+endif()
+
+if(NOT CMAKE_HOST_SYSTEM_PROCESSOR)
+    execute_process(COMMAND \"uname\" \"-m\" OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()"
+# Need to add items for MinGW and other systems.
+if [ "$SYSTEM" = "MinGW" ]; then
+    triplet="$triplet
+set(VCPKG_ENV_PASSTHROUGH PATH)"
+    if [ "$LINKAGE" = "dynamic" ]; then
+        triplet="$triplet
+set(VCPKG_POLICY_DLLS_WITHOUT_LIBS enabled)"
+    fi
+elif [ "$SYSTEM" = "Emscripten" ]; then
+    triplet="$triplet
+set(VCPKG_ENV_PASSTHROUGH EMSDK PATH)"
+fi
+triplet_file=^SYSROOT^/vcpkg/triplets/community/"$TRIPLE"-xcross.cmake
+echo "$triplet" > "$triplet_file"
+chmod +660 "$triplet_file"
+chown -R cross:cross "$triplet_file"
+
+# Create an alias for vcpkg.
+echo '#!/bin/bash
+# Wrapper script for vcpkg to ensure we use the correct triplet.
+# Note that the triplet can always be provided: vcpkg does not care.
+
+^SYSROOT^/vcpkg/vcpkg "$@" --triplet $(cat /env/triplet)-xcross' > ^BIN^/vcpkg
+chmod +x ^BIN^/vcpkg
+
+# Create an environment variable containing the triplet.
+# Allows us to call the correct triplet whenever we invoke vcpkg.
+echo "$TRIPLE" > /env/triplet
