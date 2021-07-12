@@ -13,7 +13,7 @@ Each Docker image comes pre-installed with:
 - CMake
 - Ninja
 
-In addition, each xcross provides [images]((https://hub.docker.com/r/ahuszagh/pkgcross)) pre-installed with popular C/C++ package managers and addition build tools:
+In addition, each xcross provides [images](https://hub.docker.com/r/ahuszagh/pkgcross) pre-installed with popular C/C++ package managers and addition build tools:
 
 - Conan
 - vcpkg

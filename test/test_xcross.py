@@ -133,10 +133,13 @@ def test_permissions():
     # Make sure all files produced have the same permissions.
     # This means we properly mapped the image.
     euid = os.geteuid()
-    run_image(['touch', 'sample_xcross_file'])
-    st = os.stat('sample_xcross_file')
-    assert(st.st_uid == euid)
-    assert(st.st_gid == euid)
+    try:
+        run_image(['touch', 'sample_xcross_file'])
+        st = os.stat('sample_xcross_file')
+        assert(st.st_uid == euid)
+        assert(st.st_gid == euid)
+    finally:
+        os.unlink('sample_xcross_file')
 
     # Check sudo isn't enabled.
     run_image(['which', 'sudo'], exit_code=1)

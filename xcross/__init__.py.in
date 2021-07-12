@@ -7,6 +7,7 @@
 
 import argparse
 import collections
+import errno
 import os
 import pathlib
 import re
@@ -317,7 +318,7 @@ def find_container_engine(args):
                 print_verbose(f'Found engine {engine}.', args.verbose)
                 return engine
         except OSError as error:
-            if error.errno != os.errno.ENOENT:
+            if error.errno != errno.ENOENT:
                 raise
 
     error('Could not find docker or podman')
