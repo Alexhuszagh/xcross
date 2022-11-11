@@ -512,7 +512,7 @@ $ xcross target-specs
 
 # Building/Running Dockerfiles
 
-To build all Docker images, run `python3 setup.py build_imagesn--with-package-managers=1`. Note that can it take up to a week to build all images. To build and run a single docker image, use:
+To build all Docker images, run `python3 setup.py build_images --with-package-managers=1`. Note that can it take up to a week to build all images. To build and run a single docker image, use:
 
 ```bash
 image=ppcle-unknown-linux-gnu
@@ -522,6 +522,14 @@ python3 setup.py build_image --target "$image"
 docker run -it "ahuszagh/cross:$image" /bin/bash
 # Runs the image using xcross, for a simpler interface.
 xcross bash --target "$image"
+```
+
+After executing above, if you want an image with package managers:
+
+```bash
+python3 setup.py build_image --with-package-managers=1 --target vcpkg
+python3 setup.py build_image --with-package-managers=1 --target "$image"
+docker run -it "ahuszagh/pkgcross:$image" /bin/bash
 ```
 
 # Images
