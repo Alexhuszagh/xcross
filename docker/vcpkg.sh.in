@@ -25,7 +25,8 @@ apt-get install --assume-yes --no-install-recommends \
     ca-certificates \
     jq \
     wget \
-    unzip
+    unzip \
+    zip
 after_installed=($(apt -qq list --installed 2>/dev/null | cut -d '/' -f 1))
 
 # Calculate the packages we need to remove later.
