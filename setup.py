@@ -1641,6 +1641,7 @@ class ConfigureCommand(VersionCommand):
         replacements.append(('EXPAT_V_NEW', '\\n'.join(ct_expat)))
         replacements.append(('EXPAT_OLD', old_expat_version))
         replacements.append(('EXPAT_NEW', expat_version))
+        replacements.append(('EXPAT_DL_NEW', expat_version.replace('.','_')))
 
         self.configure(f'{patch}.in', patch, True, replacements)
 

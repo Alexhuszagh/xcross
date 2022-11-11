@@ -42,6 +42,9 @@ fi
 # Update to 2.4.1, fixes security issues.
 buffer=$(echo "$buffer" | sed 's/^^EXPAT_V_OLD^$/^EXPAT_V_NEW^/')
 buffer=$(echo "$buffer" | sed 's/^CT_EXPAT_VERSION="^EXPAT_OLD^"$/CT_EXPAT_VERSION="^EXPAT_NEW^"/')
+# Fix download mirrors
+buffer=$(echo "$buffer" | sed -e 's|CT_ISL_MIRRORS=.*$|CT_ISL_MIRRORS="https://libisl.sourceforge.io"|')
+buffer=$(echo "$buffer" | sed -e 's|CT_EXPAT_MIRRORS=.*$|CT_EXPAT_MIRRORS="https://github.com/libexpat/libexpat/releases/download/R_^EXPAT_DL_NEW^"|')
 
 # Write to file.
 echo "$buffer" > "$DST"
