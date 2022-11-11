@@ -586,7 +586,7 @@ def docker_command(args, parent_dir, relpath):
     # which is the correct default anyway.
     if args.engine_type == 'docker' and os_name() != 'nt':
         command += ['--user', f'{os.getuid()}:{os.getgid()}']
-    elif args.engine_type == 'podman':
+    elif args.engine_type == 'podman' and not args.detach:
         # Podman has issues with SELinux, so ensure we
         # disable labels. This still does not allow
         # users to modify files outside their permission.
