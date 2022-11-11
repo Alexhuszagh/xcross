@@ -255,7 +255,7 @@ def build_image(docker, target, with_pkg=False):
     if with_pkg:
         image_dir = f'pkg{image_dir}'
     path = f'{HOME}/docker/{image_dir}/Dockerfile.{target}'
-    return subprocess.call([docker, 'build', '-t', image, HOME, '--file', path])
+    return subprocess.call([docker, 'build', '--ulimit=nofile=65535:65535', '-t', image, HOME, '--file', path])
 
 class CleanDistCommand(Command):
     '''A custom command to clean Python dist artifacts.'''
